@@ -8,9 +8,9 @@
         body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e9e9e9; text-align: center; padding: 40px; }
         .box { background: #16213e; padding: 30px; border-radius: 20px; display: inline-block; width: 350px; border: 1px solid #0f3460; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         button { background: #e94560; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; margin: 10px 0; font-weight: bold; }
-        select { width: 100%; padding: 10px; border-radius: 8px; background: #0f3460; color: white; border: none; margin: 10px 0; }
+        select { width: 100%; padding: 12px; border-radius: 8px; background: #0f3460; color: #00ff41; border: 1px solid #e94560; margin: 10px 0; font-weight: bold; font-size: 15px; }
         #pass { font-size: 40px; color: #00ff41; margin: 20px 0; font-family: monospace; text-shadow: 0 0 10px #00ff41; }
-        .status { font-size: 13px; color: #999; }
+        .status { font-size: 13px; color: #aaa; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -18,16 +18,19 @@
     <div class="box">
         <h2>JK BMS Password</h2>
         <button onclick="sendScan()">1. QUÉT TÌM BMS</button>
-        <select id="list"><option value="">-- Danh sách BMS --</option></select>
+        
+        <select id="list">
+            <option value="">-- Bấm Quét và đợi 5 giây --</option>
+        </select>
+        
         <button onclick="sendConnect()" style="background:#007bff">2. LẤY MẬT KHẨU</button>
         <div id="pass">******</div>
         <div class="status" id="stat">Đang kết nối Cloud...</div>
     </div>
 
     <script>
-        // Cấu hình HiveMQ Cloud cho Web
         const broker = "0256b04eb4254d4e8c100df19b4db3f7.s1.eu.hivemq.cloud";
-        const port = 8884; // Cổng WebSockets SSL của HiveMQ Cloud
+        const port = 8884; 
         const user = "ngoctuyka";
         const pass = "Tu12345678@";
 
@@ -36,10 +39,22 @@
         client.onMessageArrived = (msg) => {
             if (msg.destinationName === "tu_physics/jkbms/scan_res") {
                 let parts = msg.payloadString.split("|");
+                let macAddress = parts[0];
+                let bmsName = parts[1];
+                
+                // Nếu tên bị trống, tự động gán nhãn
+                if (!bmsName || bmsName.trim() === "") {
+                    bmsName = "BMS Ẩn Tên";
+                }
+
                 let el = document.getElementById("list");
                 let opt = document.createElement("option");
-                opt.value = parts[0]; opt.text = parts[1];
+                opt.value = macAddress; 
+                // Hiển thị rõ ràng: Tên (Địa chỉ MAC)
+                opt.text = bmsName + " (" + macAddress + ")";
                 el.add(opt);
+                
+                document.getElementById("stat").innerText = "Đã quét thấy thiết bị!";
             } else if (msg.destinationName === "tu_physics/jkbms/pass") {
                 document.getElementById("pass").innerText = msg.payloadString;
             } else {
@@ -52,7 +67,7 @@
             userName: user,
             password: pass,
             onSuccess: () => {
-                document.getElementById("stat").innerText = "Cloud Online";
+                document.getElementById("stat").innerText = "Cloud Online. Đã sẵn sàng!";
                 client.subscribe("tu_physics/jkbms/scan_res");
                 client.subscribe("tu_physics/jkbms/pass");
                 client.subscribe("tu_physics/jkbms/status");
@@ -60,14 +75,17 @@
         });
 
         function sendScan() {
-            document.getElementById("list").innerHTML = "";
+            // Giữ lại dòng tiêu đề khi quét lại
+            document.getElementById("list").innerHTML = "<option value=''>-- Chọn BMS ở đây --</option>";
+            document.getElementById("stat").innerText = "Đang ra lệnh quét...";
             client.send("tu_physics/jkbms/cmd", "SCAN");
         }
 
         function sendConnect() {
             let mac = document.getElementById("list").value;
-            if(!mac) return alert("Chọn BMS đã!");
+            if(!mac) return alert("Anh hãy quét và chọn 1 BMS trong danh sách đã nhé!");
             document.getElementById("pass").innerText = "...";
+            document.getElementById("stat").innerText = "Đang gửi lệnh lấy mật khẩu...";
             client.send("tu_physics/jkbms/connect", mac);
         }
     </script>
