@@ -2,91 +2,260 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>JK BMS Recovery - Tu Physics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIFI-BMS Professional - Thầy Tú</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e9e9e9; text-align: center; padding: 40px; }
-        .box { background: #16213e; padding: 30px; border-radius: 20px; display: inline-block; width: 350px; border: 1px solid #0f3460; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        button { background: #e94560; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; margin: 10px 0; font-weight: bold; }
-        select { width: 100%; padding: 12px; border-radius: 8px; background: #0f3460; color: #00ff41; border: 1px solid #e94560; margin: 10px 0; font-weight: bold; font-size: 15px; }
-        #pass { font-size: 40px; color: #00ff41; margin: 20px 0; font-family: monospace; text-shadow: 0 0 10px #00ff41; }
-        .status { font-size: 13px; color: #aaa; margin-top: 10px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .cell-v { font-family: 'Courier New', Courier, monospace; }
+        
+        /* Hiệu ứng dòng chảy năng lượng */
+        .energy-line {
+            stroke: #475569;
+            stroke-width: 3;
+            fill: none;
+            transition: all 0.3s ease;
+        }
+        .flow-active {
+            stroke: #10b981;
+            stroke-dasharray: 8 8;
+            stroke-width: 4;
+        }
+        .flow-forward { animation: flow-anim 0.8s linear infinite reverse; }
+        .flow-reverse { animation: flow-anim 0.8s linear infinite; }
+        
+        @keyframes flow-anim {
+            from { stroke-dashoffset: 16; }
+            to { stroke-dashoffset: 0; }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
+        }
+        .charging-glow { animation: pulse-glow 2s ease-in-out infinite; border-color: #10b981 !important; }
+        .discharging-glow { border-color: #f59e0b !important; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen pb-20">
 
-    <div class="box">
-        <h2>JK BMS Password</h2>
-        <button onclick="sendScan()">1. QUÉT TÌM BMS</button>
+    <header class="bg-[#00a884] text-white p-3 shadow-md sticky top-0 z-50">
+        <div class="flex justify-between items-center max-w-4xl mx-auto">
+            <div class="flex items-center gap-2">
+                <span class="font-black text-xl">WIFI-BMS</span>
+                <span class="text-[10px] border px-1 rounded" id="bms-id">BMS_F568</span>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] opacity-80" id="mqtt-status">Đang kết nối Cloud...</p>
+                <p class="text-xs font-bold">V3.0 Pro</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-2">
         
-        <select id="list">
-            <option value="">-- Bấm Quét và đợi 5 giây --</option>
-        </select>
-        
-        <button onclick="sendConnect()" style="background:#007bff">2. LẤY MẬT KHẨU</button>
-        <div id="pass">******</div>
-        <div class="status" id="stat">Đang kết nối Cloud...</div>
-    </div>
+        <div id="tab-home" class="tab-content active space-y-3">
+            
+            <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center">
+                <span class="text-blue-600 font-bold">Thiết bị:</span>
+                <select id="device-selector" class="border-none font-bold text-gray-700 outline-none" onchange="switchDevice()">
+                    <option value="b1">Pin Hai Dang 314Ah</option>
+                    <option value="b2">Pin Hai Dang 280Ah</option>
+                </select>
+            </div>
+
+            <div class="bg-[#1e293b] rounded-xl p-4 shadow-inner relative h-56 w-full max-w-md mx-auto overflow-hidden">
+                <svg class="absolute inset-0 w-full h-full">
+                    <path id="line-solar" class="energy-line" d="M 60 50 L 160 50" />
+                    <path id="line-load" class="energy-line" d="M 240 50 L 340 50" />
+                    <path id="line-bat" class="energy-line" d="M 200 80 L 200 150" />
+                </svg>
+
+                <div class="absolute top-6 left-4 w-16 h-16 bg-slate-800 border-2 border-yellow-500 rounded-lg flex flex-col items-center justify-center text-yellow-400 z-10">
+                    <i class="fas fa-solar-panel text-2xl"></i>
+                    <span class="text-[9px] font-bold mt-1">SOLAR</span>
+                </div>
+
+                <div class="absolute top-6 right-4 w-16 h-16 bg-slate-800 border-2 border-blue-500 rounded-lg flex flex-col items-center justify-center text-blue-400 z-10">
+                    <i class="fas fa-house-chimney text-2xl"></i>
+                    <span class="text-[9px] font-bold mt-1">NHÀ (TẢI)</span>
+                </div>
+
+                <div class="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-16 bg-slate-700 border-2 border-slate-400 rounded-lg flex flex-col items-center justify-center text-white z-10 shadow-lg">
+                    <i class="fas fa-server text-xl mb-1 text-emerald-400"></i>
+                    <span class="text-[10px] font-bold">INVERTER</span>
+                </div>
+
+                <div id="bat-node" class="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-20 bg-slate-800 border-2 border-gray-500 rounded-lg flex flex-col items-center justify-center text-white z-10 transition-colors duration-500">
+                    <span class="text-[10px] font-bold text-gray-400 mb-1">PIN LƯU TRỮ</span>
+                    <span class="font-black text-xl" id="main_power">0 W</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-white">
+                <div class="bg-[#56b6e7] p-3 rounded-lg relative overflow-hidden">
+                    <p class="text-sm font-bold border-b border-white/30 mb-2">Điện áp</p>
+                    <div class="flex justify-between items-end">
+                        <div class="text-xs opacity-90">Điện áp:<br><span class="text-lg font-bold" id="main_voltage">-- V</span></div>
+                        <div class="text-xs opacity-90 text-right">Dòng điện:<br><span class="text-lg font-bold" id="main_current">-- A</span></div>
+                    </div>
+                </div>
+                <div class="bg-[#f27e91] p-3 rounded-lg relative overflow-hidden">
+                    <p class="text-sm font-bold border-b border-white/30 mb-2">Công suất</p>
+                    <div class="flex justify-between items-end">
+                        <div class="text-xs opacity-90">Công suất:<br><span class="text-lg font-bold" id="main_power_card">-- W</span></div>
+                        <div class="text-xs opacity-90 text-right">Phần trăm:<br><span class="text-lg font-bold" id="main_soc">-- %</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="bg-[#5cc49f] text-white p-2 font-bold text-sm">Thông tin khối pin</div>
+                <div class="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    <div class="flex justify-between border-b pb-1"><span>Điện áp:</span><span class="text-[#5cc49f] font-bold" id="pack_v">-- V</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Dòng điện:</span><span class="text-[#5cc49f] font-bold" id="pack_a">-- A</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Công suất:</span><span class="text-[#5cc49f] font-bold" id="pack_p">-- W</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Chênh lệch:</span><span class="text-[#5cc49f] font-bold" id="pack_delta">-- V</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Dung lượng:</span><span class="text-[#5cc49f] font-bold" id="pack_cap">-- Ah</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Nhiệt độ MOS:</span><span class="text-[#5cc49f] font-bold" id="pack_t_bms">-- °C</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Phần trăm:</span><span class="text-[#5cc49f] font-bold" id="pack_soc">-- %</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Nhiệt độ T1:</span><span class="text-[#5cc49f] font-bold" id="pack_t1">-- °C</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Chu kì sạc:</span><span class="text-[#5cc49f] font-bold" id="pack_cycles">--</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Nhiệt độ T2:</span><span class="text-[#5cc49f] font-bold" id="pack_t2">-- °C</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Thấp nhất:</span><span class="text-[#5cc49f] font-bold" id="pack_min">-- V</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Cao nhất:</span><span class="text-[#5cc49f] font-bold" id="pack_max">-- V</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="bg-[#5cc49f] text-white p-2 font-bold text-sm">Thông tin chi tiết (Volt)</div>
+                <div class="p-3 grid grid-cols-2 gap-x-6 gap-y-1" id="cells_grid">
+                    </div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const broker = "0256b04eb4254d4e8c100df19b4db3f7.s1.eu.hivemq.cloud";
-        const port = 8884; 
-        const user = "ngoctuyka";
-        const pass = "Tu12345678@";
-
-        const client = new Paho.MQTT.Client(broker, port, "WebUser_" + Math.random());
-
-        client.onMessageArrived = (msg) => {
-            if (msg.destinationName === "tu_physics/jkbms/scan_res") {
-                let parts = msg.payloadString.split("|");
-                let macAddress = parts[0];
-                let bmsName = parts[1];
-                
-                // Nếu tên bị trống, tự động gán nhãn
-                if (!bmsName || bmsName.trim() === "") {
-                    bmsName = "BMS Ẩn Tên";
-                }
-
-                let el = document.getElementById("list");
-                let opt = document.createElement("option");
-                opt.value = macAddress; 
-                // Hiển thị rõ ràng: Tên (Địa chỉ MAC)
-                opt.text = bmsName + " (" + macAddress + ")";
-                el.add(opt);
-                
-                document.getElementById("stat").innerText = "Đã quét thấy thiết bị!";
-            } else if (msg.destinationName === "tu_physics/jkbms/pass") {
-                document.getElementById("pass").innerText = msg.payloadString;
-            } else {
-                document.getElementById("stat").innerText = msg.payloadString;
-            }
+        const config = {
+            host: "0256b04eb4254d4e8c100df19b4db3f7.s1.eu.hivemq.cloud",
+            port: 8884,
+            user: "ngoctuyka",
+            pass: "Tu12345678@",
+            clientId: "WebUI_" + Math.random().toString(16).substr(2, 4)
         };
 
+        const client = new Paho.MQTT.Client(config.host, config.port, config.clientId);
+        let activeBms = "b1";
+
         client.connect({
+            userName: config.user,
+            password: config.pass,
             useSSL: true,
-            userName: user,
-            password: pass,
             onSuccess: () => {
-                document.getElementById("stat").innerText = "Cloud Online. Đã sẵn sàng!";
-                client.subscribe("tu_physics/jkbms/scan_res");
-                client.subscribe("tu_physics/jkbms/pass");
-                client.subscribe("tu_physics/jkbms/status");
+                document.getElementById('mqtt-status').innerText = "Trực tuyến (Cloud)";
+                client.subscribe("bms/sensor/+/state");
             }
         });
 
-        function sendScan() {
-            // Giữ lại dòng tiêu đề khi quét lại
-            document.getElementById("list").innerHTML = "<option value=''>-- Chọn BMS ở đây --</option>";
-            document.getElementById("stat").innerText = "Đang ra lệnh quét...";
-            client.send("tu_physics/jkbms/cmd", "SCAN");
+        // Tạo sẵn khung 16 Cell trống (chờ MQTT bơm dữ liệu vào)
+        const grid = document.getElementById('cells_grid');
+        for (let i = 1; i <= 16; i++) {
+            grid.innerHTML += `
+                <div class="flex justify-between border-b pb-1">
+                    <span class="text-gray-500 font-mono">${i.toString().padStart(2, '0')}:</span>
+                    <span class="font-bold cell-v text-emerald-600" id="c${i}">-- V</span>
+                </div>
+            `;
         }
 
-        function sendConnect() {
-            let mac = document.getElementById("list").value;
-            if(!mac) return alert("Anh hãy quét và chọn 1 BMS trong danh sách đã nhé!");
-            document.getElementById("pass").innerText = "...";
-            document.getElementById("stat").innerText = "Đang gửi lệnh lấy mật khẩu...";
-            client.send("tu_physics/jkbms/connect", mac);
+        client.onMessageArrived = (msg) => {
+            const topic = msg.destinationName;
+            const payload = msg.payloadString;
+            const id = topic.split('/')[2]; 
+
+            if (id.startsWith(activeBms)) {
+                const key = id.replace(activeBms + "_", "");
+                updateUI(key, payload);
+
+                // Kích hoạt đường chảy SVG
+                if (key === 'current') {
+                    const current = parseFloat(payload);
+                    const lSolar = document.getElementById('line-solar');
+                    const lLoad = document.getElementById('line-load');
+                    const lBat = document.getElementById('line-bat');
+                    const batNode = document.getElementById('bat-node');
+
+                    lSolar.className.baseVal = "energy-line";
+                    lLoad.className.baseVal = "energy-line";
+                    lBat.className.baseVal = "energy-line";
+                    batNode.classList.remove('charging-glow', 'discharging-glow');
+
+                    if (current > 0.5) {
+                        lSolar.className.baseVal = "energy-line flow-active flow-forward";
+                        lBat.className.baseVal = "energy-line flow-active flow-forward";
+                        batNode.classList.add('charging-glow');
+                        batNode.querySelector('span:last-child').style.color = '#10b981';
+                    } else if (current < -0.5) {
+                        lBat.className.baseVal = "energy-line flow-active flow-reverse";
+                        lLoad.className.baseVal = "energy-line flow-active flow-forward";
+                        batNode.classList.add('discharging-glow');
+                        batNode.querySelector('span:last-child').style.color = '#f59e0b';
+                    } else {
+                        batNode.querySelector('span:last-child').style.color = 'white';
+                    }
+                }
+            }
+        };
+
+        function updateUI(key, val) {
+            // Khai báo ánh xạ các giá trị từ MQTT vào đúng ô của HTML
+            const mapping = {
+                'voltage': ['main_voltage', 'pack_v'],
+                'current': ['main_current', 'pack_a'],
+                'power': ['main_power', 'main_power_card', 'pack_p'],
+                'soc': ['main_soc', 'pack_soc'],
+                'capacity': ['pack_cap'],
+                'delta_cell_voltage': ['pack_delta'],
+                'charging_cycles': ['pack_cycles'],
+                'temperature_sensor_1': ['pack_t_bms'],
+                'temperature_sensor_2': ['pack_t1'],
+                'temperature_sensor_3': ['pack_t2'],
+                'min_cell_voltage': ['pack_min'],
+                'max_cell_voltage': ['pack_max']
+            };
+
+            if (mapping[key]) {
+                mapping[key].forEach(elId => {
+                    const el = document.getElementById(elId);
+                    if(el) {
+                        el.innerText = val + (elId.includes('voltage') || elId.includes('_v') || elId.includes('min') || elId.includes('max') || elId.includes('delta') ? " V" : 
+                                              elId.includes('power') || elId.includes('_p') ? " W" : 
+                                              elId.includes('current') || elId.includes('_a') ? " A" : 
+                                              elId.includes('soc') ? " %" : 
+                                              elId.includes('cap') ? " Ah" : 
+                                              elId.includes('_t') ? " °C" : "");
+                    }
+                });
+            }
+
+            // Đẩy dữ liệu vào 16 ô Cell
+            if (key.startsWith('cell_voltage_')) {
+                const num = key.split('_')[2];
+                const cellEl = document.getElementById('c' + num);
+                if (cellEl) cellEl.innerText = val + " V";
+            }
+        }
+
+        function switchDevice() {
+            activeBms = document.getElementById('device-selector').value;
+            // Xóa dữ liệu cũ trên màn hình chờ load số mới
+            document.querySelectorAll('[id^="main_"], [id^="pack_"], [id^="c"]').forEach(el => {
+                if(el.tagName === 'SPAN') el.innerText = "--";
+            });
+            document.getElementById('main_power').innerText = "0 W";
         }
     </script>
 </body>
