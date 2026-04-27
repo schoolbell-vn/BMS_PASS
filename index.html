@@ -37,7 +37,7 @@
             </div>
             <div class="text-right">
                 <p class="text-[10px] opacity-80" id="mqtt-status">Đang kết nối Cloud...</p>
-                <p class="text-xs font-bold">V3.3 Pro</p>
+                <p class="text-xs font-bold">V4.0 Pro (Fast Cache)</p>
             </div>
         </div>
     </header>
@@ -156,7 +156,7 @@
             </div>
 
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div class="bg-[#5cc49f] text-white p-2 font-bold text-sm">Thông tin chi tiết (Volt)</div>
+                <div class="bg-[#5cc49f] text-white p-2 font-bold text-sm">Thông chi tiết (Volt)</div>
                 <div class="p-3 grid grid-cols-2 gap-x-6 gap-y-1" id="cells_grid"></div>
             </div>
         </div>
@@ -165,8 +165,8 @@
             <div class="bg-white rounded-lg shadow-sm overflow-hidden border">
                 
                 <div class="bg-[#56b6e7] text-white p-3 font-bold text-sm flex justify-between items-center">
-                    <span>Setting BMS (Full)</span>
-                    <button class="bg-white text-[#56b6e7] px-3 py-1 rounded text-xs shadow-sm hover:bg-gray-100">Read Data</button>
+                    <span>Setting BMS (Trực tiếp)</span>
+                    <button class="bg-white text-[#56b6e7] px-3 py-1 rounded text-xs shadow-sm hover:bg-gray-100" onclick="switchDevice()">Đồng bộ</button>
                 </div>
                 
                 <div class="p-3 space-y-5 text-sm text-gray-700 h-[65vh] overflow-y-auto setting-scroll">
@@ -177,7 +177,7 @@
                             <span class="text-blue-800 font-bold text-sm">Mật khẩu Setup:</span>
                         </div>
                         <div class="bg-white px-3 py-1.5 rounded border border-blue-300 font-mono font-bold text-blue-700 tracking-wider shadow-inner" id="pack_passcode">
-                            Đang quét...
+                            Đang lấy...
                         </div>
                     </div>
                     
@@ -185,15 +185,15 @@
                         <div class="flex justify-between items-center mb-3">
                             <span class="text-[#56b6e7] font-bold">Charge Mosfet</span>
                             <div class="relative inline-block w-10 align-middle select-none">
-                                <input type="checkbox" id="sw_charge" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="sendCmd('charging', this.checked)"/>
-                                <label for="sw_charge" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                                <input type="checkbox" id="sw_charging" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="sendCmd('charging', this.checked)"/>
+                                <label for="sw_charging" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
                             </div>
                         </div>
                         <div class="flex justify-between items-center mb-3">
                             <span class="text-[#56b6e7] font-bold">Discharge Mosfet</span>
                             <div class="relative inline-block w-10 align-middle select-none">
-                                <input type="checkbox" id="sw_discharge" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="sendCmd('discharging', this.checked)"/>
-                                <label for="sw_discharge" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                                <input type="checkbox" id="sw_discharging" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="sendCmd('discharging', this.checked)"/>
+                                <label for="sw_discharging" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
@@ -209,56 +209,46 @@
                         <h3 class="font-bold text-gray-800 border-b pb-1 mb-2">1. Điện áp & Cân bằng</h3>
                         <div class="space-y-2">
                             <script>
-                                function renderInput(id, label, val, unit) {
+                                function renderInput(id, label, unit) {
                                     document.write(`
                                     <div class="flex justify-between items-center border-b border-gray-100 pb-2">
                                         <span class="text-[#56b6e7] text-xs font-bold w-1/2">${label}</span>
                                         <div class="flex items-center gap-1 w-1/2 justify-end">
-                                            <input type="number" id="val_${id}" class="border border-gray-300 rounded p-1 w-16 text-center font-bold text-gray-700 text-xs outline-none focus:border-[#56b6e7]" value="${val}" step="0.001">
+                                            <input type="number" id="val_${id}" class="border border-gray-300 rounded p-1 w-16 text-center font-bold text-gray-700 text-xs outline-none focus:border-[#56b6e7]" step="0.001">
                                             <span class="text-gray-400 font-bold text-[10px] w-4">${unit}</span>
-                                            <button class="bg-[#00a884] text-white px-2 py-1 rounded font-bold text-xs shadow-sm active:scale-95" onclick="sendVal('${id}')">OK</button>
+                                            <button class="bg-[#00a884] text-white px-2 py-1 rounded font-bold text-xs shadow-sm active:scale-95" onclick="sendVal('${id}')">LƯU</button>
                                         </div>
                                     </div>`);
                                 }
                             </script>
                             
-                            <script>renderInput('bal_start_v', 'Start Balance voltage', '3.400', 'V');</script>
-                            <script>renderInput('bal_trig_v', 'Balance trigger voltage', '0.010', 'V');</script>
-                            <script>renderInput('cell_ovp', 'Cell OVP', '3.600', 'V');</script>
-                            <script>renderInput('cell_ovpr', 'Cell OVPR', '3.450', 'V');</script>
-                            <script>renderInput('cell_uvp', 'Cell UVP', '2.750', 'V');</script>
-                            <script>renderInput('cell_uvpr', 'Cell UVPR', '2.800', 'V');</script>
-                            <script>renderInput('req_chg_v', 'Requested charge voltage', '3.550', 'V');</script>
-                            <script>renderInput('req_float_v', 'Requested float voltage', '3.380', 'V');</script>
-                            <script>renderInput('soc_100_v', 'SOC 100% voltage', '3.500', 'V');</script>
-                            <script>renderInput('soc_0_v', 'SOC 0% voltage', '2.780', 'V');</script>
+                            <script>renderInput('bal_start_v', 'Start Balance voltage', 'V');</script>
+                            <script>renderInput('bal_trig_v', 'Balance trigger voltage', 'V');</script>
+                            <script>renderInput('cell_ovp', 'Cell OVP', 'V');</script>
+                            <script>renderInput('cell_ovpr', 'Cell OVPR', 'V');</script>
+                            <script>renderInput('cell_uvp', 'Cell UVP', 'V');</script>
+                            <script>renderInput('cell_uvpr', 'Cell UVPR', 'V');</script>
                         </div>
                     </div>
 
                     <div>
-                        <h3 class="font-bold text-gray-800 border-b pb-1 mb-2">2. Dòng, Dung lượng & Độ trễ</h3>
+                        <h3 class="font-bold text-gray-800 border-b pb-1 mb-2">2. Dòng, Dung lượng</h3>
                         <div class="space-y-2">
-                            <script>renderInput('max_bal_c', 'Max Balance Current', '2.000', 'A');</script>
-                            <script>renderInput('bat_cap', 'Battery capacity', '280', 'AH');</script>
-                            <script>renderInput('cell_count', 'Cell count', '16', '');</script>
-                            <script>renderInput('dis_ocp_delay', 'Discharge OCP Delay', '300', 'S');</script>
-                            <script>renderInput('dis_ocpr_time', 'Discharge OCPR Time', '60', 'S');</script>
-                            <script>renderInput('scp_delay', 'SCP Delay', '10500', 'S');</script>
-                            <script>renderInput('scp_rec_time', 'SCP Recovery Time', '5', 'S');</script>
+                            <script>renderInput('max_chg_current', 'Max Charge Current', 'A');</script>
+                            <script>renderInput('max_dis_current', 'Max Discharge Current', 'A');</script>
+                            <script>renderInput('bat_cap', 'Battery capacity', 'AH');</script>
                         </div>
                     </div>
 
                     <div>
                         <h3 class="font-bold text-gray-800 border-b pb-1 mb-2">3. Bảo vệ Nhiệt độ</h3>
                         <div class="space-y-2">
-                            <script>renderInput('chg_otp', 'Charge OTP', '70.0', '°C');</script>
-                            <script>renderInput('chg_otpr', 'Charge OTPR', '60.0', '°C');</script>
-                            <script>renderInput('chg_utp', 'Charge UTP', '-20.0', '°C');</script>
-                            <script>renderInput('chg_utpr', 'Charge UTPR', '-10.0', '°C');</script>
-                            <script>renderInput('dis_otp', 'Discharge OTP', '70.0', '°C');</script>
-                            <script>renderInput('dis_otpr', 'Discharge OTPR', '60.0', '°C');</script>
-                            <script>renderInput('mos_otp', 'MOS OTP', '100.0', '°C');</script>
-                            <script>renderInput('mos_otpr', 'MOS OTPR', '80.0', '°C');</script>
+                            <script>renderInput('chg_otp', 'Charge OTP', '°C');</script>
+                            <script>renderInput('chg_otpr', 'Charge OTPR', '°C');</script>
+                            <script>renderInput('dis_otp', 'Discharge OTP', '°C');</script>
+                            <script>renderInput('dis_otpr', 'Discharge OTPR', '°C');</script>
+                            <script>renderInput('mos_otp', 'MOS OTP', '°C');</script>
+                            <script>renderInput('mos_otpr', 'MOS OTPR', '°C');</script>
                         </div>
                     </div>
 
@@ -286,27 +276,6 @@
                      </div>
                 </div>
              </div>
-
-             <div class="bg-white rounded-lg shadow-sm overflow-hidden border mt-4">
-                <div class="bg-[#f7ac68] text-white p-3 font-bold text-sm flex justify-between items-center">
-                    <span>Kết nối WiFi mới</span>
-                    <i class="fas fa-wifi"></i>
-                </div>
-                <div class="p-4 space-y-4 text-sm text-gray-700">
-                     <p class="text-xs text-gray-500 italic mb-2">Nhập tên và mật khẩu WiFi mới để mạch tự kết nối lại.</p>
-                     <div>
-                         <label class="block text-xs font-bold text-gray-500 mb-1">Tên WiFi (SSID) *</label>
-                         <input type="text" id="new_wifi_ssid" placeholder="Nhập tên mạng..." class="w-full border border-gray-300 rounded p-2 outline-none focus:border-[#f7ac68]">
-                     </div>
-                     <div>
-                         <label class="block text-xs font-bold text-gray-500 mb-1">Mật khẩu WiFi</label>
-                         <input type="password" id="new_wifi_pass" placeholder="Nhập mật khẩu..." class="w-full border border-gray-300 rounded p-2 outline-none focus:border-[#f7ac68]">
-                     </div>
-                     <button onclick="changeWifi()" class="w-full bg-[#f7ac68] text-white font-bold py-3 mt-2 rounded-lg shadow-sm active:scale-95 flex justify-center items-center gap-2">
-                         <i class="fas fa-satellite-dish"></i> GỬI LỆNH KẾT NỐI
-                     </button>
-                </div>
-             </div>
         </div>
 
     </main>
@@ -316,20 +285,17 @@
             <i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold">Home</span>
         </button>
         <button onclick="nav('settings')" class="flex flex-col items-center text-gray-400 nav-btn" id="nav-settings">
-            <i class="fas fa-cog text-xl mb-1"></i><span class="text-[10px] font-bold">Settings</span>
+            <i class="fas fa-cog text-xl mb-1"></i><span class="text-[10px] font-bold">Cài Đặt</span>
         </button>
         <button onclick="nav('wifi')" class="flex flex-col items-center text-gray-400 nav-btn" id="nav-wifi">
             <i class="fas fa-wifi text-xl mb-1"></i><span class="text-[10px] font-bold">WiFi</span>
-        </button>
-        <button class="flex flex-col items-center text-gray-400 nav-btn">
-            <i class="fas fa-user text-xl mb-1"></i><span class="text-[10px] font-bold">Profile</span>
         </button>
     </nav>
 
     <script>
         const config = {
             host: "broker.emqx.io",
-            port: 8084,  // Cổng bảo mật WebSockets của EMQX
+            port: 8084,  // Cổng WebSockets bảo mật chuẩn EMQX
             user: "",
             pass: "",
             clientId: "WebUI_" + Math.random().toString(16).substr(2, 4)
@@ -338,14 +304,23 @@
         const client = new Paho.MQTT.Client(config.host, config.port, config.clientId);
         let activeBms = "b1";
 
+        // TẠO BỘ NHỚ ĐỆM (CACHE) ĐỂ CHUYỂN THIẾT BỊ KHÔNG BỊ TRỄ
+        let bmsCache = {
+            b1: {},
+            b2: {}
+        };
+
         client.connect({
             userName: config.user,
             password: config.pass,
             useSSL: true,
             onSuccess: () => {
-                document.getElementById('mqtt-status').innerText = "Trực tuyến (Cloud)";
+                document.getElementById('mqtt-status').innerText = "Trực tuyến";
+                // Lắng nghe TẤT CẢ các ngõ dữ liệu từ ESP32
                 client.subscribe("bms/sensor/+/state");
-                client.subscribe("bms/text_sensor/+/state"); // Đăng ký nhận cả mã text (như mật khẩu)
+                client.subscribe("bms/text_sensor/+/state");
+                client.subscribe("bms/number/+/state"); // Đọc lại Setting
+                client.subscribe("bms/switch/+/state"); // Đọc trạng thái Rơ-le
                 client.subscribe("bms/wifi/+/state"); 
             }
         });
@@ -363,7 +338,6 @@
         client.onMessageArrived = (msg) => {
             const topic = msg.destinationName;
             const payload = msg.payloadString;
-            const id = topic.split('/')[2]; 
 
             if(topic.includes("bms/wifi/ssid/state")) {
                 document.getElementById('wifi_current_ssid').innerText = payload;
@@ -374,13 +348,72 @@
                 return;
             }
 
-            if (id.startsWith(activeBms)) {
-                const key = id.replace(activeBms + "_", "");
-                updateUI(key, payload);
+            // Bóc tách Topic để lấy ID thiết bị và Loại thông số
+            const parts = topic.split('/');
+            if (parts.length < 4) return;
+            const type = parts[1];      // sensor, number, switch...
+            const fullId = parts[2];    // b1_voltage
+            
+            if (!fullId.startsWith('b1_') && !fullId.startsWith('b2_')) return;
+            
+            const devId = fullId.substring(0, 2); // b1 hoặc b2
+            const key = fullId.substring(3);      // voltage, bal_start_v
 
-                // HIỆU ỨNG DÒNG CHẢY
+            // 1. LƯU DỮ LIỆU VÀO CACHE THEO TỪNG BỘ BMS
+            if (!bmsCache[devId]) bmsCache[devId] = {};
+            bmsCache[devId][key] = { value: payload, type: type };
+
+            // 2. CHỈ CẬP NHẬT LÊN MÀN HÌNH NẾU ĐÓ LÀ BỘ ĐANG XEM
+            if (devId === activeBms) {
+                applyDataToUI(key, payload, type);
+            }
+        };
+
+        // HÀM HIỂN THỊ DỮ LIỆU RA GIAO DIỆN
+        function applyDataToUI(key, val, type) {
+            // Nhóm Cảm biến (Chỉ hiển thị chữ)
+            if (type === 'sensor' || type === 'text_sensor') {
+                const mapping = {
+                    'voltage': ['main_voltage', 'pack_v'],
+                    'current': ['main_current', 'pack_a'],
+                    'power': ['main_power', 'main_power_card', 'pack_p'],
+                    'soc': ['main_soc', 'pack_soc'],
+                    'capacity_remaining': ['main_energy_now', 'pack_cap_now'],
+                    'total_battery_capacity_setting': ['main_capacity'],
+                    'delta_cell_voltage': ['pack_delta'],
+                    'charging_cycles': ['pack_cycles'],
+                    'temperature_sensor_1': ['pack_t_bms'],
+                    'temperature_sensor_2': ['pack_t1'],
+                    'temperature_sensor_3': ['pack_t2'],
+                    'min_cell_voltage': ['pack_min'],
+                    'max_cell_voltage': ['pack_max'],
+                    'setup_passcode': ['pack_passcode']
+                };
+
+                if (mapping[key]) {
+                    mapping[key].forEach(elId => {
+                        const el = document.getElementById(elId);
+                        if(el) {
+                            if (elId === 'pack_passcode') el.innerText = val;
+                            else el.innerText = parseFloat(val).toFixed(2) + (elId.includes('voltage') || elId.includes('_v') || elId.includes('min') || elId.includes('max') || elId.includes('delta') ? " V" : 
+                                                  elId.includes('power') || elId.includes('_p') ? " W" : 
+                                                  elId.includes('current') || elId.includes('_a') ? " A" : 
+                                                  elId.includes('soc') ? " %" : 
+                                                  elId.includes('cap') || elId.includes('now') ? " Ah" : 
+                                                  elId.includes('_t') ? " °C" : "");
+                        }
+                    });
+                }
+
+                if (key.startsWith('cell_voltage_')) {
+                    const num = key.split('_')[2];
+                    const cellEl = document.getElementById('c' + num);
+                    if (cellEl) cellEl.innerText = parseFloat(val).toFixed(3) + " V";
+                }
+
+                // Hiệu ứng Hình ảnh
                 if (key === 'current') {
-                    const current = parseFloat(payload);
+                    const current = parseFloat(val);
                     const lSolar = document.getElementById('line-solar');
                     const lLoad = document.getElementById('line-load');
                     const lBat = document.getElementById('line-bat');
@@ -401,72 +434,53 @@
                         document.getElementById('main_power_load').innerText = "0 W";
                     }
                 }
-                
-                // MỰC NƯỚC PIN
                 if (key === 'soc') {
-                    document.getElementById('bat_fill_level').style.height = payload + "%";
-                    document.getElementById('bat_percent_text').innerText = Math.round(payload) + "%";
+                    document.getElementById('bat_fill_level').style.height = val + "%";
+                    document.getElementById('bat_percent_text').innerText = Math.round(val) + "%";
                 }
             }
-        };
 
-        function updateUI(key, val) {
-            const mapping = {
-                'voltage': ['main_voltage', 'pack_v'],
-                'current': ['main_current', 'pack_a'],
-                'power': ['main_power', 'main_power_card', 'pack_p'],
-                'soc': ['main_soc', 'pack_soc'],
-                'capacity_remaining': ['main_energy_now', 'pack_cap_now'],
-                'total_battery_capacity_setting': ['main_capacity'],
-                'delta_cell_voltage': ['pack_delta'],
-                'charging_cycles': ['pack_cycles'],
-                'temperature_sensor_1': ['pack_t_bms'],
-                'temperature_sensor_2': ['pack_t1'],
-                'temperature_sensor_3': ['pack_t2'],
-                'min_cell_voltage': ['pack_min'],
-                'max_cell_voltage': ['pack_max'],
-                
-                // Ô mật khẩu thiết bị (Mới thêm)
-                'setup_passcode': ['pack_passcode']
-            };
-
-            if (mapping[key]) {
-                mapping[key].forEach(elId => {
-                    const el = document.getElementById(elId);
-                    if(el) {
-                        // Nếu là ô mật khẩu thì hiển thị thẳng chữ thô (không thêm đơn vị V, A)
-                        if (elId === 'pack_passcode') {
-                            el.innerText = val;
-                        } else {
-                            el.innerText = val + (elId.includes('voltage') || elId.includes('_v') || elId.includes('min') || elId.includes('max') || elId.includes('delta') ? " V" : 
-                                                  elId.includes('power') || elId.includes('_p') ? " W" : 
-                                                  elId.includes('current') || elId.includes('_a') ? " A" : 
-                                                  elId.includes('soc') ? " %" : 
-                                                  elId.includes('cap') || elId.includes('now') ? " Ah" : 
-                                                  elId.includes('_t') ? " °C" : "");
-                        }
-                    }
-                });
+            // Nhóm Cài đặt Thông số (Đổ số vào ô Textbox thay vì giá trị cứng HTML)
+            if (type === 'number') {
+                const inputEl = document.getElementById('val_' + key);
+                if (inputEl) {
+                    inputEl.value = parseFloat(val); // Sẽ tự lưu lại ngay cả khi tải lại trang
+                }
             }
 
-            if (key.startsWith('cell_voltage_')) {
-                const num = key.split('_')[2];
-                const cellEl = document.getElementById('c' + num);
-                if (cellEl) cellEl.innerText = val + " V";
+            // Nhóm Công tắc
+            if (type === 'switch') {
+                const swEl = document.getElementById('sw_' + key);
+                if (swEl) {
+                    swEl.checked = (val === 'ON');
+                }
             }
         }
 
+        // HÀM CHUYỂN ĐỔI THIẾT BỊ (ĐÃ TỐI ƯU SIÊU NHANH)
         function switchDevice() {
             activeBms = document.getElementById('device-selector').value;
-            document.querySelectorAll('[id^="main_"], [id^="pack_"], [id^="c"], [id^="bat_percent"]').forEach(el => {
-                if(el.tagName === 'SPAN') el.innerText = "--";
-            });
+            
+            // Xóa hiệu ứng cũ
             document.getElementById('main_power').innerText = "0 W";
             document.getElementById('bat_fill_level').style.height = "0%";
             document.getElementById('line-solar').classList.remove('active');
             document.getElementById('line-load').classList.remove('active');
             document.getElementById('line-bat').classList.remove('active');
-            document.getElementById('pack_passcode').innerText = "Đang quét...";
+            
+            // Lấy toàn bộ dữ liệu từ Bộ nhớ đệm (Cache) đắp thẳng lên màn hình
+            const data = bmsCache[activeBms];
+            if (data && Object.keys(data).length > 0) {
+                for (const k in data) {
+                    applyDataToUI(k, data[k].value, data[k].type);
+                }
+            } else {
+                // Nếu chưa có Cache (lúc mới mở Web 1 giây đầu), để thông số là "--" chờ load
+                document.querySelectorAll('[id^="main_"], [id^="pack_"], [id^="c"], [id^="bat_percent"]').forEach(el => {
+                    if(el.tagName === 'SPAN') el.innerText = "--";
+                });
+                document.getElementById('pack_passcode').innerText = "Đang quét...";
+            }
         }
 
         function nav(tab) {
@@ -482,30 +496,13 @@
         function sendCmd(type, state) {
             const val = state ? "ON" : "OFF";
             client.send(`bms/switch/${activeBms}_${type}/command`, val);
-            alert(`Đã gửi lệnh bật/tắt ${type} cho bộ ${activeBms}`);
+            alert(`Đã gửi lệnh Rơ-le xuống BMS`);
         }
 
         function sendVal(id) {
             const input = document.getElementById('val_' + id);
             client.send(`bms/number/${activeBms}_${id}/command`, input.value);
-            alert(`Đã gửi lệnh cài đặt [${id}] = ${input.value} cho bộ ${activeBms}`);
-        }
-
-        function changeWifi() {
-            const ssid = document.getElementById('new_wifi_ssid').value;
-            const pass = document.getElementById('new_wifi_pass').value;
-            
-            if(!ssid) {
-                alert("Thầy vui lòng nhập Tên WiFi (SSID) nhé!");
-                return;
-            }
-            
-            client.send(`bms/wifi/ssid/command`, ssid);
-            client.send(`bms/wifi/pass/command`, pass);
-            
-            alert(`Đã gửi lệnh đổi WiFi sang mạng: ${ssid}\nNếu mật khẩu đúng, mạch sẽ kết nối trong 10 giây.`);
-            document.getElementById('new_wifi_ssid').value = "";
-            document.getElementById('new_wifi_pass').value = "";
+            alert(`Đã GHI ĐÈ cài đặt thành công!`);
         }
     </script>
 </body>
