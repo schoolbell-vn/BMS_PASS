@@ -12,35 +12,21 @@
         .tab-content.active { display: block; }
         .cell-v { font-family: 'Courier New', Courier, monospace; }
         
-        /* Hiệu ứng dòng chảy năng lượng */
-        .energy-line {
-            stroke: #475569;
-            stroke-width: 3;
-            fill: none;
-            transition: all 0.3s ease;
-        }
-        .flow-active {
-            stroke: #10b981;
-            stroke-dasharray: 8 8;
-            stroke-width: 4;
-        }
-        .flow-forward { animation: flow-anim 0.8s linear infinite reverse; }
-        .flow-reverse { animation: flow-anim 0.8s linear infinite; }
-        
-        @keyframes flow-anim {
-            from { stroke-dashoffset: 16; }
-            to { stroke-dashoffset: 0; }
-        }
-        
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
-        }
-        .charging-glow { animation: pulse-glow 2s ease-in-out infinite; border-color: #10b981 !important; }
-        .discharging-glow { border-color: #f59e0b !important; }
+        /* Hiệu ứng dòng điện chạy */
+        .energy-flow { stroke-dasharray: 6; stroke-dashoffset: 12; opacity: 0; transition: opacity 0.3s ease; }
+        .energy-flow.active { opacity: 1; }
+        .flow-forward { animation: flow 0.6s linear infinite; }
+        .flow-reverse { animation: flow 0.6s linear infinite reverse; }
+        @keyframes flow { to { stroke-dashoffset: 0; } }
+
+        /* Nút gạt Toggle (Công tắc) */
+        .toggle-checkbox:checked { right: 0; border-color: #00a884; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #00a884; }
+        .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
+        .toggle-label { background-color: #cbd5e1; transition: all 0.3s; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen pb-20">
+<body class="bg-gray-100 min-h-screen pb-20 font-sans">
 
     <header class="bg-[#00a884] text-white p-3 shadow-md sticky top-0 z-50">
         <div class="flex justify-between items-center max-w-4xl mx-auto">
@@ -57,73 +43,113 @@
 
     <main class="max-w-4xl mx-auto p-2">
         
+        <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center mb-3 border-l-4 border-blue-500">
+            <span class="text-blue-600 font-bold">Thiết bị:</span>
+            <select id="device-selector" class="border-none font-bold text-gray-700 outline-none bg-transparent" onchange="switchDevice()">
+                <option value="b1">Pin Hai Dang 314Ah</option>
+                <option value="b2">Pin Hai Dang 280Ah</option>
+            </select>
+        </div>
+
         <div id="tab-home" class="tab-content active space-y-3">
             
-            <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center">
-                <span class="text-blue-600 font-bold">Thiết bị:</span>
-                <select id="device-selector" class="border-none font-bold text-gray-700 outline-none" onchange="switchDevice()">
-                    <option value="b1">Pin Hai Dang 314Ah</option>
-                    <option value="b2">Pin Hai Dang 280Ah</option>
-                </select>
-            </div>
-
-            <div class="bg-[#1e293b] rounded-xl p-4 shadow-inner relative h-56 w-full max-w-md mx-auto overflow-hidden">
-                <svg class="absolute inset-0 w-full h-full">
-                    <path id="line-solar" class="energy-line" d="M 60 50 L 160 50" />
-                    <path id="line-load" class="energy-line" d="M 240 50 L 340 50" />
-                    <path id="line-bat" class="energy-line" d="M 200 80 L 200 150" />
+            <div class="bg-white rounded-xl p-2 shadow-sm relative h-64 w-full max-w-md mx-auto overflow-hidden">
+                <svg viewBox="0 0 400 260" class="absolute inset-0 w-full h-full z-0" preserveAspectRatio="xMidYMid meet">
+                    <path d="M 80 60 L 165 60" stroke="#f1f5f9" stroke-width="4" fill="none" />
+                    <path d="M 235 60 L 320 60" stroke="#f1f5f9" stroke-width="4" fill="none" />
+                    <path d="M 200 100 L 200 150" stroke="#f1f5f9" stroke-width="4" fill="none" />
+                    
+                    <path id="line-solar" d="M 80 60 L 165 60" stroke="#eab308" stroke-width="4" fill="none" class="energy-flow" />
+                    <path id="line-load" d="M 235 60 L 320 60" stroke="#3b82f6" stroke-width="4" fill="none" class="energy-flow" />
+                    <path id="line-bat" d="M 200 100 L 200 150" stroke="#f97316" stroke-width="4" fill="none" class="energy-flow" />
                 </svg>
 
-                <div class="absolute top-6 left-4 w-16 h-16 bg-slate-800 border-2 border-yellow-500 rounded-lg flex flex-col items-center justify-center text-yellow-400 z-10">
-                    <i class="fas fa-solar-panel text-2xl"></i>
-                    <span class="text-[9px] font-bold mt-1">SOLAR</span>
+                <div class="absolute top-[25px] left-[15px] w-16 text-center z-10 flex flex-col items-center">
+                    <i class="fas fa-solar-panel text-4xl text-yellow-500 mb-1"></i>
+                    <span class="text-[10px] font-bold text-yellow-600">PIN MẶT TRỜI</span>
                 </div>
 
-                <div class="absolute top-6 right-4 w-16 h-16 bg-slate-800 border-2 border-blue-500 rounded-lg flex flex-col items-center justify-center text-blue-400 z-10">
-                    <i class="fas fa-house-chimney text-2xl"></i>
-                    <span class="text-[9px] font-bold mt-1">NHÀ (TẢI)</span>
+                <div class="absolute top-[25px] right-[15px] w-16 text-center z-10 flex flex-col items-center">
+                    <i class="fas fa-house-chimney text-4xl text-blue-500 mb-1"></i>
+                    <span class="text-[10px] font-bold text-blue-600">TẢI TIÊU THỤ</span>
+                    <span class="text-xs font-bold text-blue-500 mt-1" id="main_power_load">0 W</span>
                 </div>
 
-                <div class="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-16 bg-slate-700 border-2 border-slate-400 rounded-lg flex flex-col items-center justify-center text-white z-10 shadow-lg">
-                    <i class="fas fa-server text-xl mb-1 text-emerald-400"></i>
-                    <span class="text-[10px] font-bold">INVERTER</span>
+                <div class="absolute top-[20px] left-1/2 -translate-x-1/2 z-10">
+                    <div class="w-16 h-20 bg-white rounded-lg shadow-md border-2 border-gray-200 flex flex-col items-center py-2 relative">
+                        <div class="flex gap-1.5 mb-2">
+                            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_5px_#22c55e]"></div>
+                            <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                        </div>
+                        <div class="w-10 h-6 bg-slate-800 rounded flex items-center justify-center">
+                            <div class="w-8 h-4 bg-blue-200 rounded-sm opacity-50"></div>
+                        </div>
+                        <div class="w-3 h-3 rounded-full bg-gray-300 absolute -bottom-1.5 border border-gray-400"></div>
+                    </div>
                 </div>
 
-                <div id="bat-node" class="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-20 bg-slate-800 border-2 border-gray-500 rounded-lg flex flex-col items-center justify-center text-white z-10 transition-colors duration-500">
-                    <span class="text-[10px] font-bold text-gray-400 mb-1">PIN LƯU TRỮ</span>
-                    <span class="font-black text-xl" id="main_power">0 W</span>
+                <div class="absolute top-[140px] left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
+                    <div class="w-20 bg-white px-2 py-0.5 rounded-full border border-orange-300 text-center shadow-sm z-20 -mb-2">
+                        <span class="text-[11px] font-black text-orange-600" id="main_power">0 W</span>
+                    </div>
+                    <div class="relative w-12 h-[70px] border-[3px] border-orange-500 rounded bg-white shadow-sm z-10 overflow-hidden">
+                        <div class="absolute -top-[3px] left-1/2 -translate-x-1/2 w-4 h-[3px] bg-orange-500"></div>
+                        <div class="absolute bottom-0 left-0 w-full bg-orange-400 transition-all duration-1000 ease-in-out" id="bat_fill_level" style="height: 0%;"></div>
+                        <div class="absolute inset-0 flex items-center justify-center z-20">
+                            <span class="text-[11px] font-black text-gray-800 bg-white/80 px-1 rounded shadow-sm" id="bat_percent_text">--%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-2 text-white">
-                <div class="bg-[#56b6e7] p-3 rounded-lg relative overflow-hidden">
+                <div class="bg-[#56b6e7] p-3 rounded-lg relative overflow-hidden shadow-sm">
                     <p class="text-sm font-bold border-b border-white/30 mb-2">Điện áp</p>
                     <div class="flex justify-between items-end">
                         <div class="text-xs opacity-90">Điện áp:<br><span class="text-lg font-bold" id="main_voltage">-- V</span></div>
                         <div class="text-xs opacity-90 text-right">Dòng điện:<br><span class="text-lg font-bold" id="main_current">-- A</span></div>
                     </div>
+                    <i class="fas fa-bolt absolute top-2 right-2 opacity-20 text-3xl"></i>
                 </div>
-                <div class="bg-[#f27e91] p-3 rounded-lg relative overflow-hidden">
+                <div class="bg-[#f27e91] p-3 rounded-lg relative overflow-hidden shadow-sm">
                     <p class="text-sm font-bold border-b border-white/30 mb-2">Công suất</p>
                     <div class="flex justify-between items-end">
                         <div class="text-xs opacity-90">Công suất:<br><span class="text-lg font-bold" id="main_power_card">-- W</span></div>
                         <div class="text-xs opacity-90 text-right">Phần trăm:<br><span class="text-lg font-bold" id="main_soc">-- %</span></div>
                     </div>
+                    <i class="fas fa-battery-three-quarters absolute top-2 right-2 opacity-20 text-3xl"></i>
+                </div>
+                <div class="bg-[#f7ac68] p-3 rounded-lg relative overflow-hidden shadow-sm">
+                    <p class="text-sm font-bold border-b border-white/30 mb-2">Hằng ngày</p>
+                    <div class="flex justify-between items-end">
+                        <div class="text-xs opacity-90">Sạc:<br><span class="text-lg font-bold">0.000 kWh</span></div>
+                        <div class="text-xs opacity-90 text-right">Xả:<br><span class="text-lg font-bold">0.000 kWh</span></div>
+                    </div>
+                    <i class="fas fa-calendar-day absolute top-2 right-2 opacity-20 text-3xl"></i>
+                </div>
+                <div class="bg-[#49c5b6] p-3 rounded-lg relative overflow-hidden shadow-sm">
+                    <p class="text-sm font-bold border-b border-white/30 mb-2">Dung lượng</p>
+                    <div class="flex justify-between items-end">
+                        <div class="text-xs opacity-90">Còn lại:<br><span class="text-lg font-bold" id="main_energy_now">-- Ah</span></div>
+                        <div class="text-xs opacity-90 text-right">Tổng:<br><span class="text-lg font-bold" id="main_capacity">-- Ah</span></div>
+                    </div>
+                    <i class="fas fa-database absolute top-2 right-2 opacity-20 text-3xl"></i>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div class="bg-[#5cc49f] text-white p-2 font-bold text-sm">Thông tin khối pin</div>
-                <div class="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div class="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] sm:text-xs text-gray-600">
                     <div class="flex justify-between border-b pb-1"><span>Điện áp:</span><span class="text-[#5cc49f] font-bold" id="pack_v">-- V</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Dòng điện:</span><span class="text-[#5cc49f] font-bold" id="pack_a">-- A</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Công suất:</span><span class="text-[#5cc49f] font-bold" id="pack_p">-- W</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Chênh lệch:</span><span class="text-[#5cc49f] font-bold" id="pack_delta">-- V</span></div>
-                    <div class="flex justify-between border-b pb-1"><span>Dung lượng:</span><span class="text-[#5cc49f] font-bold" id="pack_cap">-- Ah</span></div>
-                    <div class="flex justify-between border-b pb-1"><span>Nhiệt độ MOS:</span><span class="text-[#5cc49f] font-bold" id="pack_t_bms">-- °C</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Dung lượng:</span><span class="text-[#5cc49f] font-bold" id="pack_cap_now">-- Ah</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Nhiệt độ BMS:</span><span class="text-[#5cc49f] font-bold" id="pack_t_bms">-- °C</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Phần trăm:</span><span class="text-[#5cc49f] font-bold" id="pack_soc">-- %</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Nhiệt độ T1:</span><span class="text-[#5cc49f] font-bold" id="pack_t1">-- °C</span></div>
-                    <div class="flex justify-between border-b pb-1"><span>Chu kì sạc:</span><span class="text-[#5cc49f] font-bold" id="pack_cycles">--</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Chu kì sx:</span><span class="text-[#5cc49f] font-bold" id="pack_cycles">--</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Nhiệt độ T2:</span><span class="text-[#5cc49f] font-bold" id="pack_t2">-- °C</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Thấp nhất:</span><span class="text-[#5cc49f] font-bold" id="pack_min">-- V</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Cao nhất:</span><span class="text-[#5cc49f] font-bold" id="pack_max">-- V</span></div>
@@ -132,11 +158,142 @@
 
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div class="bg-[#5cc49f] text-white p-2 font-bold text-sm">Thông tin chi tiết (Volt)</div>
-                <div class="p-3 grid grid-cols-2 gap-x-6 gap-y-1" id="cells_grid">
-                    </div>
+                <div class="p-3 grid grid-cols-2 gap-x-6 gap-y-1" id="cells_grid"></div>
             </div>
         </div>
+
+        <div id="tab-settings" class="tab-content space-y-3">
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden border">
+                <div class="bg-[#56b6e7] text-white p-3 font-bold text-sm flex justify-between">
+                    <span>Setting BMS</span>
+                    <button class="bg-white text-[#56b6e7] px-3 py-0.5 rounded text-xs">Read</button>
+                </div>
+                
+                <div class="p-4 space-y-5 text-sm text-gray-700">
+                    <div class="space-y-4 border-b pb-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#56b6e7] font-bold">Charge Mosfet</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="toggle" id="sw_charge" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="sendCmd('charging', this.checked)"/>
+                                <label for="sw_charge" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#56b6e7] font-bold">Discharge Mosfet</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="toggle" id="sw_discharge" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="sendCmd('discharging', this.checked)"/>
+                                <label for="sw_discharge" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#56b6e7] font-bold">Balancer</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="toggle" id="sw_balancer" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="sendCmd('balancer', this.checked)"/>
+                                <label for="sw_balancer" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#56b6e7] font-bold">Start Balance voltage</span>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="val_bal_v" class="border border-gray-300 rounded p-1 w-20 text-center font-bold text-gray-700" value="3.400" step="0.001">
+                                <span class="text-gray-500 font-bold">V</span>
+                                <button class="bg-[#00a884] text-white px-3 py-1 rounded font-bold" onclick="sendVal('bal_v')">OK</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#56b6e7] font-bold">Cell OVP</span>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="val_ovp" class="border border-gray-300 rounded p-1 w-20 text-center font-bold text-gray-700" value="3.600" step="0.001">
+                                <span class="text-gray-500 font-bold">V</span>
+                                <button class="bg-[#00a884] text-white px-3 py-1 rounded font-bold" onclick="sendVal('ovp')">OK</button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#56b6e7] font-bold">Cell UVPR</span>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="val_uvpr" class="border border-gray-300 rounded p-1 w-20 text-center font-bold text-gray-700" value="2.800" step="0.001">
+                                <span class="text-gray-500 font-bold">V</span>
+                                <button class="bg-[#00a884] text-white px-3 py-1 rounded font-bold" onclick="sendVal('uvpr')">OK</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-[#56b6e7] font-bold">Battery capacity</span>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="val_cap" class="border border-gray-300 rounded p-1 w-20 text-center font-bold text-gray-700" value="314">
+                                <span class="text-gray-500 font-bold">AH</span>
+                                <button class="bg-[#00a884] text-white px-3 py-1 rounded font-bold" onclick="sendVal('cap')">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-wifi" class="tab-content space-y-3">
+             <div class="bg-white rounded-lg shadow-sm overflow-hidden border">
+                <div class="bg-purple-500 text-white p-3 font-bold text-sm flex justify-between items-center">
+                    <span>Thông tin Mạng hiện tại</span>
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <div class="p-4 space-y-4 text-sm text-gray-700">
+                     <div class="flex justify-between items-center border-b pb-2">
+                        <span class="font-bold text-gray-500">Tên WiFi (SSID):</span>
+                        <span id="wifi_current_ssid" class="text-purple-600 font-bold text-lg">Đang tải...</span>
+                     </div>
+                     <div class="flex justify-between items-center pt-1">
+                        <span class="font-bold text-gray-500">Cường độ sóng:</span>
+                        <div class="flex items-center gap-2">
+                            <span id="wifi_current_signal" class="text-purple-600 font-bold text-lg">-- dBm</span>
+                            <i class="fas fa-signal text-purple-500"></i>
+                        </div>
+                     </div>
+                </div>
+             </div>
+
+             <div class="bg-white rounded-lg shadow-sm overflow-hidden border mt-4">
+                <div class="bg-[#f7ac68] text-white p-3 font-bold text-sm flex justify-between items-center">
+                    <span>Kết nối WiFi mới</span>
+                    <i class="fas fa-wifi"></i>
+                </div>
+                <div class="p-4 space-y-4 text-sm text-gray-700">
+                     <p class="text-xs text-gray-500 italic mb-2">Nhập tên và mật khẩu WiFi mới để cấu hình lại mạch từ xa.</p>
+                     <div>
+                         <label class="block text-xs font-bold text-gray-500 mb-1">Tên WiFi (SSID) *</label>
+                         <input type="text" id="new_wifi_ssid" placeholder="Nhập tên mạng..." class="w-full border border-gray-300 rounded p-2 outline-none focus:border-[#f7ac68] focus:ring-1 focus:ring-[#f7ac68]">
+                     </div>
+                     <div>
+                         <label class="block text-xs font-bold text-gray-500 mb-1">Mật khẩu WiFi</label>
+                         <input type="password" id="new_wifi_pass" placeholder="Nhập mật khẩu..." class="w-full border border-gray-300 rounded p-2 outline-none focus:border-[#f7ac68] focus:ring-1 focus:ring-[#f7ac68]">
+                     </div>
+                     <button onclick="changeWifi()" class="w-full bg-[#f7ac68] text-white font-bold py-3 mt-2 rounded-lg shadow-sm active:scale-95 transition-transform flex justify-center items-center gap-2">
+                         <i class="fas fa-satellite-dish"></i> GỬI LỆNH KẾT NỐI
+                     </button>
+                </div>
+             </div>
+        </div>
+
     </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-2 shadow-[0_-5px_10px_rgba(0,0,0,0.05)] z-50">
+        <button onclick="nav('home')" class="flex flex-col items-center text-[#00a884] nav-btn" id="nav-home">
+            <i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold">Home</span>
+        </button>
+        <button onclick="nav('settings')" class="flex flex-col items-center text-gray-400 nav-btn" id="nav-settings">
+            <i class="fas fa-cog text-xl mb-1"></i><span class="text-[10px] font-bold">Settings</span>
+        </button>
+        <button onclick="nav('wifi')" class="flex flex-col items-center text-gray-400 nav-btn" id="nav-wifi">
+            <i class="fas fa-wifi text-xl mb-1"></i><span class="text-[10px] font-bold">WiFi</span>
+        </button>
+        <button class="flex flex-col items-center text-gray-400 nav-btn">
+            <i class="fas fa-user text-xl mb-1"></i><span class="text-[10px] font-bold">Profile</span>
+        </button>
+    </nav>
 
     <script>
         const config = {
@@ -157,10 +314,10 @@
             onSuccess: () => {
                 document.getElementById('mqtt-status').innerText = "Trực tuyến (Cloud)";
                 client.subscribe("bms/sensor/+/state");
+                client.subscribe("bms/wifi/+/state"); // Đăng ký nhận thông tin WiFi
             }
         });
 
-        // Tạo sẵn khung 16 Cell trống (chờ MQTT bơm dữ liệu vào)
         const grid = document.getElementById('cells_grid');
         for (let i = 1; i <= 16; i++) {
             grid.innerHTML += `
@@ -176,48 +333,59 @@
             const payload = msg.payloadString;
             const id = topic.split('/')[2]; 
 
+            // Cập nhật thông tin WiFi nếu nhận được
+            if(topic.includes("bms/wifi/ssid/state")) {
+                document.getElementById('wifi_current_ssid').innerText = payload;
+                return;
+            }
+            if(topic.includes("bms/wifi/signal/state")) {
+                document.getElementById('wifi_current_signal').innerText = payload + " dBm";
+                return;
+            }
+
             if (id.startsWith(activeBms)) {
                 const key = id.replace(activeBms + "_", "");
                 updateUI(key, payload);
 
-                // Kích hoạt đường chảy SVG
+                // LOGIC SẠC XẢ (Solar -> Inverter -> Pin)
                 if (key === 'current') {
                     const current = parseFloat(payload);
                     const lSolar = document.getElementById('line-solar');
                     const lLoad = document.getElementById('line-load');
                     const lBat = document.getElementById('line-bat');
-                    const batNode = document.getElementById('bat-node');
 
-                    lSolar.className.baseVal = "energy-line";
-                    lLoad.className.baseVal = "energy-line";
-                    lBat.className.baseVal = "energy-line";
-                    batNode.classList.remove('charging-glow', 'discharging-glow');
+                    lSolar.classList.remove('active', 'flow-forward', 'flow-reverse');
+                    lLoad.classList.remove('active', 'flow-forward', 'flow-reverse');
+                    lBat.classList.remove('active', 'flow-forward', 'flow-reverse');
 
                     if (current > 0.5) {
-                        lSolar.className.baseVal = "energy-line flow-active flow-forward";
-                        lBat.className.baseVal = "energy-line flow-active flow-forward";
-                        batNode.classList.add('charging-glow');
-                        batNode.querySelector('span:last-child').style.color = '#10b981';
+                        lSolar.classList.add('active', 'flow-forward');
+                        lBat.classList.add('active', 'flow-forward');
+                        document.getElementById('main_power_load').innerText = "0 W";
                     } else if (current < -0.5) {
-                        lBat.className.baseVal = "energy-line flow-active flow-reverse";
-                        lLoad.className.baseVal = "energy-line flow-active flow-forward";
-                        batNode.classList.add('discharging-glow');
-                        batNode.querySelector('span:last-child').style.color = '#f59e0b';
+                        lBat.classList.add('active', 'flow-reverse');
+                        lLoad.classList.add('active', 'flow-forward');
+                        document.getElementById('main_power_load').innerText = document.getElementById('main_power').innerText;
                     } else {
-                        batNode.querySelector('span:last-child').style.color = 'white';
+                        document.getElementById('main_power_load').innerText = "0 W";
                     }
+                }
+                
+                if (key === 'soc') {
+                    document.getElementById('bat_fill_level').style.height = payload + "%";
+                    document.getElementById('bat_percent_text').innerText = Math.round(payload) + "%";
                 }
             }
         };
 
         function updateUI(key, val) {
-            // Khai báo ánh xạ các giá trị từ MQTT vào đúng ô của HTML
             const mapping = {
                 'voltage': ['main_voltage', 'pack_v'],
                 'current': ['main_current', 'pack_a'],
                 'power': ['main_power', 'main_power_card', 'pack_p'],
                 'soc': ['main_soc', 'pack_soc'],
-                'capacity': ['pack_cap'],
+                'capacity_remaining': ['main_energy_now', 'pack_cap_now'],
+                'total_battery_capacity_setting': ['main_capacity'],
                 'delta_cell_voltage': ['pack_delta'],
                 'charging_cycles': ['pack_cycles'],
                 'temperature_sensor_1': ['pack_t_bms'],
@@ -235,13 +403,12 @@
                                               elId.includes('power') || elId.includes('_p') ? " W" : 
                                               elId.includes('current') || elId.includes('_a') ? " A" : 
                                               elId.includes('soc') ? " %" : 
-                                              elId.includes('cap') ? " Ah" : 
+                                              elId.includes('cap') || elId.includes('now') ? " Ah" : 
                                               elId.includes('_t') ? " °C" : "");
                     }
                 });
             }
 
-            // Đẩy dữ liệu vào 16 ô Cell
             if (key.startsWith('cell_voltage_')) {
                 const num = key.split('_')[2];
                 const cellEl = document.getElementById('c' + num);
@@ -251,11 +418,56 @@
 
         function switchDevice() {
             activeBms = document.getElementById('device-selector').value;
-            // Xóa dữ liệu cũ trên màn hình chờ load số mới
-            document.querySelectorAll('[id^="main_"], [id^="pack_"], [id^="c"]').forEach(el => {
+            document.querySelectorAll('[id^="main_"], [id^="pack_"], [id^="c"], [id^="bat_percent"]').forEach(el => {
                 if(el.tagName === 'SPAN') el.innerText = "--";
             });
             document.getElementById('main_power').innerText = "0 W";
+            document.getElementById('bat_fill_level').style.height = "0%";
+            document.getElementById('line-solar').classList.remove('active');
+            document.getElementById('line-load').classList.remove('active');
+            document.getElementById('line-bat').classList.remove('active');
+            document.getElementById('val_cap').value = (activeBms === 'b1') ? "314" : "280";
+        }
+
+        function nav(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.replace('text-[#00a884]', 'text-gray-400');
+            });
+            document.getElementById('nav-' + tab).classList.replace('text-gray-400', 'text-[#00a884]');
+        }
+
+        // --- CÁC HÀM GỬI LỆNH MQTT ---
+        function sendCmd(type, state) {
+            const val = state ? "ON" : "OFF";
+            client.send(`bms/switch/${activeBms}_${type}/command`, val);
+            alert(`Đã gửi lệnh bật/tắt ${type} cho bộ ${activeBms}`);
+        }
+
+        function sendVal(type) {
+            const input = document.getElementById('val_' + type);
+            client.send(`bms/number/${activeBms}_${type}/command`, input.value);
+            alert(`Đã gửi lệnh cài đặt ${type} = ${input.value} cho bộ ${activeBms}`);
+        }
+
+        function changeWifi() {
+            const ssid = document.getElementById('new_wifi_ssid').value;
+            const pass = document.getElementById('new_wifi_pass').value;
+            
+            if(!ssid) {
+                alert("Thầy vui lòng nhập Tên WiFi (SSID) nhé!");
+                return;
+            }
+            
+            // Gửi lệnh thay đổi WiFi xuống ESP32
+            client.send(`bms/wifi/ssid/command`, ssid);
+            client.send(`bms/wifi/pass/command`, pass);
+            
+            alert(`Đã gửi lệnh đổi WiFi sang mạng: ${ssid}\nNếu mật khẩu đúng, mạch sẽ khởi động lại và kết nối vào mạng mới trong 10 giây.`);
+            document.getElementById('new_wifi_ssid').value = "";
+            document.getElementById('new_wifi_pass').value = "";
         }
     </script>
 </body>
