@@ -15,17 +15,13 @@
         
         .cell-v { font-family: 'Courier New', Courier, monospace; }
         
-        /* Hiệu ứng kính 3D (Glassmorphism & Neumorphism) */
+        /* Hiệu ứng kính 3D (Neumorphism) */
         .card-3d {
             background: linear-gradient(145deg, #ffffff, #f0f0f0);
             box-shadow: 6px 6px 12px #d1d5db, -6px -6px 12px #ffffff;
             border-radius: 16px;
         }
-        .card-inner-3d {
-            background: #ffffff;
-            box-shadow: inset 4px 4px 8px #e5e7eb, inset -4px -4px 8px #ffffff;
-        }
-
+        
         /* Gradient Thẻ màu 3D */
         .grad-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
         .grad-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
@@ -48,7 +44,7 @@
         .setting-scroll::-webkit-scrollbar { width: 6px; }
         .setting-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 6px; }
         
-        /* Pin 3D */
+        /* Cọc Pin rõ nét */
         .battery-cap {
             width: 36%; height: 8px; 
             background: linear-gradient(to right, #9ca3af, #e5e7eb, #9ca3af);
@@ -76,9 +72,9 @@
                 </div>
             </div>
             <div class="text-right">
-                <div id="mqtt-status-badge" class="inline-flex items-center gap-1.5 bg-red-500/20 text-red-400 border border-red-500/50 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-300">
-                    <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse" id="mqtt-dot"></div>
-                    <span id="mqtt-status">Chờ kết nối...</span>
+                <div id="mqtt-status-badge" class="inline-flex items-center gap-1.5 bg-gray-500/20 text-gray-400 border border-gray-500/50 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-300">
+                    <div class="w-2 h-2 rounded-full bg-gray-500 animate-pulse" id="mqtt-dot"></div>
+                    <span id="mqtt-status">Đang tìm ESP32...</span>
                 </div>
                 <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Thầy Tú - V5.1 3D Fix</p>
             </div>
@@ -100,76 +96,59 @@
 
         <div id="tab-home" class="tab-content active space-y-4">
             
-            <div class="card-3d p-4 relative h-72 w-full max-w-md mx-auto overflow-hidden flex items-center justify-center">
+            <div class="card-3d p-4 relative h-48 w-full max-w-md mx-auto overflow-hidden flex items-center justify-center">
                 <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
                 
-                <svg viewBox="0 0 400 280" class="absolute inset-0 w-full h-full z-0" preserveAspectRatio="xMidYMid meet">
-                    <path d="M 80 80 L 170 80" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round" fill="none" />
-                    <path d="M 230 80 L 320 80" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round" fill="none" />
-                    <path d="M 200 110 L 200 165" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round" fill="none" />
-                    <path id="line-solar" d="M 80 80 L 170 80" stroke="#eab308" stroke-width="6" stroke-linecap="round" fill="none" class="energy-flow" />
-                    <path id="line-load" d="M 230 80 L 320 80" stroke="#3b82f6" stroke-width="6" stroke-linecap="round" fill="none" class="energy-flow" />
-                    <path id="line-bat" d="M 200 110 L 200 165" stroke="#10b981" stroke-width="6" stroke-linecap="round" fill="none" class="energy-flow" />
+                <svg viewBox="0 0 400 192" class="absolute inset-0 w-full h-full z-0" preserveAspectRatio="xMidYMid meet">
+                    <path d="M 100 96 L 170 96" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round" fill="none" />
+                    <path d="M 230 96 L 300 96" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round" fill="none" />
+                    <path id="line-solar" d="M 100 96 L 170 96" stroke="#eab308" stroke-width="6" stroke-linecap="round" fill="none" class="energy-flow" />
+                    <path id="line-load" d="M 230 96 L 300 96" stroke="#3b82f6" stroke-width="6" stroke-linecap="round" fill="none" class="energy-flow" />
                 </svg>
 
-                <div class="absolute top-[35px] left-[10px] w-24 text-center z-10 flex flex-col items-center">
-                    <div class="bg-white p-2.5 rounded-2xl shadow-[0_5px_15px_rgba(234,179,8,0.2)] border border-yellow-100 mb-2">
-                        <svg class="w-10 h-10 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v4h4V5H4zm6 0v4h4V5h-4zm6 0v4h4V5h-4zM4 11v4h4v-4H4zm6 0v4h4v-4h-4zm6 0v4h4v-4h-4zM4 17v2h4v-2H4zm6 0v2h4v-2h-4zm6 0v2h4v-2h-4z"/>
+                <div class="absolute top-1/2 left-[10px] -translate-y-1/2 w-24 text-center z-10 flex flex-col items-center">
+                    <div class="bg-gradient-to-br from-white to-gray-50 p-3 rounded-2xl shadow-[5px_5px_10px_#d1d5db,-5px_-5px_10px_#ffffff] border border-gray-100 mb-2 relative">
+                        <svg class="w-9 h-9 text-yellow-500 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="3" y1="15" x2="21" y2="15"></line>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                            <line x1="15" y1="3" x2="15" y2="21"></line>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-black text-gray-700 tracking-wider">SOLAR ARRAY</span>
+                    <span class="text-[10px] font-black text-gray-600 tracking-wider">SOLAR</span>
                     <div class="mt-1 bg-gray-800 text-yellow-400 font-mono text-xs px-2 py-0.5 rounded shadow-inner whitespace-nowrap" id="solar_power">-- W</div>
                 </div>
 
-                <div class="absolute top-[35px] right-[10px] w-24 text-center z-10 flex flex-col items-center">
-                    <div class="bg-white p-2.5 rounded-2xl shadow-[0_5px_15px_rgba(59,130,246,0.2)] border border-blue-100 mb-2">
-                        <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center mt-2">
+                    <div class="absolute -top-[30px] bg-gray-800 text-white px-2.5 py-0.5 rounded-full shadow-lg border border-gray-600 z-30 whitespace-nowrap flex items-center gap-1">
+                        <i class="fas fa-bolt text-green-400 text-[10px]"></i>
+                        <span class="text-xs font-mono font-bold text-green-400" id="main_power">-- W</span>
+                    </div>
+
+                    <div class="battery-cap relative z-20 flex justify-between px-1">
+                        <span class="text-[7px] font-black text-gray-800 mt-[1px]">+</span>
+                        <span class="text-[7px] font-black text-gray-800 mt-[1px]">-</span>
+                    </div>
+                    <div class="relative w-[70px] h-[90px] battery-body border-2 border-gray-400 rounded-lg rounded-t-none shadow-[0_10px_20px_rgba(0,0,0,0.1)] z-10 overflow-hidden flex flex-col justify-end">
+                        <div class="w-full bg-gradient-to-t from-emerald-600 to-green-400 transition-all duration-1000 ease-out relative" id="bat_fill_level" style="height: 0%;">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-white/40"></div>
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center z-20">
+                            <div class="bg-black/40 backdrop-blur-sm border border-white/20 px-1.5 py-0.5 rounded text-white font-black text-[13px] drop-shadow-md" id="bat_percent_text">-- %</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute top-1/2 right-[10px] -translate-y-1/2 w-24 text-center z-10 flex flex-col items-center">
+                    <div class="bg-gradient-to-br from-white to-gray-50 p-3 rounded-2xl shadow-[5px_5px_10px_#d1d5db,-5px_-5px_10px_#ffffff] border border-gray-100 mb-2 relative">
+                        <svg class="w-9 h-9 text-blue-500 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-black text-gray-700 tracking-wider">HOME LOAD</span>
-                    <div class="mt-1 bg-gray-800 text-blue-400 font-mono text-xs px-2 py-0.5 rounded shadow-inner whitespace-nowrap" id="main_power_load">0 W</div>
-                </div>
-
-                <div class="absolute top-[40px] left-1/2 -translate-x-1/2 z-10">
-                    <div class="w-20 h-[85px] card-inner-3d rounded-xl flex flex-col items-center py-2 relative border border-gray-200">
-                        <div class="flex gap-2 mb-2.5">
-                            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]"></div>
-                            <div class="w-2 h-2 rounded-full bg-red-500 shadow-[inset_0_2px_2px_rgba(0,0,0,0.3)]"></div>
-                            <div class="w-2 h-2 rounded-full bg-yellow-500 shadow-[inset_0_2px_2px_rgba(0,0,0,0.3)]"></div>
-                        </div>
-                        <div class="w-14 h-8 bg-gray-900 rounded-md flex items-center justify-center shadow-inner border border-gray-700 relative overflow-hidden">
-                            <div class="absolute inset-0 bg-blue-500/10"></div>
-                            <span class="text-[8px] font-mono text-cyan-400 font-bold z-10">ONLINE</span>
-                        </div>
-                        <div class="mt-2.5 flex gap-1">
-                            <div class="w-3 h-1 bg-gray-300 rounded-full"></div>
-                            <div class="w-3 h-1 bg-gray-300 rounded-full"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="absolute top-[160px] left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
-                    
-                    <div class="absolute -top-[35px] left-[130%] bg-gradient-to-r from-gray-800 to-gray-900 text-white px-2 py-1 rounded shadow-md border border-gray-600 z-30 whitespace-nowrap flex items-center gap-1">
-                        <i class="fas fa-bolt text-green-400 text-[10px]"></i>
-                        <span class="text-[11px] font-mono font-bold text-green-400" id="main_power">0 W</span>
-                    </div>
-
-                    <div class="battery-cap relative z-20 flex justify-between px-1">
-                        <span class="text-[6px] font-black text-gray-800 mt-[1px]">+</span>
-                        <span class="text-[6px] font-black text-gray-800 mt-[1px]">-</span>
-                    </div>
-                    <div class="relative w-16 h-20 battery-body border-2 border-gray-400 rounded-lg rounded-t-none shadow-lg z-10 overflow-hidden flex flex-col justify-end">
-                        <div class="w-full bg-gradient-to-t from-emerald-600 to-green-400 transition-all duration-1000 ease-out shadow-[0_-2px_10px_rgba(16,185,129,0.5)] relative" id="bat_fill_level" style="height: 0%;">
-                            <div class="absolute top-0 left-0 w-full h-1 bg-white/30"></div>
-                        </div>
-                        <div class="absolute inset-0 flex items-center justify-center z-20">
-                            <div class="bg-black/50 backdrop-blur-sm border border-white/20 px-1.5 py-0.5 rounded text-white font-black text-sm drop-shadow-md" id="bat_percent_text">--%</div>
-                        </div>
-                    </div>
+                    <span class="text-[10px] font-black text-gray-600 tracking-wider">HOME LOAD</span>
+                    <div class="mt-1 bg-gray-800 text-blue-400 font-mono text-xs px-2 py-0.5 rounded shadow-inner whitespace-nowrap" id="main_power_load">-- W</div>
                 </div>
             </div>
 
@@ -252,7 +231,7 @@
                             <span class="text-blue-800 font-black tracking-wide text-sm">MẬT KHẨU SETUP:</span>
                         </div>
                         <div class="bg-white px-4 py-2 rounded-lg border-2 border-blue-200 font-mono font-black text-blue-700 tracking-widest shadow-sm" id="pack_passcode">
-                            Đang lấy...
+                            Đang quét...
                         </div>
                     </div>
                     
@@ -297,7 +276,6 @@
                                     </div>`);
                                 }
                             </script>
-                            
                             <script>renderInput('bal_start_v', 'Start Balance Voltage', 'V');</script>
                             <script>renderInput('bal_trig_v', 'Balance Trigger Voltage', 'V');</script>
                             <script>renderInput('cell_ovp', 'Cell OVP (Quá áp)', 'V');</script>
@@ -378,47 +356,49 @@
 
         const client = new Paho.MQTT.Client(config.host, config.port, config.clientId);
         let activeBms = "b1";
-
         let bmsCache = { b1: {}, b2: {} };
-        
-        // BIẾN CHÓ CANH GÁC (WATCHDOG TIMER)
-        let watchdogTimer = null;
+        let isEspConnected = false;
 
-        function setOfflineState() {
-            document.getElementById('mqtt-status').innerText = "ESP32 Mất kết nối!";
-            const badge = document.getElementById('mqtt-status-badge');
-            badge.className = "inline-flex items-center gap-1.5 bg-red-500/20 text-red-500 border border-red-500/50 px-2.5 py-1 rounded-full text-xs font-bold";
-            document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-red-500";
+        function resetUIToDash() {
+            ['main_voltage', 'pack_v', 'pack_delta', 'pack_min', 'pack_max'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- V"; });
+            ['main_current', 'pack_a'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- A"; });
+            ['main_power', 'main_power_card', 'pack_p', 'main_power_load', 'solar_power'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- W"; });
+            ['main_soc', 'pack_soc', 'bat_percent_text'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- %"; });
+            ['main_energy_now', 'main_capacity', 'pack_cap_now'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- Ah"; });
+            ['pack_t_bms', 'pack_t1', 'pack_t2'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- °C"; });
+            ['pack_cycles', 'pack_cycles_card'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="--"; });
+            for(let i=1; i<=16; i++) { const el=document.getElementById('c'+i); if(el) el.innerText="-- V"; }
             
-            // Đưa toàn bộ số liệu về "--"
-            document.querySelectorAll('[id^="main_"], [id^="pack_"], [id^="c"], [id^="bat_percent"]').forEach(el => {
-                if(el.tagName === 'SPAN' || el.tagName === 'DIV') {
-                    if (el.id !== 'main_power_load' && el.id !== 'solar_power') el.innerText = "--";
-                }
-            });
-            document.getElementById('main_power').innerText = "0 W";
-            document.getElementById('main_power_load').innerText = "0 W";
-            document.getElementById('solar_power').innerText = "-- W";
             document.getElementById('bat_fill_level').style.height = "0%";
             document.getElementById('line-solar').classList.remove('active', 'flow-forward', 'flow-reverse');
             document.getElementById('line-load').classList.remove('active', 'flow-forward', 'flow-reverse');
-            document.getElementById('line-bat').classList.remove('active', 'flow-forward', 'flow-reverse');
-            document.getElementById('pack_passcode').innerText = "Vui lòng bật ESP32...";
+            document.getElementById('pack_passcode').innerText = "Đang quét...";
         }
+
+        function setOfflineState() {
+            isEspConnected = false;
+            document.getElementById('mqtt-status').innerText = "ESP32 Ngoại tuyến!";
+            const badge = document.getElementById('mqtt-status-badge');
+            badge.className = "inline-flex items-center gap-1.5 bg-red-500/20 text-red-500 border border-red-500/50 px-2.5 py-1 rounded-full text-xs font-bold";
+            document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-red-500";
+            resetUIToDash();
+        }
+
+        // Vừa tải trang HTML là đưa toàn bộ về dạng -- (Không có số ảo)
+        resetUIToDash();
 
         client.connect({
             userName: config.user,
             password: config.pass,
             useSSL: true,
             onSuccess: () => {
-                document.getElementById('mqtt-status').innerText = "Đang chờ dữ liệu...";
+                document.getElementById('mqtt-status').innerText = "Đang tìm ESP32...";
+                client.subscribe("bms/status"); // Topic báo trạng thái sống/chết của ESP32
                 client.subscribe("bms/sensor/+/state");
                 client.subscribe("bms/text_sensor/+/state");
                 client.subscribe("bms/number/+/state");
                 client.subscribe("bms/switch/+/state");
                 client.subscribe("bms/wifi/+/state"); 
-                
-                watchdogTimer = setTimeout(setOfflineState, 15000);
             }
         });
 
@@ -433,16 +413,25 @@
         }
 
         client.onMessageArrived = (msg) => {
-            clearTimeout(watchdogTimer);
-            watchdogTimer = setTimeout(setOfflineState, 15000);
-            
-            document.getElementById('mqtt-status').innerText = "Đang trực tuyến";
-            const badge = document.getElementById('mqtt-status-badge');
-            badge.className = "inline-flex items-center gap-1.5 bg-green-500/20 text-emerald-600 border border-emerald-500/50 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-300";
-            document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-
             const topic = msg.destinationName;
             const payload = msg.payloadString;
+
+            // Lắng nghe Nhịp tim ESP32
+            if (topic === "bms/status") {
+                if (payload === "online") {
+                    isEspConnected = true;
+                    document.getElementById('mqtt-status').innerText = "Đang trực tuyến";
+                    const badge = document.getElementById('mqtt-status-badge');
+                    badge.className = "inline-flex items-center gap-1.5 bg-green-500/20 text-emerald-600 border border-emerald-500/50 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-300";
+                    document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                } else {
+                    setOfflineState();
+                }
+                return;
+            }
+
+            // NẾU ESP32 ĐANG TẮT ĐIỆN -> CHẶN HIỂN THỊ DỮ LIỆU
+            if (!isEspConnected) return;
 
             if(topic.includes("bms/wifi/ssid/state")) {
                 document.getElementById('wifi_current_ssid').innerText = payload;
@@ -457,7 +446,6 @@
             if (parts.length < 4) return;
             const type = parts[1];
             const fullId = parts[2];
-            
             if (!fullId.startsWith('b1_') && !fullId.startsWith('b2_')) return;
             
             const devId = fullId.substring(0, 2);
@@ -531,22 +519,17 @@
                     const current = parseFloat(val);
                     const lSolar = document.getElementById('line-solar');
                     const lLoad = document.getElementById('line-load');
-                    const lBat = document.getElementById('line-bat');
 
                     lSolar.classList.remove('active', 'flow-forward', 'flow-reverse');
                     lLoad.classList.remove('active', 'flow-forward', 'flow-reverse');
-                    lBat.classList.remove('active', 'flow-forward', 'flow-reverse');
 
-                    // Gán công suất mặt trời mô phỏng hoặc lấy thực tế (Tạm thời map với nguồn nạp)
                     const pwr = bmsCache[activeBms]['power'] ? parseFloat(bmsCache[activeBms]['power'].value).toFixed(0) : "0";
 
                     if (current > 0.5) {
                         lSolar.classList.add('active', 'flow-forward');
-                        lBat.classList.add('active', 'flow-forward');
                         document.getElementById('main_power_load').innerText = "0 W";
                         document.getElementById('solar_power').innerText = pwr + " W";
                     } else if (current < -0.5) {
-                        lBat.classList.add('active', 'flow-reverse');
                         lLoad.classList.add('active', 'flow-forward');
                         document.getElementById('main_power_load').innerText = pwr + " W";
                         document.getElementById('solar_power').innerText = "0 W";
@@ -580,22 +563,12 @@
 
         function switchDevice() {
             activeBms = document.getElementById('device-selector').value;
-            document.getElementById('main_power').innerText = "0 W";
-            document.getElementById('main_power_load').innerText = "0 W";
-            document.getElementById('solar_power').innerText = "-- W";
-            document.getElementById('bat_fill_level').style.height = "0%";
-            document.getElementById('line-solar').classList.remove('active');
-            document.getElementById('line-load').classList.remove('active');
-            document.getElementById('line-bat').classList.remove('active');
-            
-            const data = bmsCache[activeBms];
-            if (data && Object.keys(data).length > 0) {
-                for (const k in data) applyDataToUI(k, data[k].value, data[k].type);
-            } else {
-                document.querySelectorAll('[id^="main_"], [id^="pack_"], [id^="c"], [id^="bat_percent"]').forEach(el => {
-                    if(el.tagName === 'SPAN') el.innerText = "--";
-                });
-                document.getElementById('pack_passcode').innerText = "Đang quét...";
+            resetUIToDash();
+            if (isEspConnected) {
+                const data = bmsCache[activeBms];
+                if (data && Object.keys(data).length > 0) {
+                    for (const k in data) applyDataToUI(k, data[k].value, data[k].type);
+                }
             }
         }
 
@@ -618,7 +591,6 @@
         function sendVal(id) {
             const input = document.getElementById('val_' + id);
             client.send(`bms/number/${activeBms}_${id}/command`, input.value);
-            // Hiệu ứng nút bấm
             event.target.innerText = "ĐÃ LƯU";
             event.target.classList.replace('from-emerald-500', 'from-blue-500');
             event.target.classList.replace('to-green-600', 'to-blue-600');
