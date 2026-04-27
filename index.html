@@ -370,6 +370,7 @@
         };
 
         // HÀM HIỂN THỊ DỮ LIỆU RA GIAO DIỆN
+       // HÀM HIỂN THỊ DỮ LIỆU RA GIAO DIỆN (ĐÃ FIX LỖI LÀM TRÒN SỐ mV)
         function applyDataToUI(key, val, type) {
             // Nhóm Cảm biến (Chỉ hiển thị chữ)
             if (type === 'sensor' || type === 'text_sensor') {
@@ -394,17 +395,44 @@
                     mapping[key].forEach(elId => {
                         const el = document.getElementById(elId);
                         if(el) {
-                            if (elId === 'pack_passcode') el.innerText = val;
-                            else el.innerText = parseFloat(val).toFixed(2) + (elId.includes('voltage') || elId.includes('_v') || elId.includes('min') || elId.includes('max') || elId.includes('delta') ? " V" : 
-                                                  elId.includes('power') || elId.includes('_p') ? " W" : 
-                                                  elId.includes('current') || elId.includes('_a') ? " A" : 
-                                                  elId.includes('soc') ? " %" : 
-                                                  elId.includes('cap') || elId.includes('now') ? " Ah" : 
-                                                  elId.includes('_t') ? " °C" : "");
+                            if (elId === 'pack_passcode') {
+                                el.innerText = val;
+                            } else {
+                                let formattedVal = val;
+                                let unit = "";
+                                
+                                // QUAN TRỌNG: Phân loại định dạng số để không làm tròn mất mV
+                                if (elId.includes('voltage') || elId.includes('_v') || elId.includes('min') || elId.includes('max') || elId.includes('delta')) {
+                                    formattedVal = parseFloat(val).toFixed(3); // Giữ nguyên 3 số thập phân (mV)
+                                    unit = " V";
+                                } else if (elId.includes('current') || elId.includes('_a')) {
+                                    formattedVal = parseFloat(val).toFixed(2);
+                                    unit = " A";
+                                } else if (elId.includes('power') || elId.includes('_p')) {
+                                    formattedVal = parseFloat(val).toFixed(0);
+                                    unit = " W";
+                                } else if (elId.includes('soc')) {
+                                    formattedVal = parseFloat(val).toFixed(1);
+                                    unit = " %";
+                                } else if (elId.includes('cap') || elId.includes('now')) {
+                                    formattedVal = parseFloat(val).toFixed(1);
+                                    unit = " Ah";
+                                } else if (elId.includes('_t')) {
+                                    formattedVal = parseFloat(val).toFixed(1);
+                                    unit = " °C";
+                                } else if (elId.includes('cycles')) {
+                                    formattedVal = parseInt(val);
+                                } else {
+                                    formattedVal = parseFloat(val).toFixed(2);
+                                }
+
+                                el.innerText = formattedVal + unit;
+                            }
                         }
                     });
                 }
 
+                // Fix luôn độ lệch mV cho 16 Cell pin
                 if (key.startsWith('cell_voltage_')) {
                     const num = key.split('_')[2];
                     const cellEl = document.getElementById('c' + num);
@@ -440,11 +468,15 @@
                 }
             }
 
-            // Nhóm Cài đặt Thông số (Đổ số vào ô Textbox thay vì giá trị cứng HTML)
+            // Nhóm Cài đặt Thông số (Gỡ bỏ làm tròn mất số ở phần form)
             if (type === 'number') {
                 const inputEl = document.getElementById('val_' + key);
                 if (inputEl) {
-                    inputEl.value = parseFloat(val); // Sẽ tự lưu lại ngay cả khi tải lại trang
+                    if (key.includes('voltage') || key.includes('_v') || key.includes('ovp') || key.includes('uvp')) {
+                        inputEl.value = parseFloat(val).toFixed(3);
+                    } else {
+                        inputEl.value = parseFloat(val);
+                    }
                 }
             }
 
