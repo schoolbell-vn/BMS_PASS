@@ -23,7 +23,6 @@
         .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
         .toggle-label { background-color: #cbd5e1; transition: all 0.3s; }
         
-        /* Chỉnh thanh cuộn cho danh sách setting */
         .setting-scroll::-webkit-scrollbar { width: 4px; }
         .setting-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
@@ -38,7 +37,7 @@
             </div>
             <div class="text-right">
                 <p class="text-[10px] opacity-80" id="mqtt-status">Đang kết nối Cloud...</p>
-                <p class="text-xs font-bold">V3.1 Pro</p>
+                <p class="text-xs font-bold">V3.3 Pro</p>
             </div>
         </div>
     </header>
@@ -112,11 +111,28 @@
                         <div class="text-xs opacity-90 text-right">Dòng điện:<br><span class="text-lg font-bold" id="main_current">-- A</span></div>
                     </div>
                 </div>
+                
                 <div class="bg-[#f27e91] p-3 rounded-lg relative overflow-hidden shadow-sm">
                     <p class="text-sm font-bold border-b border-white/30 mb-2">Công suất</p>
                     <div class="flex justify-between items-end">
                         <div class="text-xs opacity-90">Công suất:<br><span class="text-lg font-bold" id="main_power_card">-- W</span></div>
                         <div class="text-xs opacity-90 text-right">Phần trăm:<br><span class="text-lg font-bold" id="main_soc">-- %</span></div>
+                    </div>
+                </div>
+                
+                <div class="bg-[#f7ac68] p-3 rounded-lg relative overflow-hidden shadow-sm">
+                    <p class="text-sm font-bold border-b border-white/30 mb-2">Hằng ngày</p>
+                    <div class="flex justify-between items-end">
+                        <div class="text-xs opacity-90">Sạc:<br><span class="text-lg font-bold">0.000 kWh</span></div>
+                        <div class="text-xs opacity-90 text-right">Xả:<br><span class="text-lg font-bold">0.000 kWh</span></div>
+                    </div>
+                </div>
+                
+                <div class="bg-[#49c5b6] p-3 rounded-lg relative overflow-hidden shadow-sm">
+                    <p class="text-sm font-bold border-b border-white/30 mb-2">Dung lượng</p>
+                    <div class="flex justify-between items-end">
+                        <div class="text-xs opacity-90">Còn lại:<br><span class="text-lg font-bold" id="main_energy_now">-- Ah</span></div>
+                        <div class="text-xs opacity-90 text-right">Tổng:<br><span class="text-lg font-bold" id="main_capacity">-- Ah</span></div>
                     </div>
                 </div>
             </div>
@@ -130,6 +146,10 @@
                     <div class="flex justify-between border-b pb-1"><span>Chênh lệch:</span><span class="text-[#5cc49f] font-bold" id="pack_delta">-- V</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Dung lượng:</span><span class="text-[#5cc49f] font-bold" id="pack_cap_now">-- Ah</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Nhiệt độ BMS:</span><span class="text-[#5cc49f] font-bold" id="pack_t_bms">-- °C</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Phần trăm:</span><span class="text-[#5cc49f] font-bold" id="pack_soc">-- %</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Nhiệt độ T1:</span><span class="text-[#5cc49f] font-bold" id="pack_t1">-- °C</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Chu kì sx:</span><span class="text-[#5cc49f] font-bold" id="pack_cycles">--</span></div>
+                    <div class="flex justify-between border-b pb-1"><span>Nhiệt độ T2:</span><span class="text-[#5cc49f] font-bold" id="pack_t2">-- °C</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Thấp nhất:</span><span class="text-[#5cc49f] font-bold" id="pack_min">-- V</span></div>
                     <div class="flex justify-between border-b pb-1"><span>Cao nhất:</span><span class="text-[#5cc49f] font-bold" id="pack_max">-- V</span></div>
                 </div>
@@ -150,6 +170,16 @@
                 </div>
                 
                 <div class="p-3 space-y-5 text-sm text-gray-700 h-[65vh] overflow-y-auto setting-scroll">
+                    
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-4 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-key text-blue-600 text-lg"></i>
+                            <span class="text-blue-800 font-bold text-sm">Mật khẩu Setup:</span>
+                        </div>
+                        <div class="bg-white px-3 py-1.5 rounded border border-blue-300 font-mono font-bold text-blue-700 tracking-wider shadow-inner" id="pack_passcode">
+                            Đang quét...
+                        </div>
+                    </div>
                     
                     <div class="bg-gray-50 p-3 rounded-lg border">
                         <div class="flex justify-between items-center mb-3">
@@ -186,7 +216,7 @@
                                         <div class="flex items-center gap-1 w-1/2 justify-end">
                                             <input type="number" id="val_${id}" class="border border-gray-300 rounded p-1 w-16 text-center font-bold text-gray-700 text-xs outline-none focus:border-[#56b6e7]" value="${val}" step="0.001">
                                             <span class="text-gray-400 font-bold text-[10px] w-4">${unit}</span>
-                                            <button class="bg-[#00a884] text-white px-2 py-1 rounded font-bold text-xs shadow-sm hover:opacity-80 active:scale-95" onclick="sendVal('${id}')">OK</button>
+                                            <button class="bg-[#00a884] text-white px-2 py-1 rounded font-bold text-xs shadow-sm active:scale-95" onclick="sendVal('${id}')">OK</button>
                                         </div>
                                     </div>`);
                                 }
@@ -256,6 +286,27 @@
                      </div>
                 </div>
              </div>
+
+             <div class="bg-white rounded-lg shadow-sm overflow-hidden border mt-4">
+                <div class="bg-[#f7ac68] text-white p-3 font-bold text-sm flex justify-between items-center">
+                    <span>Kết nối WiFi mới</span>
+                    <i class="fas fa-wifi"></i>
+                </div>
+                <div class="p-4 space-y-4 text-sm text-gray-700">
+                     <p class="text-xs text-gray-500 italic mb-2">Nhập tên và mật khẩu WiFi mới để mạch tự kết nối lại.</p>
+                     <div>
+                         <label class="block text-xs font-bold text-gray-500 mb-1">Tên WiFi (SSID) *</label>
+                         <input type="text" id="new_wifi_ssid" placeholder="Nhập tên mạng..." class="w-full border border-gray-300 rounded p-2 outline-none focus:border-[#f7ac68]">
+                     </div>
+                     <div>
+                         <label class="block text-xs font-bold text-gray-500 mb-1">Mật khẩu WiFi</label>
+                         <input type="password" id="new_wifi_pass" placeholder="Nhập mật khẩu..." class="w-full border border-gray-300 rounded p-2 outline-none focus:border-[#f7ac68]">
+                     </div>
+                     <button onclick="changeWifi()" class="w-full bg-[#f7ac68] text-white font-bold py-3 mt-2 rounded-lg shadow-sm active:scale-95 flex justify-center items-center gap-2">
+                         <i class="fas fa-satellite-dish"></i> GỬI LỆNH KẾT NỐI
+                     </button>
+                </div>
+             </div>
         </div>
 
     </main>
@@ -294,6 +345,7 @@
             onSuccess: () => {
                 document.getElementById('mqtt-status').innerText = "Trực tuyến (Cloud)";
                 client.subscribe("bms/sensor/+/state");
+                client.subscribe("bms/text_sensor/+/state"); // Đăng ký nhận cả mã text (như mật khẩu)
                 client.subscribe("bms/wifi/+/state"); 
             }
         });
@@ -326,6 +378,7 @@
                 const key = id.replace(activeBms + "_", "");
                 updateUI(key, payload);
 
+                // HIỆU ỨNG DÒNG CHẢY
                 if (key === 'current') {
                     const current = parseFloat(payload);
                     const lSolar = document.getElementById('line-solar');
@@ -349,6 +402,7 @@
                     }
                 }
                 
+                // MỰC NƯỚC PIN
                 if (key === 'soc') {
                     document.getElementById('bat_fill_level').style.height = payload + "%";
                     document.getElementById('bat_percent_text').innerText = Math.round(payload) + "%";
@@ -362,23 +416,35 @@
                 'current': ['main_current', 'pack_a'],
                 'power': ['main_power', 'main_power_card', 'pack_p'],
                 'soc': ['main_soc', 'pack_soc'],
-                'capacity_remaining': ['main_energy_now'],
+                'capacity_remaining': ['main_energy_now', 'pack_cap_now'],
                 'total_battery_capacity_setting': ['main_capacity'],
                 'delta_cell_voltage': ['pack_delta'],
                 'charging_cycles': ['pack_cycles'],
+                'temperature_sensor_1': ['pack_t_bms'],
+                'temperature_sensor_2': ['pack_t1'],
+                'temperature_sensor_3': ['pack_t2'],
                 'min_cell_voltage': ['pack_min'],
-                'max_cell_voltage': ['pack_max']
+                'max_cell_voltage': ['pack_max'],
+                
+                // Ô mật khẩu thiết bị (Mới thêm)
+                'setup_passcode': ['pack_passcode']
             };
 
             if (mapping[key]) {
                 mapping[key].forEach(elId => {
                     const el = document.getElementById(elId);
                     if(el) {
-                        el.innerText = val + (elId.includes('voltage') || elId.includes('_v') || elId.includes('min') || elId.includes('max') || elId.includes('delta') ? " V" : 
-                                              elId.includes('power') || elId.includes('_p') ? " W" : 
-                                              elId.includes('current') || elId.includes('_a') ? " A" : 
-                                              elId.includes('soc') ? " %" : 
-                                              elId.includes('cap') || elId.includes('now') ? " Ah" : "");
+                        // Nếu là ô mật khẩu thì hiển thị thẳng chữ thô (không thêm đơn vị V, A)
+                        if (elId === 'pack_passcode') {
+                            el.innerText = val;
+                        } else {
+                            el.innerText = val + (elId.includes('voltage') || elId.includes('_v') || elId.includes('min') || elId.includes('max') || elId.includes('delta') ? " V" : 
+                                                  elId.includes('power') || elId.includes('_p') ? " W" : 
+                                                  elId.includes('current') || elId.includes('_a') ? " A" : 
+                                                  elId.includes('soc') ? " %" : 
+                                                  elId.includes('cap') || elId.includes('now') ? " Ah" : 
+                                                  elId.includes('_t') ? " °C" : "");
+                        }
                     }
                 });
             }
@@ -400,9 +466,7 @@
             document.getElementById('line-solar').classList.remove('active');
             document.getElementById('line-load').classList.remove('active');
             document.getElementById('line-bat').classList.remove('active');
-            
-            // Tự động load dung lượng ảo khi chuyển bộ
-            document.getElementById('val_bat_cap').value = (activeBms === 'b1') ? "314" : "280";
+            document.getElementById('pack_passcode').innerText = "Đang quét...";
         }
 
         function nav(tab) {
@@ -424,7 +488,24 @@
         function sendVal(id) {
             const input = document.getElementById('val_' + id);
             client.send(`bms/number/${activeBms}_${id}/command`, input.value);
-            alert(`Đã gửi lệnh cài đặt [${id}] = ${input.value} xuống cho bộ ${activeBms}`);
+            alert(`Đã gửi lệnh cài đặt [${id}] = ${input.value} cho bộ ${activeBms}`);
+        }
+
+        function changeWifi() {
+            const ssid = document.getElementById('new_wifi_ssid').value;
+            const pass = document.getElementById('new_wifi_pass').value;
+            
+            if(!ssid) {
+                alert("Thầy vui lòng nhập Tên WiFi (SSID) nhé!");
+                return;
+            }
+            
+            client.send(`bms/wifi/ssid/command`, ssid);
+            client.send(`bms/wifi/pass/command`, pass);
+            
+            alert(`Đã gửi lệnh đổi WiFi sang mạng: ${ssid}\nNếu mật khẩu đúng, mạch sẽ kết nối trong 10 giây.`);
+            document.getElementById('new_wifi_ssid').value = "";
+            document.getElementById('new_wifi_pass').value = "";
         }
     </script>
 </body>
