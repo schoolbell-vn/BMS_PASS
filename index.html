@@ -172,7 +172,7 @@
                 <div class="grad-orange p-3.5 rounded-2xl shadow-[0_8px_15px_rgba(249,115,22,0.3)] border border-orange-400/50">
                     <p class="text-xs font-bold text-orange-100 mb-2 uppercase tracking-wide flex items-center gap-1.5"><i class="fas fa-chart-line"></i> Chu kỳ</p>
                     <div class="flex justify-between items-end">
-                        <div class="text-[10px] text-orange-200">Tổng Sạc<br><span class="text-lg font-bold text-white drop-shadow-md">0.00 kWh</span></div>
+                        <div class="text-[10px] text-orange-200">Tổng Sạc<br><span class="text-lg font-bold text-white drop-shadow-md" id="main_total_charge">-- Ah</span></div>
                         <div class="text-[10px] text-orange-200 text-right">Lượt sạc<br><span class="text-lg font-bold text-white drop-shadow-md" id="pack_cycles_card">--</span></div>
                     </div>
                 </div>
@@ -347,10 +347,10 @@
 
     <script>
         const config = {
-            host: "broker.emqx.io",
-            port: 8084,
-            user: "",
-            pass: "",
+            host: "0256b04eb4254d4e8c100df19b4db3f7.s1.eu.hivemq.cloud",
+            port: 8884, /* Port WebSockets TLS của HiveMQ */
+            user: "ngoctuyka",
+            pass: "Tu12345678@",
             clientId: "WebUI_" + Math.random().toString(16).substr(2, 6)
         };
 
@@ -364,7 +364,7 @@
             ['main_current', 'pack_a'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- A"; });
             ['main_power', 'main_power_card', 'pack_p', 'main_power_load', 'solar_power'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- W"; });
             ['main_soc', 'pack_soc', 'bat_percent_text'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- %"; });
-            ['main_energy_now', 'main_capacity', 'pack_cap_now'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- Ah"; });
+            ['main_energy_now', 'main_capacity', 'pack_cap_now', 'main_total_charge'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- Ah"; });
             ['pack_t_bms', 'pack_t1', 'pack_t2'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- °C"; });
             ['pack_cycles', 'pack_cycles_card'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="--"; });
             for(let i=1; i<=16; i++) { const el=document.getElementById('c'+i); if(el) el.innerText="-- V"; }
@@ -460,16 +460,17 @@
         };
 
         function applyDataToUI(key, val, type) {
-            if (type === 'sensor' || type === 'text_sensor') {
+            if (type === 'sensor' || type === 'text_sensor' || type === 'number') {
                 const mapping = {
                     'voltage': ['main_voltage', 'pack_v'],
                     'current': ['main_current', 'pack_a'],
                     'power': ['main_power', 'main_power_card', 'pack_p'],
                     'soc': ['main_soc', 'pack_soc'],
                     'capacity_remaining': ['main_energy_now', 'pack_cap_now'],
-                    'total_battery_capacity_setting': ['main_capacity'],
+                    'bat_cap': ['main_capacity'], // Đã sửa key
                     'delta_cell_voltage': ['pack_delta'],
                     'charging_cycles': ['pack_cycles', 'pack_cycles_card'],
+                    'total_charging_cycle_capacity': ['main_total_charge'], // Đã thêm
                     'temperature_sensor_1': ['pack_t_bms'],
                     'temperature_sensor_2': ['pack_t1'],
                     'temperature_sensor_3': ['pack_t2'],
@@ -494,7 +495,7 @@
                                     formattedVal = parseFloat(val).toFixed(0); unit = " W";
                                 } else if (elId.includes('soc')) {
                                     formattedVal = parseFloat(val).toFixed(1); unit = " %";
-                                } else if (elId.includes('cap') || elId.includes('now')) {
+                                } else if (elId.includes('cap') || elId.includes('now') || elId.includes('total_charge')) {
                                     formattedVal = parseFloat(val).toFixed(1); unit = " Ah";
                                 } else if (elId.includes('_t')) {
                                     formattedVal = parseFloat(val).toFixed(1); unit = " °C";
