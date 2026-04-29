@@ -347,10 +347,10 @@
 
     <script>
         const config = {
-            host: "h11d16c6.ala.asia-southeast1.emqxsl.com",
-            port: 8084, /* WebSockets TLS Port */
-            user: "ngoctuyka",
-            pass: "Tu123456789",
+            broker: "broker.emqx.io"
+            port: 8083
+            user: "",
+            pass: "",
             clientId: "WebUI_" + Math.random().toString(16).substr(2, 6)
         };
 
@@ -388,17 +388,15 @@
         resetUIToDash();
 
         client.connect({
-            userName: config.user,
-            password: config.pass,
-            useSSL: true,
+            useSSL: false,
             onSuccess: () => {
-                document.getElementById('mqtt-status').innerText = "Đang tìm ESP32...";
-                client.subscribe("bms/status"); // Topic báo trạng thái sống/chết của ESP32
-                client.subscribe("bms/sensor/+/state");
-                client.subscribe("bms/text_sensor/+/state");
-                client.subscribe("bms/number/+/state");
-                client.subscribe("bms/switch/+/state");
-                client.subscribe("bms/wifi/+/state"); 
+                document.getElementById('mqtt-status').innerText = "Đã kết nối Server";
+                client.subscribe("ngoctuyka_bms_private/status"); 
+                client.subscribe("ngoctuyka_bms_private/sensor/+/state");
+                client.subscribe("ngoctuyka_bms_private/text_sensor/+/state");
+                client.subscribe("ngoctuyka_bms_private/number/+/state");
+                client.subscribe("ngoctuyka_bms_private/switch/+/state");
+                client.subscribe("ngoctuyka_bms_private/wifi/+/state"); 
             }
         });
 
