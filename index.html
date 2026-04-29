@@ -16,7 +16,6 @@
         .card-scifi { background: rgba(13, 20, 36, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(6, 182, 212, 0.25); box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(6,182,212,0.05); border-radius: 12px; }
         .neon-text { text-shadow: 0 0 10px currentColor; }
         
-        /* Hiệu ứng Năng lượng */
         .energy-path { stroke-dasharray: 6 8; opacity: 0.1; transition: opacity 0.4s ease; }
         .flow-charge { stroke: #f97316; opacity: 1; filter: drop-shadow(0 0 5px #f97316); animation: dash-charge 0.6s linear infinite; }
         .flow-discharge { stroke: #06b6d4; opacity: 1; filter: drop-shadow(0 0 5px #06b6d4); animation: dash-discharge 0.6s linear infinite; }
@@ -25,55 +24,54 @@
 
         .battery-body { background: #0f172a; border: 2px solid #06b6d4; box-shadow: 0 0 15px rgba(6,182,212,0.4), inset 0 0 15px rgba(0,0,0,0.8); }
 
-        /* CÔNG TẮC TO RÕ RÀNG */
         .toggle-checkbox:checked { right: 0; border-color: #06b6d4; background-color: #06b6d4; }
         .toggle-checkbox:checked + .toggle-label { background-color: rgba(6,182,212,0.25); border: 1px solid #06b6d4; box-shadow: 0 0 15px rgba(6,182,212,0.6); }
-        .toggle-checkbox { right: 28px; z-index: 1; border-color: #334155; background-color: #0f172a; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
+        .toggle-checkbox { right: 32px; z-index: 1; border-color: #334155; background-color: #0f172a; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
         .toggle-label { background-color: #1e293b; border: 1px solid #334155; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
 
         .nav-active { border-top: 3px solid #06b6d4; color: #06b6d4 !important; background: linear-gradient(0deg, rgba(6,182,212,0.15), transparent); }
-        .setting-scroll::-webkit-scrollbar { width: 4px; }
-        .setting-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
+        .setting-scroll::-webkit-scrollbar { width: 5px; }
+        .setting-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 5px; }
     </style>
 </head>
-<body class="min-h-screen pb-24">
+<body class="min-h-screen pb-28">
 
-    <header class="bg-[#090e17] border-b border-cyan-900/50 p-3.5 sticky top-0 z-50">
+    <header class="bg-[#090e17] border-b border-cyan-900/50 p-4 sticky top-0 z-50">
         <div class="flex justify-between items-center max-w-xl mx-auto">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-[#0f172a] rounded flex items-center justify-center border border-cyan-500 shadow-[0_0_12px_#06b6d4]">
-                    <i class="fas fa-atom text-cyan-400 text-xl animate-spin-slow"></i>
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-[#0f172a] rounded-xl flex items-center justify-center border border-cyan-500 shadow-[0_0_15px_#06b6d4]">
+                    <i class="fas fa-atom text-cyan-400 text-2xl animate-spin-slow"></i>
                 </div>
                 <div>
-                    <h1 class="font-black text-lg tracking-widest text-cyan-50 neon-text uppercase">BMS Mobile</h1>
-                    <span class="text-xs text-cyan-400 tracking-widest block mt-0.5">THẦY TÚ • PRO</span>
+                    <h1 class="font-black text-xl tracking-widest text-cyan-50 neon-text uppercase">BMS Mobile</h1>
+                    <span class="text-sm text-cyan-400 tracking-widest block mt-1">THẦY TÚ • PRO</span>
                 </div>
             </div>
-            <div id="mqtt-status-badge" class="bg-gray-800 border border-gray-700 px-3 py-1.5 rounded text-xs font-black text-gray-400 flex items-center shadow-md">
-                <div class="w-2 h-2 rounded-full bg-gray-500 mr-2" id="mqtt-dot"></div>
+            <div id="mqtt-status-badge" class="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-sm font-black text-gray-400 flex items-center shadow-md">
+                <div class="w-2.5 h-2.5 rounded-full bg-gray-500 mr-2" id="mqtt-dot"></div>
                 <span id="mqtt-status">WAIT...</span>
             </div>
         </div>
     </header>
 
-    <main class="max-w-xl mx-auto p-3 mt-2">
+    <main class="max-w-xl mx-auto p-4 mt-2">
         
-        <div class="card-scifi p-3 flex justify-between items-center mb-5">
-            <div class="text-cyan-500 pl-2 font-black text-xs tracking-widest uppercase"><i class="fas fa-server mr-1"></i> Trạm:</div>
-            <select id="device-selector" class="flex-1 ml-2 bg-transparent text-cyan-100 border-none font-bold outline-none text-base tracking-widest" onchange="switchDevice()">
+        <div class="card-scifi p-4 flex justify-between items-center mb-6">
+            <div class="text-cyan-500 pl-2 font-black text-base tracking-widest uppercase"><i class="fas fa-server mr-2"></i> Trạm:</div>
+            <select id="device-selector" class="flex-1 ml-3 bg-transparent text-cyan-100 border-none font-bold outline-none text-lg tracking-widest" onchange="switchDevice()">
                 <option value="b1" class="bg-gray-900 text-cyan-400">ARRAY 01: 314 Ah</option>
                 <option value="b2" class="bg-gray-900 text-cyan-400">ARRAY 02: 280 Ah</option>
             </select>
-            <div class="pr-2 text-cyan-400 text-sm font-black neon-text" id="bt_rssi_header">BT: --</div>
+            <div class="pr-2 text-cyan-400 text-base font-black neon-text" id="bt_rssi_header">BT: --</div>
         </div>
 
-        <div id="tab-home" class="tab-content active space-y-5">
+        <div id="tab-home" class="tab-content active space-y-6">
             
-            <div class="card-scifi p-4 relative h-60 w-full flex items-center justify-center overflow-hidden border-cyan-500/40">
-                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#06b6d4 1px, transparent 1px); background-size: 25px 25px;"></div>
+            <div class="card-scifi p-4 relative h-64 w-full flex items-center justify-center overflow-hidden border-cyan-500/40">
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#06b6d4 1.5px, transparent 1.5px); background-size: 30px 30px;"></div>
                 
-                <div class="absolute top-3 z-30 bg-[#070b14]/90 px-5 py-2 rounded-full border border-cyan-500 shadow-[0_0_20px_#06b6d4] flex items-center gap-2.5">
-                    <i id="pwr-icon" class="fas fa-bolt text-gray-500 text-lg"></i>
+                <div class="absolute top-3 z-30 bg-[#070b14]/90 px-6 py-2.5 rounded-full border border-cyan-500 shadow-[0_0_20px_#06b6d4] flex items-center gap-3">
+                    <i id="pwr-icon" class="fas fa-bolt text-gray-500 text-xl"></i>
                     <span class="text-3xl font-black neon-text text-gray-400" id="main_power">0 W</span>
                 </div>
 
@@ -95,89 +93,89 @@
                     <path id="path-load" d="M 185 90 L 230 90" stroke-width="5" fill="none" class="energy-path" />
                 </svg>
 
-                <div class="relative z-20 flex flex-col items-center mt-10">
-                    <div class="w-12 h-2.5 bg-gray-600 rounded-t border border-cyan-500/50"></div>
-                    <div class="relative w-[70px] h-[90px] battery-body rounded-lg rounded-t-none overflow-hidden flex flex-col justify-end p-0.5 border-2 border-cyan-400">
+                <div class="relative z-20 flex flex-col items-center mt-12">
+                    <div class="w-14 h-3 bg-gray-600 rounded-t border border-cyan-500/50"></div>
+                    <div class="relative w-[80px] h-[100px] battery-body rounded-lg rounded-t-none overflow-hidden flex flex-col justify-end p-1 border-2 border-cyan-400">
                         <div id="bat_fill_level" class="w-full bg-gradient-to-t from-cyan-600 to-cyan-300 transition-all duration-1000 relative" style="height: 0%;"></div>
                         <div class="absolute inset-0 flex items-center justify-center z-20">
-                            <span class="text-white font-black text-xl neon-text drop-shadow-[0_0_8px_#000]" id="bat_percent_text">-- %</span>
+                            <span class="text-white font-black text-2xl neon-text drop-shadow-[0_0_8px_#000]" id="bat_percent_text">-- %</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="card-scifi bg-gradient-to-br from-blue-900/40 to-blue-800/10 border-blue-500/30 p-4">
-                    <p class="text-sm text-blue-300 font-bold uppercase mb-2 tracking-wider"><i class="fas fa-bolt"></i> Volt / Amp</p>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="card-scifi bg-gradient-to-br from-blue-900/40 to-blue-800/10 border-blue-500/30 p-5">
+                    <p class="text-sm text-blue-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-bolt"></i> Volt / Amp</p>
                     <div class="flex justify-between items-baseline">
                         <span class="text-2xl font-black text-blue-100 neon-text" id="main_voltage">-- V</span>
                         <span class="text-2xl font-black text-blue-100 neon-text" id="main_current">-- A</span>
                     </div>
                 </div>
-                <div class="card-scifi bg-gradient-to-br from-red-900/40 to-red-800/10 border-red-500/30 p-4">
-                    <p class="text-sm text-red-300 font-bold uppercase mb-2 tracking-wider"><i class="fas fa-tachometer-alt"></i> Hiệu suất</p>
+                <div class="card-scifi bg-gradient-to-br from-red-900/40 to-red-800/10 border-red-500/30 p-5">
+                    <p class="text-sm text-red-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-tachometer-alt"></i> Hiệu suất</p>
                     <div class="flex justify-between items-end">
                         <span class="text-3xl font-black text-red-100 neon-text" id="main_soc">-- %</span>
-                        <span class="text-sm text-red-400 font-bold mb-1">P: <span id="main_power_card">--</span> W</span>
+                        <span class="text-base text-red-400 font-bold mb-1">P: <span id="main_power_card">--</span> W</span>
                     </div>
                 </div>
-                <div class="card-scifi bg-gradient-to-br from-orange-900/40 to-orange-800/10 border-orange-500/30 p-4">
-                    <p class="text-sm text-orange-300 font-bold uppercase mb-2 tracking-wider"><i class="fas fa-charging-station"></i> Điện năng</p>
+                <div class="card-scifi bg-gradient-to-br from-orange-900/40 to-orange-800/10 border-orange-500/30 p-5">
+                    <p class="text-sm text-orange-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-charging-station"></i> Điện năng</p>
                     <div class="flex justify-between items-baseline">
-                        <span class="text-2xl font-black text-white neon-text" id="kwh_remaining">--</span>
+                        <span class="text-3xl font-black text-white neon-text" id="kwh_remaining">--</span>
                         <span class="text-sm text-orange-400 font-bold">/ <span id="kwh_total">--</span> kWh</span>
                     </div>
                 </div>
-                <div class="card-scifi bg-gradient-to-br from-green-900/40 to-green-800/10 border-green-500/30 p-4">
-                    <p class="text-sm text-green-300 font-bold uppercase mb-2 tracking-wider"><i class="fas fa-battery-half"></i> Dung lượng</p>
+                <div class="card-scifi bg-gradient-to-br from-green-900/40 to-green-800/10 border-green-500/30 p-5">
+                    <p class="text-sm text-green-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-battery-half"></i> Dung lượng</p>
                     <div class="flex justify-between items-baseline">
-                        <span class="text-2xl font-black text-white neon-text" id="main_energy_now">--</span>
+                        <span class="text-3xl font-black text-white neon-text" id="main_energy_now">--</span>
                         <span class="text-sm text-green-400 font-bold">/ <span id="main_capacity">--</span> Ah</span>
                     </div>
                 </div>
             </div>
 
             <div class="card-scifi overflow-hidden border-cyan-800/50">
-                <div class="bg-[#0f172a] text-cyan-400 p-3 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase">
+                <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase">
                     <i class="fas fa-microscope"></i> Thông số kỹ thuật
                 </div>
-                <div class="p-4 grid grid-cols-2 gap-x-6 gap-y-3.5 text-sm text-gray-400">
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Hệ thống Volt:</span><span class="text-cyan-300 font-bold" id="pack_v">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Dòng tải:</span><span class="text-cyan-300 font-bold" id="pack_a">-- A</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Lệch Cell Δ:</span><span class="text-red-400 font-bold" id="pack_delta">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Công suất:</span><span class="text-cyan-300 font-bold" id="pack_p">-- W</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt độ MOS:</span><span class="text-orange-400 font-bold" id="pack_t_bms">-- °C</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Ah Hiện tại:</span><span class="text-cyan-300 font-bold" id="pack_cap_now">-- Ah</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Chu kỳ sạc:</span><span class="text-cyan-300 font-bold" id="pack_cycles">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt độ T1:</span><span class="text-cyan-300 font-bold" id="pack_t1">-- °C</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Tổng Ah Sạc:</span><span class="text-cyan-300 font-bold" id="main_total_charge">-- Ah</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt độ T2:</span><span class="text-cyan-300 font-bold" id="pack_t2">-- °C</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Cell Thấp nhất:</span><span class="text-red-400 font-bold" id="pack_min">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Cell Cao nhất:</span><span class="text-blue-400 font-bold" id="pack_max">-- V</span></div>
+                <div class="p-5 grid grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-300">
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Hệ thống Volt:</span><span class="text-cyan-300 font-bold" id="pack_v">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Dòng tải:</span><span class="text-cyan-300 font-bold" id="pack_a">-- A</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Lệch Cell Δ:</span><span class="text-red-400 font-bold" id="pack_delta">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Công suất:</span><span class="text-cyan-300 font-bold" id="pack_p">-- W</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Nhiệt độ MOS:</span><span class="text-orange-400 font-bold" id="pack_t_bms">-- °C</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Ah Hiện tại:</span><span class="text-cyan-300 font-bold" id="pack_cap_now">-- Ah</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Chu kỳ sạc:</span><span class="text-cyan-300 font-bold" id="pack_cycles">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Nhiệt độ T1:</span><span class="text-cyan-300 font-bold" id="pack_t1">-- °C</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Tổng Ah Sạc:</span><span class="text-cyan-300 font-bold" id="main_total_charge">-- Ah</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Nhiệt độ T2:</span><span class="text-cyan-300 font-bold" id="pack_t2">-- °C</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Cell Thấp nhất:</span><span class="text-red-500 font-black" id="pack_min">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2"><span>Cell Cao nhất:</span><span class="text-purple-400 font-black" id="pack_max">-- V</span></div>
                 </div>
             </div>
 
             <div class="card-scifi overflow-hidden mb-8 border-cyan-800/50">
-                <div class="bg-[#0f172a] text-cyan-400 p-3 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase">
+                <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase">
                     <i class="fas fa-layer-group"></i> Điện áp 16 Cell
                 </div>
-                <div class="p-4 grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C01</span><span class="font-black text-cyan-300 font-mono" id="c1">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C02</span><span class="font-black text-cyan-300 font-mono" id="c2">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C03</span><span class="font-black text-cyan-300 font-mono" id="c3">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C04</span><span class="font-black text-cyan-300 font-mono" id="c4">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C05</span><span class="font-black text-cyan-300 font-mono" id="c5">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C06</span><span class="font-black text-cyan-300 font-mono" id="c6">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C07</span><span class="font-black text-cyan-300 font-mono" id="c7">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C08</span><span class="font-black text-cyan-300 font-mono" id="c8">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C09</span><span class="font-black text-cyan-300 font-mono" id="c9">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C10</span><span class="font-black text-cyan-300 font-mono" id="c10">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C11</span><span class="font-black text-cyan-300 font-mono" id="c11">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C12</span><span class="font-black text-cyan-300 font-mono" id="c12">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C13</span><span class="font-black text-cyan-300 font-mono" id="c13">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C14</span><span class="font-black text-cyan-300 font-mono" id="c14">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C15</span><span class="font-black text-cyan-300 font-mono" id="c15">-- V</span></div>
-                    <div class="flex justify-between border-b border-gray-800/50 pb-1.5"><span class="text-gray-500 font-bold">C16</span><span class="font-black text-cyan-300 font-mono" id="c16">-- V</span></div>
+                <div class="p-5 grid grid-cols-2 gap-x-8 gap-y-4 text-base">
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C01</span><span class="font-black text-cyan-300 font-mono" id="c1">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C02</span><span class="font-black text-cyan-300 font-mono" id="c2">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C03</span><span class="font-black text-cyan-300 font-mono" id="c3">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C04</span><span class="font-black text-cyan-300 font-mono" id="c4">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C05</span><span class="font-black text-cyan-300 font-mono" id="c5">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C06</span><span class="font-black text-cyan-300 font-mono" id="c6">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C07</span><span class="font-black text-cyan-300 font-mono" id="c7">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C08</span><span class="font-black text-cyan-300 font-mono" id="c8">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C09</span><span class="font-black text-cyan-300 font-mono" id="c9">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C10</span><span class="font-black text-cyan-300 font-mono" id="c10">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C11</span><span class="font-black text-cyan-300 font-mono" id="c11">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C12</span><span class="font-black text-cyan-300 font-mono" id="c12">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C13</span><span class="font-black text-cyan-300 font-mono" id="c13">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C14</span><span class="font-black text-cyan-300 font-mono" id="c14">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C15</span><span class="font-black text-cyan-300 font-mono" id="c15">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C16</span><span class="font-black text-cyan-300 font-mono" id="c16">-- V</span></div>
                 </div>
             </div>
         </div>
@@ -188,35 +186,35 @@
                     <i class="fas fa-tools"></i> System Configuration
                 </div>
                 
-                <div class="p-4 space-y-6 h-[65vh] overflow-y-auto setting-scroll">
+                <div class="p-5 space-y-8 h-[65vh] overflow-y-auto setting-scroll">
                     
-                    <div class="bg-[#111827] p-4 rounded-lg border border-cyan-900/50 flex justify-between items-center shadow-inner">
-                        <span class="text-cyan-600 font-bold text-sm uppercase tracking-widest">Passcode:</span>
+                    <div class="bg-[#111827] p-5 rounded-lg border border-cyan-900/50 flex justify-between items-center shadow-inner">
+                        <span class="text-cyan-600 font-bold text-base uppercase tracking-widest">Passcode:</span>
                         <div class="font-mono font-black text-cyan-400 tracking-widest text-xl neon-text" id="pack_passcode">SCANNING...</div>
                     </div>
                     
-                    <div class="bg-[#0f172a] p-5 rounded-xl border border-gray-800 shadow-lg">
-                        <h3 class="text-sm font-bold text-cyan-700 uppercase tracking-widest mb-5 border-b border-gray-800 pb-3">Công tắc Rơ-le (Mosfet)</h3>
-                        <div class="space-y-6">
+                    <div class="bg-[#0f172a] p-6 rounded-xl border border-gray-800 shadow-lg">
+                        <h3 class="text-base font-bold text-cyan-700 uppercase tracking-widest mb-6 border-b border-gray-800 pb-3">Công tắc Rơ-le (Mosfet)</h3>
+                        <div class="space-y-7">
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-300 font-bold text-base"><i class="fas fa-plug text-green-500 w-6"></i> BẬT SẠC (CHARGE)</span>
-                                <div class="relative inline-block w-14 align-middle">
-                                    <input type="checkbox" id="sw_charging" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('charging', this.checked)"/>
-                                    <label for="sw_charging" class="toggle-label block overflow-hidden h-7 rounded-full cursor-pointer"></label>
+                                <div class="relative inline-block w-16 align-middle">
+                                    <input type="checkbox" id="sw_charging" checked class="toggle-checkbox absolute block w-8 h-8 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('charging', this.checked)"/>
+                                    <label for="sw_charging" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer"></label>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-300 font-bold text-base"><i class="fas fa-bolt text-red-500 w-6"></i> BẬT XẢ (DISCHARGE)</span>
-                                <div class="relative inline-block w-14 align-middle">
-                                    <input type="checkbox" id="sw_discharging" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('discharging', this.checked)"/>
-                                    <label for="sw_discharging" class="toggle-label block overflow-hidden h-7 rounded-full cursor-pointer"></label>
+                                <div class="relative inline-block w-16 align-middle">
+                                    <input type="checkbox" id="sw_discharging" checked class="toggle-checkbox absolute block w-8 h-8 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('discharging', this.checked)"/>
+                                    <label for="sw_discharging" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer"></label>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-300 font-bold text-base"><i class="fas fa-balance-scale text-blue-500 w-6"></i> CÂN BẰNG</span>
-                                <div class="relative inline-block w-14 align-middle">
-                                    <input type="checkbox" id="sw_balancer" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('balancer', this.checked)"/>
-                                    <label for="sw_balancer" class="toggle-label block overflow-hidden h-7 rounded-full cursor-pointer"></label>
+                                <div class="relative inline-block w-16 align-middle">
+                                    <input type="checkbox" id="sw_balancer" checked class="toggle-checkbox absolute block w-8 h-8 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('balancer', this.checked)"/>
+                                    <label for="sw_balancer" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer"></label>
                                 </div>
                             </div>
                         </div>
@@ -224,258 +222,258 @@
 
                     <div class="pb-8">
                         
-                        <h3 class="text-sm font-black text-cyan-600 uppercase mb-4 border-l-4 border-cyan-600 pl-3">1. Điện áp (Voltage)</h3>
-                        <div class="space-y-4 mb-8">
+                        <h3 class="text-base font-black text-cyan-600 uppercase mb-5 border-l-4 border-cyan-600 pl-3">1. Điện áp (Voltage)</h3>
+                        <div class="space-y-5 mb-10">
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Start Balance voltage</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_bal_start_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bal_start_v')">OK</button>
+                                    <input type="number" id="val_bal_start_v" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bal_start_v')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Balance trigger voltage</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_bal_trig_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bal_trig_v')">OK</button>
+                                    <input type="number" id="val_bal_trig_v" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bal_trig_v')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Cell OVP</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_cell_ovp" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_ovp')">OK</button>
+                                    <input type="number" id="val_cell_ovp" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_ovp')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Requested charge voltage</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_cell_req_chg_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_req_chg_v')">OK</button>
+                                    <input type="number" id="val_cell_req_chg_v" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_req_chg_v')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Requested float voltage</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_cell_req_float_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_req_float_v')">OK</button>
+                                    <input type="number" id="val_cell_req_float_v" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_req_float_v')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">SOC 100% voltage</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_soc_100_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'soc_100_v')">OK</button>
+                                    <input type="number" id="val_soc_100_v" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'soc_100_v')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Cell OVPR</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_cell_ovpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_ovpr')">OK</button>
+                                    <input type="number" id="val_cell_ovpr" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_ovpr')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Cell UVPR</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_cell_uvpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_uvpr')">OK</button>
+                                    <input type="number" id="val_cell_uvpr" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_uvpr')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">SOC 0% voltage</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_soc_0_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'soc_0_v')">OK</button>
+                                    <input type="number" id="val_soc_0_v" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'soc_0_v')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Cell UVP</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_cell_uvp" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_uvp')">OK</button>
+                                    <input type="number" id="val_cell_uvp" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_uvp')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Power Off Voltage</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_power_off_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'power_off_v')">OK</button>
+                                    <input type="number" id="val_power_off_v" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'power_off_v')">OK</button>
                                 </div>
                             </div>
                         </div>
 
-                        <h3 class="text-sm font-black text-blue-500 uppercase mb-4 border-l-4 border-blue-500 pl-3">2. Dòng điện & Thời gian</h3>
-                        <div class="space-y-4 mb-8">
+                        <h3 class="text-base font-black text-blue-500 uppercase mb-4 border-l-4 border-blue-500 pl-3">2. Dòng điện & Thời gian</h3>
+                        <div class="space-y-5 mb-10">
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Continuous Charge Current</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_max_chg_current" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-20 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">A</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'max_chg_current')">OK</button>
+                                    <input type="number" id="val_max_chg_current" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">A</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'max_chg_current')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Continuous Discharge Current</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_max_dis_current" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-20 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">A</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'max_dis_current')">OK</button>
+                                    <input type="number" id="val_max_dis_current" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">A</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'max_dis_current')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Charge OCP Delay</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_chg_ocp_delay" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-20 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">S</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_ocp_delay')">OK</button>
+                                    <input type="number" id="val_chg_ocp_delay" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">S</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_ocp_delay')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Charge OCPR Time</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_chg_ocpr_time" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-20 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">S</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_ocpr_time')">OK</button>
+                                    <input type="number" id="val_chg_ocpr_time" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">S</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_ocpr_time')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Discharge OCP Delay</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_dis_ocp_delay" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-20 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">S</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_ocp_delay')">OK</button>
+                                    <input type="number" id="val_dis_ocp_delay" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">S</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_ocp_delay')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Discharge OCPR Time</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_dis_ocpr_time" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-20 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">S</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_ocpr_time')">OK</button>
+                                    <input type="number" id="val_dis_ocpr_time" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">S</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_ocpr_time')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">SCP Recovery Time</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_scp_rec_time" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-20 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">S</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'scp_rec_time')">OK</button>
+                                    <input type="number" id="val_scp_rec_time" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">S</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'scp_rec_time')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Max Balance Current</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_max_bal_current" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none" step="0.001">
-                                    <span class="text-gray-600 font-bold text-sm w-4">A</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'max_bal_current')">OK</button>
+                                    <input type="number" id="val_max_bal_current" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-600 font-bold text-base w-4">A</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'max_bal_current')">OK</button>
                                 </div>
                             </div>
                         </div>
 
-                        <h3 class="text-sm font-black text-orange-500 uppercase mb-4 border-l-4 border-orange-500 pl-3">3. Bảo vệ Nhiệt độ (OTP)</h3>
-                        <div class="space-y-4 mb-8">
+                        <h3 class="text-base font-black text-orange-500 uppercase mb-4 border-l-4 border-orange-500 pl-3">3. Bảo vệ Nhiệt độ (OTP)</h3>
+                        <div class="space-y-5 mb-10">
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Charge OTP</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_chg_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_otp')">OK</button>
+                                    <input type="number" id="val_chg_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_otp')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Charge OTPR</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_chg_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_otpr')">OK</button>
+                                    <input type="number" id="val_chg_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_otpr')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Discharge OTP</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_dis_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_otp')">OK</button>
+                                    <input type="number" id="val_dis_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_otp')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Discharge OTPR</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_dis_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_otpr')">OK</button>
+                                    <input type="number" id="val_dis_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_otpr')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Charge UTP</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_chg_utp" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_utp')">OK</button>
+                                    <input type="number" id="val_chg_utp" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_utp')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Charge UTPR</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_chg_utpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_utpr')">OK</button>
+                                    <input type="number" id="val_chg_utpr" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_utpr')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">MOS OTP</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_mos_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'mos_otp')">OK</button>
+                                    <input type="number" id="val_mos_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'mos_otp')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">MOS OTPR</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_mos_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'mos_otpr')">OK</button>
+                                    <input type="number" id="val_mos_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'mos_otpr')">OK</button>
                                 </div>
                             </div>
                         </div>
 
-                        <h3 class="text-sm font-black text-purple-500 uppercase mb-4 border-l-4 border-purple-500 pl-3">4. Dữ liệu Lõi Hệ thống</h3>
-                        <div class="space-y-4">
+                        <h3 class="text-base font-black text-purple-500 uppercase mb-4 border-l-4 border-purple-500 pl-3">4. Dữ liệu Lõi Hệ thống</h3>
+                        <div class="space-y-5">
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">SCP Delay</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_scp_delay" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">S</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'scp_delay')">OK</button>
+                                    <input type="number" id="val_scp_delay" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">S</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'scp_delay')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Battery capacity</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_bat_cap" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">Ah</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bat_cap')">OK</button>
+                                    <input type="number" id="val_bat_cap" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">Ah</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bat_cap')">OK</button>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
                                 <div class="text-gray-300 text-sm font-bold w-[55%]">Cell count</div>
                                 <div class="flex items-center justify-end gap-2 w-[45%]">
-                                    <input type="number" id="val_cell_count" class="bg-[#0f172a] border border-cyan-900 rounded p-2.5 w-24 text-center font-bold text-cyan-400 text-base outline-none">
-                                    <span class="text-gray-600 font-bold text-sm w-4">C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_count')">OK</button>
+                                    <input type="number" id="val_cell_count" class="bg-[#0f172a] border border-cyan-900 rounded p-3 w-24 text-center font-bold text-cyan-400 text-lg outline-none">
+                                    <span class="text-gray-600 font-bold text-base w-4">C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_count')">OK</button>
                                 </div>
                             </div>
                         </div>
@@ -490,7 +488,7 @@
                 <div class="bg-[#0f172a] text-purple-400 p-4 text-sm font-bold uppercase tracking-widest border-b border-purple-900/50">
                     <i class="fas fa-network-wired"></i> Network Telemetry
                 </div>
-                <div class="p-5 space-y-5">
+                <div class="p-6 space-y-6">
                      <div class="flex justify-between items-center bg-[#111827] p-5 rounded-xl border border-gray-800 shadow-inner">
                         <span class="text-gray-500 text-sm font-bold uppercase">WiFi Tên (SSID):</span>
                         <span id="wifi_current_ssid" class="text-cyan-400 font-black text-lg neon-text">SCANNING...</span>
@@ -498,13 +496,13 @@
                      <div class="flex justify-between items-center bg-[#111827] p-5 rounded-xl border border-gray-800 shadow-inner">
                         <span class="text-gray-500 text-sm font-bold uppercase">Sóng WiFi:</span>
                         <div class="flex items-center gap-3">
-                            <span id="wifi_current_signal" class="text-cyan-400 font-black text-xl neon-text">-- dBm</span>
-                            <i class="fas fa-wifi text-cyan-600 text-2xl"></i>
+                            <span id="wifi_current_signal" class="text-cyan-400 font-black text-2xl neon-text">-- dBm</span>
+                            <i class="fas fa-wifi text-cyan-600 text-3xl"></i>
                         </div>
                      </div>
                      
-                     <div class="pt-5 border-t border-gray-800">
-                        <p class="text-xs text-gray-500 font-bold mb-4 uppercase tracking-widest">Tín hiệu Bluetooth BMS</p>
+                     <div class="pt-6 border-t border-gray-800">
+                        <p class="text-sm text-gray-500 font-bold mb-4 uppercase tracking-widest">Tín hiệu Bluetooth BMS</p>
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div class="bg-[#111827] p-4 rounded-xl border border-gray-800 flex flex-col items-center shadow-inner">
                                 <span class="text-gray-500 font-bold mb-2">PACK_01 (314Ah)</span>
@@ -524,21 +522,21 @@
 
     <nav class="fixed bottom-0 left-0 right-0 bg-[#090e17]/95 backdrop-blur-md border-t border-cyan-900/50 flex justify-around p-3 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
         <button onclick="nav('home')" class="flex flex-col items-center text-gray-500 w-full py-1.5 nav-btn nav-active transition-all duration-300 rounded-lg" id="nav-home">
-            <i class="fas fa-chart-line mb-1 text-2xl"></i><span class="text-[11px] font-black uppercase tracking-widest">Home</span>
+            <i class="fas fa-chart-line mb-1 text-2xl"></i><span class="text-xs font-black uppercase tracking-widest">Home</span>
         </button>
         <button onclick="nav('settings')" class="flex flex-col items-center text-gray-500 w-full py-1.5 nav-btn transition-all duration-300 rounded-lg" id="nav-settings">
-            <i class="fas fa-sliders-h mb-1 text-2xl"></i><span class="text-[11px] font-black uppercase tracking-widest">Config</span>
+            <i class="fas fa-sliders-h mb-1 text-2xl"></i><span class="text-xs font-black uppercase tracking-widest">Config</span>
         </button>
         <button onclick="nav('wifi')" class="flex flex-col items-center text-gray-500 w-full py-1.5 nav-btn transition-all duration-300 rounded-lg" id="nav-wifi">
-            <i class="fas fa-network-wired mb-1 text-2xl"></i><span class="text-[11px] font-black uppercase tracking-widest">Network</span>
+            <i class="fas fa-network-wired mb-1 text-2xl"></i><span class="text-xs font-black uppercase tracking-widest">Network</span>
         </button>
     </nav>
 
     <script>
         const config = {
             host: "broker.emqx.io",
-            port: 8084, // Cổng bảo mật TLS
-            clientId: "WebUI_SciFi_Pro_" + Math.random().toString(16).substr(2, 6)
+            port: 8084,
+            clientId: "WebUI_MobFull_Final_" + Math.random().toString(16).substr(2, 5)
         };
 
         const client = new Paho.MQTT.Client(config.host, config.port, config.clientId);
@@ -546,13 +544,11 @@
         let activeBms = "b1";
         let bmsCache = { b1: {}, b2: {} };
         let isEspConnected = false;
-        
-        // Theo dõi các lệnh đang chờ phản hồi
         let pendingCommands = {};
 
         function resetBtn(btn) {
             btn.innerText = "OK"; 
-            btn.className = "bg-cyan-900 text-cyan-100 border border-cyan-700 px-5 py-2.5 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition";
+            btn.className = "bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-3 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition";
         }
 
         function resetUI() {
@@ -561,29 +557,27 @@
                            'pack_v','pack_a','pack_delta','pack_t_bms','pack_min','pack_max',
                            'pack_t1','pack_t2','pack_cycles','main_total_charge','pack_p'];
             elIds.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = "--"; });
-            for(let i=1; i<=16; i++) { const c = document.getElementById('c'+i); if(c) c.innerText = "-- V"; }
-            
-            const fill = document.getElementById('bat_fill_level');
-            if (fill) fill.style.height = "0%";
-            
-            const mPower = document.getElementById('main_power');
-            if (mPower) { mPower.innerText = "0 W"; mPower.style.color = "#6b7280"; }
-            
-            const pIcon = document.getElementById('pwr-icon');
-            if (pIcon) pIcon.className = "fas fa-bolt text-gray-600 text-lg";
-            
-            const pSolar = document.getElementById('path-solar');
-            if (pSolar) pSolar.className.baseVal = "energy-path";
-            
-            const pLoad = document.getElementById('path-load');
-            if (pLoad) pLoad.className.baseVal = "energy-path";
+            for(let i=1; i<=16; i++) { 
+                const c = document.getElementById('c'+i); 
+                if(c) {
+                    c.innerText = "-- V"; 
+                    c.className = "font-black text-cyan-300 font-mono text-base"; 
+                } 
+            }
+            if (document.getElementById('bat_fill_level')) document.getElementById('bat_fill_level').style.height = "0%";
+            if (document.getElementById('main_power')) {
+                document.getElementById('main_power').innerText = "0 W";
+                document.getElementById('main_power').style.color = "#6b7280";
+            }
+            if (document.getElementById('pwr-icon')) document.getElementById('pwr-icon').className = "fas fa-bolt text-gray-600 text-xl";
+            if (document.getElementById('path-solar')) document.getElementById('path-solar').className.baseVal = "energy-path";
+            if (document.getElementById('path-load')) document.getElementById('path-load').className.baseVal = "energy-path";
         }
 
         client.connect({
             useSSL: true,
             onSuccess: () => {
-                const s = document.getElementById('mqtt-status');
-                if (s) s.innerText = "LINKED";
+                if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "LINKED";
                 client.subscribe(`${prefix}/status`); 
                 client.subscribe(`${prefix}/sensor/+/state`);
                 client.subscribe(`${prefix}/text_sensor/+/state`);
@@ -600,17 +594,14 @@
                 if (topic === `${prefix}/status`) {
                     isEspConnected = (val === "online");
                     const badge = document.getElementById('mqtt-status-badge');
-                    const dot = document.getElementById('mqtt-dot');
-                    const sTxt = document.getElementById('mqtt-status');
-                    
                     if (isEspConnected) {
-                        if(sTxt) sTxt.innerText = "ONLINE";
-                        if(badge) badge.className = "bg-cyan-900/30 border border-cyan-500/50 px-3 py-1.5 rounded text-xs font-black text-cyan-400 flex items-center shadow-md";
-                        if(dot) dot.className = "w-2 h-2 rounded-full bg-cyan-400 animate-pulse mr-2";
+                        if (badge) badge.className = "bg-cyan-900/30 border border-cyan-500/50 px-4 py-2 rounded-lg text-sm font-black text-cyan-400 flex items-center shadow-md";
+                        if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "ONLINE";
+                        if (document.getElementById('mqtt-dot')) document.getElementById('mqtt-dot').className = "w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse mr-2";
                     } else {
-                        if(sTxt) sTxt.innerText = "OFFLINE";
-                        if(badge) badge.className = "bg-red-900/30 border border-red-500/50 px-3 py-1.5 rounded text-xs font-black text-red-500 flex items-center shadow-md";
-                        if(dot) dot.className = "w-2 h-2 rounded-full bg-red-500 mr-2";
+                        if (badge) badge.className = "bg-red-900/30 border border-red-500/50 px-4 py-2 rounded-lg text-sm font-black text-red-500 flex items-center shadow-md";
+                        if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "OFFLINE";
+                        if (document.getElementById('mqtt-dot')) document.getElementById('mqtt-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500 mr-2";
                         resetUI();
                     }
                     return;
@@ -618,13 +609,25 @@
 
                 if (!isEspConnected) return;
 
+                // Sửa sóng Bluetooth: Dò theo chữ chứa trong Topic
+                if (topic.includes("b1_rssi")) {
+                    if (document.getElementById('bt_rssi_1')) document.getElementById('bt_rssi_1').innerText = val + " dBm";
+                    if (activeBms === 'b1' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val;
+                    return;
+                }
+                if (topic.includes("b2_rssi")) {
+                    if (document.getElementById('bt_rssi_2')) document.getElementById('bt_rssi_2').innerText = val + " dBm";
+                    if (activeBms === 'b2' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val;
+                    return;
+                }
+
                 if (topic.includes("wifi_ssid")) {
-                    const el = document.getElementById('wifi_current_ssid');
-                    if (el) el.innerText = val;
+                    if (document.getElementById('wifi_current_ssid')) document.getElementById('wifi_current_ssid').innerText = val;
+                    return;
                 }
                 if (topic.includes("wifi_signal")) {
-                    const el = document.getElementById('wifi_current_signal');
-                    if (el) el.innerText = val;
+                    if (document.getElementById('wifi_current_signal')) document.getElementById('wifi_current_signal').innerText = val + " dBm";
+                    return;
                 }
                 
                 const parts = topic.split('/');
@@ -633,7 +636,6 @@
                 const fullId = parts[2];
                 
                 if (!fullId.startsWith('b1_') && !fullId.startsWith('b2_')) return;
-                
                 const devId = fullId.substring(0, 2);
                 const key = fullId.substring(3);
 
@@ -642,46 +644,23 @@
 
                 if (devId === activeBms) updateScreen(key, val, type);
 
-                // Cập nhật Sóng Bluetooth (RSSI) - SỬA LỖI HEADER BÁM THEO TRẠM
-                if (key === 'rssi') {
-                    const r1 = document.getElementById('bt_rssi_1');
-                    if(r1 && devId === 'b1') r1.innerText = val + " dBm";
-                    
-                    const r2 = document.getElementById('bt_rssi_2');
-                    if(r2 && devId === 'b2') r2.innerText = val + " dBm";
-                    
-                    // Nếu sóng của trạm nào gửi lên mà đúng trạm đang mở thì đẩy lên Header
-                    if (devId === activeBms) {
-                        const h = document.getElementById('bt_rssi_header');
-                        if (h) h.innerText = "BT: " + val;
-                    }
-                }
-            } catch (e) {
-                console.error("Lỗi giải mã MQTT:", e);
-            }
+            } catch (e) { console.error("MQTT Error:", e); }
         };
 
         function updateScreen(key, val, type) {
-            
-            // XỬ LÝ PHẢN HỒI THÀNH CÔNG (SMART FEEDBACK)
             const pendingKey = `${activeBms}_${key}`;
             if (pendingCommands[pendingKey]) {
                 const pending = pendingCommands[pendingKey];
                 let isMatch = false;
-                
-                if (type === 'number') {
-                    if (Math.abs(parseFloat(val) - pending.expectedValue) < 0.05) isMatch = true;
-                } else if (type === 'switch') {
-                    const receivedVal = (val.toUpperCase() === 'ON' || val === 'true' || val === '1');
-                    if (receivedVal === pending.expectedValue) isMatch = true;
-                }
+                if (type === 'number' && Math.abs(parseFloat(val) - pending.expectedValue) < 0.05) isMatch = true;
+                if (type === 'switch' && (val.toUpperCase() === 'ON' || val === 'true') === pending.expectedValue) isMatch = true;
 
                 if (isMatch) {
                     clearTimeout(pending.timeout);
                     const btn = pending.btnElement;
                     if (btn) {
                         btn.innerText = "SUCCESS";
-                        btn.className = "bg-green-500 text-white px-5 py-2.5 rounded font-black text-sm transition shadow-[0_0_15px_#22c55e]";
+                        btn.className = "bg-green-500 text-white px-5 py-3 rounded font-black text-sm transition shadow-[0_0_15px_#22c55e]";
                         setTimeout(() => resetBtn(btn), 2500);
                     }
                     delete pendingCommands[pendingKey];
@@ -692,34 +671,62 @@
                 'voltage': ['main_voltage', 'pack_v'], 'current': ['main_current', 'pack_a'],
                 'soc': ['main_soc', 'pack_soc'], 
                 'capacity_remaining': ['main_energy_now', 'pack_cap_now'], 'bat_cap': ['main_capacity'], 
-                'delta_cell_voltage': ['pack_delta'], 'temperature_sensor_1': ['pack_t_bms'], 
+                'temperature_sensor_1': ['pack_t_bms'], 
                 'temperature_sensor_2': ['pack_t1'], 'temperature_sensor_3': ['pack_t2'],
-                'min_cell_voltage': ['pack_min'], 'max_cell_voltage': ['pack_max'], 
-                'charging_cycles': ['pack_cycles'], 'total_charging_cycle_capacity': ['main_total_charge'],
-                'setup_passcode': ['pack_passcode']
+                'charging_cycles': ['pack_cycles'], 'total_charging_cycle_capacity': ['main_total_charge']
             };
 
             if (maps[key]) {
                 maps[key].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) {
-                        if (id === 'pack_passcode') el.innerText = val;
-                        else if (id === 'pack_cycles') el.innerText = parseInt(val);
-                        else el.innerText = (key.includes('voltage') || key === 'delta_cell_voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
+                        if (id === 'pack_cycles') el.innerText = parseInt(val);
+                        else el.innerText = key.includes('voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
                     }
                 });
             }
 
+            // TÍNH TOÁN LẠI MIN/MAX/DELTA CELL ĐỂ ĐẢM BẢO CHUẨN XÁC VÀ TÔ MÀU
             if (key.startsWith('cell_voltage_')) {
-                const c = document.getElementById('c' + key.split('_')[2]);
-                if (c) c.innerText = parseFloat(val).toFixed(3) + " V";
+                let minV = 999.0;
+                let maxV = 0.0;
+                let minIdx = -1;
+                let maxIdx = -1;
+
+                // Cập nhật giá trị hiển thị 16 Cell
+                for (let i = 1; i <= 16; i++) {
+                    const cKey = `cell_voltage_${i}`;
+                    const cEl = document.getElementById('c' + i);
+                    if (bmsCache[activeBms][cKey]) {
+                        const cellV = parseFloat(bmsCache[activeBms][cKey].value);
+                        if (cEl) cEl.innerText = cellV.toFixed(3) + " V";
+                        if (cellV < minV) { minV = cellV; minIdx = i; }
+                        if (cellV > maxV) { maxV = cellV; maxIdx = i; }
+                    }
+                }
+
+                // Tô màu Đỏ (Min) / Tím (Max)
+                if (minIdx !== -1 && maxIdx !== -1) {
+                    for (let i = 1; i <= 16; i++) {
+                        const cEl = document.getElementById('c' + i);
+                        if (cEl) {
+                            if (i === minIdx) cEl.className = "font-black text-red-500 font-mono text-base neon-text";
+                            else if (i === maxIdx) cEl.className = "font-black text-purple-400 font-mono text-base neon-text";
+                            else cEl.className = "font-black text-cyan-300 font-mono text-base";
+                        }
+                    }
+                    // Cập nhật chẩn đoán
+                    const deltaV = (maxV - minV).toFixed(3);
+                    if(document.getElementById('pack_min')) document.getElementById('pack_min').innerText = minV.toFixed(3) + " V";
+                    if(document.getElementById('pack_max')) document.getElementById('pack_max').innerText = maxV.toFixed(3) + " V";
+                    if(document.getElementById('pack_delta')) document.getElementById('pack_delta').innerText = deltaV + " V";
+                }
             }
 
-            // ĐỒNG BỘ 100% CÔNG SUẤT 3 VỊ TRÍ
+            // ĐỒNG BỘ 100% CÔNG SUẤT (P) CHUẨN XÁC 3 VỊ TRÍ
             if (key === 'current' || key === 'power') {
                 const A = parseFloat(bmsCache[activeBms]['current']?.value || 0);
-                const P_val = parseFloat(bmsCache[activeBms]['power']?.value || 0);
-                const P_display = Math.round(P_val);
+                const P = Math.round(parseFloat(bmsCache[activeBms]['power']?.value || 0));
                 
                 const pEl = document.getElementById('main_power');
                 const pCard = document.getElementById('main_power_card');
@@ -728,71 +735,54 @@
                 const pSolar = document.getElementById('path-solar');
                 const pLoad = document.getElementById('path-load');
                 
-                // Cập nhật thẻ chi tiết và thẻ Hiệu suất (Thêm chữ W)
-                if (pDiag) pDiag.innerText = P_display + " W";
-                if (pCard) pCard.innerText = P_display;
+                if (pDiag) pDiag.innerText = P + " W";
+                if (pCard) pCard.innerText = P;
 
-                // Xử lý mũi tên và dấu (+/-) trên đỉnh Pin
                 if (A >= 0.1) {
-                    if (pEl) { pEl.innerText = "+" + P_display + " W"; pEl.className = "text-3xl font-black text-[#f97316] neon-text"; }
+                    if (pEl) { pEl.innerText = "+" + P + " W"; pEl.className = "text-3xl font-black text-[#f97316] neon-text"; }
                     if (pIcon) pIcon.className = "fas fa-plug text-orange-500 animate-pulse text-2xl";
-                    if (pSolar) pSolar.className.baseVal = "energy-path flow-charge"; 
+                    if (pSolar) pSolar.className.baseVal = "energy-path flow-charge";
                     if (pLoad) pLoad.className.baseVal = "energy-path";
                 } else if (A <= -0.1) {
-                    if (pEl) { pEl.innerText = "-" + P_display + " W"; pEl.className = "text-3xl font-black text-[#06b6d4] neon-text"; }
+                    if (pEl) { pEl.innerText = "-" + P + " W"; pEl.className = "text-3xl font-black text-[#06b6d4] neon-text"; }
                     if (pIcon) pIcon.className = "fas fa-bolt text-cyan-400 text-2xl";
-                    if (pLoad) pLoad.className.baseVal = "energy-path flow-discharge"; 
+                    if (pLoad) pLoad.className.baseVal = "energy-path flow-discharge";
                     if (pSolar) pSolar.className.baseVal = "energy-path";
                 } else {
                     if (pEl) { pEl.innerText = "0 W"; pEl.className = "text-3xl font-black text-gray-500"; }
-                    if (pCard) { pCard.innerText = "0"; }
                     if (pIcon) pIcon.className = "fas fa-bolt text-gray-600 text-2xl";
-                    if (pSolar) pSolar.className.baseVal = "energy-path"; 
+                    if (pSolar) pSolar.className.baseVal = "energy-path";
                     if (pLoad) pLoad.className.baseVal = "energy-path";
                 }
             }
 
-            // TÁCH RIÊNG TÍNH TOÁN KWH
             if (key === 'voltage' || key === 'capacity_remaining' || key === 'bat_cap') {
                 const V = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
                 
-                const kr = document.getElementById('kwh_remaining');
-                if (kr) kr.innerText = ((AhNow * V) / 1000).toFixed(2);
-                
-                const kt = document.getElementById('kwh_total');
-                if (kt) kt.innerText = ((AhMax * V) / 1000).toFixed(1);
+                if (document.getElementById('kwh_remaining')) document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2);
+                if (document.getElementById('kwh_total')) document.getElementById('kwh_total').innerText = ((AhMax * V) / 1000).toFixed(1);
             }
 
             if (key === 'soc') {
-                const fl = document.getElementById('bat_fill_level');
-                if (fl) fl.style.height = val + "%";
-                const pt = document.getElementById('bat_percent_text');
-                if (pt) pt.innerText = Math.round(val) + " %";
+                if (document.getElementById('bat_fill_level')) document.getElementById('bat_fill_level').style.height = val + "%";
+                if (document.getElementById('bat_percent_text')) document.getElementById('bat_percent_text').innerText = Math.round(val) + " %";
             }
 
-            // ĐỊNH DẠNG CỠ CHỮ THẬP PHÂN THÔNG MINH CHO CÀI ĐẶT
             if (type === 'number') {
                 const i = document.getElementById('val_' + key);
-                // CHỈ CẬP NHẬT KHI KHÔNG ĐANG CHỜ PHẢN HỒI (tránh giật nút)
-                if (i && !pendingCommands[`${activeBms}_${key}`]) {
+                if (i && !pendingCommands[pendingKey]) {
                     let v = parseFloat(val);
-                    if (key === 'max_bal_current' || key.includes('_v') || key.includes('ovp') || key.includes('uvp')) {
-                        i.value = v.toFixed(3);
-                    } else if (key.includes('otp') || key.includes('utp')) {
-                        i.value = v.toFixed(1);
-                    } else {
-                        i.value = Math.round(v);
-                    }
+                    if (key === 'max_bal_current' || key.includes('_v') || key.includes('ovp') || key.includes('uvp')) i.value = v.toFixed(3);
+                    else if (key.includes('otp') || key.includes('utp')) i.value = v.toFixed(1);
+                    else i.value = Math.round(v);
                 }
             }
 
             if (type === 'switch') {
                 const sw = document.getElementById('sw_' + key);
-                if (sw && !pendingCommands[`${activeBms}_${key}`]) {
-                    sw.checked = (val.toUpperCase() === 'ON' || val === 'true' || val === '1');
-                }
+                if (sw && !pendingCommands[pendingKey]) sw.checked = (val.toUpperCase() === 'ON' || val === 'true');
             }
         }
 
@@ -800,89 +790,59 @@
             activeBms = document.getElementById('device-selector').value;
             resetUI();
             const d = bmsCache[activeBms];
-            if (d) {
-                Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
-                // Phục hồi lại RSSI khi lật Tab Trạm
-                const h = document.getElementById('bt_rssi_header');
-                if (h) {
-                    if (d['rssi']) h.innerText = "BT: " + d['rssi'].value;
-                    else h.innerText = "BT: --";
-                }
+            if (d) Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
+            
+            // Tìm lại Sóng Bluetooth sau khi đổi Trạm
+            const headerBt = document.getElementById('bt_rssi_header');
+            const btId = (activeBms === 'b1') ? 'bt_rssi_1' : 'bt_rssi_2';
+            const btValEl = document.getElementById(btId);
+            if (headerBt && btValEl && btValEl.innerText !== '-- dBm') {
+                headerBt.innerText = "BT: " + btValEl.innerText.replace(" dBm", "");
+            } else if (headerBt) {
+                headerBt.innerText = "BT: --";
             }
         }
 
         function nav(t) {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
-            const tb = document.getElementById('tab-' + t);
-            if (tb) tb.classList.add('active');
-            
-            document.querySelectorAll('.nav-btn').forEach(b => { 
-                b.classList.remove('nav-active'); 
-                b.classList.replace('text-cyan-400', 'text-gray-500'); 
-            });
+            if (document.getElementById('tab-' + t)) document.getElementById('tab-' + t).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('nav-active'); b.classList.replace('text-cyan-400', 'text-gray-500'); });
             const act = document.getElementById('nav-' + t);
-            if (act) {
-                act.classList.add('nav-active'); 
-                act.classList.replace('text-gray-500', 'text-cyan-400');
-            }
+            if (act) { act.classList.add('nav-active'); act.classList.replace('text-gray-500', 'text-cyan-400'); }
         }
 
         function sendCmd(t, s) { 
-            if (!isEspConnected) {
-                alert("CẢNH BÁO: Đang mất kết nối mạng. Không thể gửi lệnh!");
-                return;
-            }
-            try {
-                const payload = s ? "ON" : "OFF";
-                const message = new Paho.MQTT.Message(payload);
-                message.destinationName = `${prefix}/switch/${activeBms}_${t}/command`;
-                client.send(message);
-                pendingCommands[`${activeBms}_${t}`] = { expectedValue: s };
-            } catch (error) {
-                console.error("Lỗi gửi:", error);
-            }
+            if (!isEspConnected) { alert("ESP32 OFFLINE!"); return; }
+            const message = new Paho.MQTT.Message(s ? "ON" : "OFF");
+            message.destinationName = `${prefix}/switch/${activeBms}_${t}/command`;
+            client.send(message);
+            pendingCommands[`${activeBms}_${t}`] = { expectedValue: s };
         }
 
         function sendVal(e, id) {
-            if (!isEspConnected) {
-                alert("CẢNH BÁO: Đang mất kết nối mạng. Không thể gửi thông số!");
-                return;
-            }
+            if (!isEspConnected) { alert("ESP32 OFFLINE!"); return; }
             const input = document.getElementById('val_' + id);
-            if (!input || input.value === "") {
-                alert("Bạn chưa nhập giá trị hợp lệ!");
-                return;
-            }
+            if (!input || input.value === "") return;
+            const val = parseFloat(input.value);
+            const message = new Paho.MQTT.Message(val.toString());
+            message.destinationName = `${prefix}/number/${activeBms}_${id}/command`;
+            client.send(message);
             
-            try {
-                const expectedValue = parseFloat(input.value);
-                const message = new Paho.MQTT.Message(expectedValue.toString());
-                message.destinationName = `${prefix}/number/${activeBms}_${id}/command`;
-                client.send(message);
-                
-                if (e && e.target) {
-                    const btn = e.target;
-                    btn.innerText = "SENDING"; 
-                    btn.className = "bg-yellow-600 text-white px-5 py-2.5 rounded font-black text-sm transition animate-pulse shadow-[0_0_15px_#ca8a04]";
-                    
-                    const pKey = `${activeBms}_${id}`;
-                    if (pendingCommands[pKey] && pendingCommands[pKey].timeout) clearTimeout(pendingCommands[pKey].timeout);
-                    
-                    pendingCommands[pKey] = {
-                        btnElement: btn,
-                        expectedValue: expectedValue,
-                        timeout: setTimeout(() => {
-                            btn.innerText = "TIMEOUT";
-                            btn.className = "bg-red-600 text-white px-5 py-2.5 rounded font-black text-sm transition shadow-[0_0_15px_#dc2626]";
-                            delete pendingCommands[pKey];
-                            setTimeout(() => resetBtn(btn), 3000);
-                        }, 8000)
-                    };
-                }
-            } catch (error) {
-                console.error("Lỗi gửi MQTT:", error);
-                alert("Không thể gửi gói tin MQTT.");
-            }
+            const btn = e.target;
+            btn.innerText = "SENDING"; 
+            btn.className = "bg-yellow-600 text-white px-5 py-3 rounded font-black text-sm animate-pulse shadow-[0_0_15px_#ca8a04]";
+            const pKey = `${activeBms}_${id}`;
+            if (pendingCommands[pKey] && pendingCommands[pKey].timeout) clearTimeout(pendingCommands[pKey].timeout);
+            pendingCommands[pKey] = {
+                btnElement: btn,
+                expectedValue: val,
+                timeout: setTimeout(() => {
+                    btn.innerText = "TIMEOUT";
+                    btn.className = "bg-red-600 text-white px-5 py-3 rounded font-black text-sm shadow-[0_0_15px_#dc2626]";
+                    delete pendingCommands[pKey];
+                    setTimeout(() => resetBtn(btn), 3000);
+                }, 8000)
+            };
         }
     </script>
 </body>
