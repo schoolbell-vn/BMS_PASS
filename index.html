@@ -585,6 +585,7 @@
             const topic = msg.destinationName;
             const val = msg.payloadString;
 
+            // Bắt trạng thái Mạch Online / Offline
             if (topic === `${prefix}/status`) {
                 isEspConnected = (val === "online");
                 const badge = document.getElementById('mqtt-status-badge');
@@ -603,6 +604,7 @@
 
             if (!isEspConnected) return;
 
+            // Xử lý hiển thị Sóng WiFi
             if (topic.includes("wifi_ssid")) document.getElementById('wifi_current_ssid').innerText = val;
             if (topic.includes("wifi_signal")) document.getElementById('wifi_current_signal').innerText = val;
             
@@ -618,9 +620,15 @@
 
             if (devId === activeBms) updateScreen(key, val, type);
 
+            // Cập nhật Sóng Bluetooth liên tục cho 2 trạm
             if (key === 'rssi') {
                 if(devId === 'b1') document.getElementById('bt_rssi_1').innerText = val + " dBm";
                 if(devId === 'b2') document.getElementById('bt_rssi_2').innerText = val + " dBm";
+                
+                // ĐÂY LÀ DÒNG CHÌA KHÓA FIX LỖI: Luôn cập nhật Header theo trạm đang chọn
+                if(devId === activeBms) {
+                    document.getElementById('bt_rssi_header').innerText = "BT: " + val;
+                }
             }
         };
 
