@@ -347,8 +347,8 @@
 
     <script>
         const config = {
-            broker: "broker.emqx.io"
-            port: 8083
+            host: "broker.emqx.io", // Sửa chữ 'broker' thành 'host' và thêm dấu phẩy
+            port: 8083,             // Thêm dấu phẩy ở đây
             user: "",
             pass: "",
             clientId: "WebUI_" + Math.random().toString(16).substr(2, 6)
@@ -391,12 +391,13 @@
             useSSL: false,
             onSuccess: () => {
                 document.getElementById('mqtt-status').innerText = "Đã kết nối Server";
-                client.subscribe("ngoctuyka_bms_private/status"); 
-                client.subscribe("ngoctuyka_bms_private/sensor/+/state");
-                client.subscribe("ngoctuyka_bms_private/text_sensor/+/state");
-                client.subscribe("ngoctuyka_bms_private/number/+/state");
-                client.subscribe("ngoctuyka_bms_private/switch/+/state");
-                client.subscribe("ngoctuyka_bms_private/wifi/+/state"); 
+                // Bắt buộc phải có _2026 cho khớp với bms.yaml
+                client.subscribe("ngoctuyka_bms_private_2026/status"); 
+                client.subscribe("ngoctuyka_bms_private_2026/sensor/+/state");
+                client.subscribe("ngoctuyka_bms_private_2026/text_sensor/+/state");
+                client.subscribe("ngoctuyka_bms_private_2026/number/+/state");
+                client.subscribe("ngoctuyka_bms_private_2026/switch/+/state");
+                client.subscribe("ngoctuyka_bms_private_2026/wifi/+/state"); 
             }
         });
 
