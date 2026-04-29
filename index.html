@@ -416,7 +416,7 @@
             const payload = msg.payloadString;
 
             // Lắng nghe Nhịp tim ESP32
-            if (topic === "bms/status") {
+            if (topic === "ngoctuyka_bms_private_2026/status") {
                 if (payload === "online") {
                     isEspConnected = true;
                     document.getElementById('mqtt-status').innerText = "Đang trực tuyến";
@@ -432,11 +432,11 @@
             // NẾU ESP32 ĐANG TẮT ĐIỆN -> CHẶN HIỂN THỊ DỮ LIỆU
             if (!isEspConnected) return;
 
-            if(topic.includes("bms/wifi/ssid/state")) {
+           if(topic.includes("ngoctuyka_bms_private_2026/wifi/ssid/state")) {
                 document.getElementById('wifi_current_ssid').innerText = payload;
                 return;
             }
-            if(topic.includes("bms/wifi/signal/state")) {
+            if(topic.includes("ngoctuyka_bms_private_2026/wifi/signal/state")) {
                 document.getElementById('wifi_current_signal').innerText = payload + " dBm";
                 return;
             }
@@ -585,12 +585,14 @@
 
         function sendCmd(type, state) {
             const val = state ? "ON" : "OFF";
-            client.send(`bms/switch/${activeBms}_${type}/command`, val);
+            // Đổi bms thành ngoctuyka_bms_private_2026
+            client.send(`ngoctuyka_bms_private_2026/switch/${activeBms}_${type}/command`, val);
         }
 
-        function sendVal(id) {
+       function sendVal(id) {
             const input = document.getElementById('val_' + id);
-            client.send(`bms/number/${activeBms}_${id}/command`, input.value);
+            // Đổi bms thành ngoctuyka_bms_private_2026
+            client.send(`ngoctuyka_bms_private_2026/number/${activeBms}_${id}/command`, input.value);
             event.target.innerText = "ĐÃ LƯU";
             event.target.classList.replace('from-emerald-500', 'from-blue-500');
             event.target.classList.replace('to-green-600', 'to-blue-600');
