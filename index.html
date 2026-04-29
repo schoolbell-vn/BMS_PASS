@@ -25,7 +25,7 @@
 
         .battery-body { background: #0f172a; border: 2px solid #06b6d4; box-shadow: 0 0 15px rgba(6,182,212,0.4), inset 0 0 15px rgba(0,0,0,0.8); }
 
-        /* FIX CÔNG TẮC */
+        /* CÔNG TẮC CHUẨN */
         .toggle-checkbox:checked { right: 0; border-color: #06b6d4; background-color: #06b6d4; }
         .toggle-checkbox:checked + .toggle-label { background-color: rgba(6,182,212,0.25); border: 1px solid #06b6d4; box-shadow: 0 0 15px rgba(6,182,212,0.6); }
         .toggle-checkbox { right: 28px; z-index: 1; border-color: #334155; background-color: #0f172a; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
@@ -184,7 +184,7 @@
 
         <div id="tab-settings" class="tab-content space-y-5">
             <div class="card-scifi overflow-hidden border-yellow-500/30">
-                <div class="bg-[#0f172a] text-yellow-400 p-4 font-bold text-xs tracking-widest border-b border-yellow-900/50 uppercase">
+                <div class="bg-[#0f172a] text-yellow-400 p-3 font-bold text-xs tracking-widest border-b border-yellow-900/50 uppercase">
                     <i class="fas fa-tools"></i> Cấu hình hệ thống
                 </div>
                 
@@ -234,7 +234,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_bal_start_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('bal_start_v')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bal_start_v')">LƯU</button>
                                 </div>
                             </div>
 
@@ -246,7 +246,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_bal_trig_v" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('bal_trig_v')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bal_trig_v')">LƯU</button>
                                 </div>
                             </div>
 
@@ -258,7 +258,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_cell_ovp" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('cell_ovp')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_ovp')">LƯU</button>
                                 </div>
                             </div>
 
@@ -270,7 +270,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_cell_ovpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('cell_ovpr')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_ovpr')">LƯU</button>
                                 </div>
                             </div>
 
@@ -282,7 +282,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_cell_uvp" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('cell_uvp')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_uvp')">LƯU</button>
                                 </div>
                             </div>
 
@@ -294,7 +294,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_cell_uvpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">V</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('cell_uvpr')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'cell_uvpr')">LƯU</button>
                                 </div>
                             </div>
 
@@ -306,7 +306,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_max_chg_current" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">A</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('max_chg_current')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'max_chg_current')">LƯU</button>
                                 </div>
                             </div>
 
@@ -318,7 +318,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_max_dis_current" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">A</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('max_dis_current')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'max_dis_current')">LƯU</button>
                                 </div>
                             </div>
 
@@ -330,7 +330,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_bat_cap" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">Ah</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('bat_cap')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'bat_cap')">LƯU</button>
                                 </div>
                             </div>
 
@@ -342,7 +342,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_chg_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('chg_otp')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_otp')">LƯU</button>
                                 </div>
                             </div>
 
@@ -354,7 +354,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_chg_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('chg_otpr')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'chg_otpr')">LƯU</button>
                                 </div>
                             </div>
 
@@ -366,7 +366,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_dis_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('dis_otp')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_otp')">LƯU</button>
                                 </div>
                             </div>
 
@@ -378,7 +378,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_dis_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('dis_otpr')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'dis_otpr')">LƯU</button>
                                 </div>
                             </div>
 
@@ -390,7 +390,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_mos_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('mos_otp')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'mos_otp')">LƯU</button>
                                 </div>
                             </div>
 
@@ -402,7 +402,7 @@
                                 <div class="flex items-center justify-between">
                                     <input type="number" id="val_mos_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-2 w-24 text-center font-bold text-cyan-400 text-sm outline-none">
                                     <span class="text-gray-600 font-bold text-sm w-4">°C</span>
-                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal('mos_otpr')">LƯU</button>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition" onclick="sendVal(event, 'mos_otpr')">LƯU</button>
                                 </div>
                             </div>
                         </div>
@@ -474,7 +474,7 @@
         let isEspConnected = false;
 
         function resetUI() {
-            // Không tắt công tắc Rơ-le, chỉ reset các con số về "--"
+            // Reset các con số về "--" nhưng KHÔNG tắt công tắc Rơ-le
             const elIds = ['main_voltage','main_current','main_power_card','main_soc',
                            'kwh_remaining','kwh_total','main_energy_now','main_capacity',
                            'pack_v','pack_a','pack_delta','pack_t_bms','pack_min','pack_max',
@@ -506,7 +506,7 @@
             const topic = msg.destinationName;
             const val = msg.payloadString;
 
-            // Xử lý báo trạng thái Online/Offline
+            // Bắt trạng thái Mạch Online / Offline
             if (topic === `${prefix}/status`) {
                 isEspConnected = (val === "online");
                 const badge = document.getElementById('mqtt-status-badge');
@@ -541,7 +541,7 @@
 
             if (devId === activeBms) updateScreen(key, val, type);
 
-            // Cập nhật tín hiệu Bluetooth RSSI riêng cho 2 bộ
+            // Cập nhật Bluetooth liên tục cho 2 trạm
             if (key === 'rssi') {
                 if(devId === 'b1') document.getElementById('bt_rssi_1').innerText = val + " dBm";
                 if(devId === 'b2') document.getElementById('bt_rssi_2').innerText = val + " dBm";
@@ -549,7 +549,6 @@
         };
 
         function updateScreen(key, val, type) {
-            // Ánh xạ dữ liệu lên Giao diện Chẩn đoán & Màn hình chính
             const maps = {
                 'voltage': ['main_voltage', 'pack_v'], 
                 'current': ['main_current', 'pack_a'],
@@ -616,7 +615,6 @@
                     pLoad.className.baseVal = "energy-path";
                 }
 
-                // Tính kWh
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
                 document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2);
@@ -629,20 +627,19 @@
                 document.getElementById('bat_percent_text').innerText = Math.round(val) + " %";
             }
 
-            // 15 Ô Cài đặt (Làm tròn cho Dòng điện A, giữ nguyên thập phân 3 số cho Điện áp V)
+            // 15 Ô Cài đặt
             if (type === 'number') {
                 const i = document.getElementById('val_' + key);
                 if (i) i.value = key.includes('current') ? Math.round(val) : parseFloat(val).toFixed(3);
             }
 
-            // Đồng bộ trạng thái thực tế của Rơ-le từ ESP32
+            // Đồng bộ trạng thái Rơ-le từ ESP32
             if (type === 'switch') {
                 const sw = document.getElementById('sw_' + key);
                 if (sw) sw.checked = (val.toUpperCase() === 'ON' || val === 'true' || val === '1');
             }
         }
 
-        // Đổi mạch hiển thị
         function switchDevice() {
             activeBms = document.getElementById('device-selector').value;
             resetUI();
@@ -650,7 +647,6 @@
             if (d) Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
         }
 
-        // Chuyển Tab qua lại (Giữ nguyên hiệu ứng đổi màu)
         function nav(t) {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
             document.getElementById('tab-' + t).classList.add('active');
@@ -659,13 +655,58 @@
             act.classList.add('nav-active'); act.classList.replace('text-gray-500', 'text-cyan-400');
         }
 
-        // Nút gửi lệnh cài đặt
-        function sendCmd(t, s) { client.send(`${prefix}/switch/${activeBms}_${t}/command`, s ? "ON" : "OFF"); }
-        function sendVal(id) {
-            const btn = event.target;
-            client.send(`${prefix}/number/${activeBms}_${id}/command`, document.getElementById('val_' + id).value);
-            btn.innerText = "ĐÃ GỬI"; btn.className = "bg-green-600 text-white px-4 py-2 rounded font-bold text-xs transition";
-            setTimeout(() => { btn.innerText = "LƯU"; btn.className = "bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600"; }, 1500);
+        // =========================================================================
+        // ĐÂY CHÍNH LÀ BÍ QUYẾT ĐỂ FIX LỖI KHÔNG GỬI ĐƯỢC LỆNH (10 ĐIỂM Ở ĐÂY NÀY!)
+        // =========================================================================
+        function sendCmd(t, s) { 
+            if (!isEspConnected) {
+                alert("Cảnh báo: ESP32 đang mất kết nối. Vui lòng kiểm tra mạch!");
+                return;
+            }
+            try {
+                const payload = s ? "ON" : "OFF";
+                const topic = `${prefix}/switch/${activeBms}_${t}/command`;
+                
+                // Paho MQTT bắt buộc phải tạo Object Message thay vì gửi chuỗi thường
+                const message = new Paho.MQTT.Message(payload);
+                message.destinationName = topic;
+                client.send(message);
+            } catch (error) {
+                console.error("Lỗi gửi MQTT:", error);
+            }
+        }
+
+        function sendVal(e, id) {
+            if (!isEspConnected) {
+                alert("Cảnh báo: ESP32 đang mất kết nối. Vui lòng kiểm tra mạch!");
+                return;
+            }
+            const input = document.getElementById('val_' + id);
+            if (!input || input.value === "") {
+                alert("Vui lòng nhập giá trị hợp lệ!");
+                return;
+            }
+            
+            try {
+                const topic = `${prefix}/number/${activeBms}_${id}/command`;
+                const message = new Paho.MQTT.Message(input.value.toString());
+                message.destinationName = topic;
+                client.send(message);
+                
+                // Hiệu ứng đổi màu Nút bấm cực ngầu
+                if (e && e.target) {
+                    const btn = e.target;
+                    btn.innerText = "ĐÃ LƯU"; 
+                    btn.className = "bg-green-600 text-white px-4 py-2 rounded font-bold text-xs transition shadow-[0_0_15px_#16a34a]";
+                    setTimeout(() => { 
+                        btn.innerText = "LƯU"; 
+                        btn.className = "bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition"; 
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error("Lỗi gửi MQTT:", error);
+                alert("Lỗi phần mềm kết nối MQTT, không thể gửi lệnh.");
+            }
         }
     </script>
 </body>
