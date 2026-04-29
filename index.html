@@ -348,7 +348,7 @@
     <script>
         const config = {
             host: "broker.emqx.io", // Sửa chữ 'broker' thành 'host' và thêm dấu phẩy
-            port: 8083,             // Thêm dấu phẩy ở đây
+            port: 8084,             // Thêm dấu phẩy ở đây
             user: "",
             pass: "",
             clientId: "WebUI_" + Math.random().toString(16).substr(2, 6)
@@ -388,7 +388,7 @@
         resetUIToDash();
 
         client.connect({
-            useSSL: false,
+            useSSL: true,
             onSuccess: () => {
                 document.getElementById('mqtt-status').innerText = "Đã kết nối Server";
                 // Bắt buộc phải có _2026 cho khớp với bms.yaml
