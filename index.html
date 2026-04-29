@@ -2,240 +2,214 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMS ULTIMATE SCI-FI EDITION - THẦY TÚ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BMS SCI-FI MOBILE FULL - THẦY TÚ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* TÔNG MÀU VŨ TRỤ DARK-MODE */
-        body { background-color: #050810; font-family: 'Courier New', Courier, monospace; color: #e2e8f0; overflow-x: hidden; }
-        
-        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        body { background-color: #050810; font-family: 'Courier New', Courier, monospace; color: #e2e8f0; -webkit-tap-highlight-color: transparent; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* BOX SCI-FI VỚI HIỆU ỨNG KÍNH MỜ */
-        .card-scifi {
-            background: rgba(13, 20, 36, 0.85);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(6, 182, 212, 0.25);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(6, 182, 212, 0.05);
-            border-radius: 16px;
-        }
-
-        /* HIỆU ỨNG NĂNG LƯỢNG CHẠY (ENERGY FLOW) */
+        .card-scifi { background: rgba(13, 20, 36, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(6, 182, 212, 0.25); box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(6,182,212,0.05); border-radius: 12px; }
+        .neon-text { text-shadow: 0 0 8px currentColor; }
+        
+        /* Hiệu ứng Năng lượng */
         .energy-path { stroke-dasharray: 6 8; opacity: 0.1; transition: opacity 0.4s ease; }
-        .flow-charge { 
-            stroke: #f97316; opacity: 1; 
-            filter: drop-shadow(0 0 8px #f97316); 
-            animation: dash-charge 0.6s linear infinite; 
-        }
-        .flow-discharge { 
-            stroke: #06b6d4; opacity: 1; 
-            filter: drop-shadow(0 0 8px #06b6d4); 
-            animation: dash-discharge 0.6s linear infinite; 
-        }
+        .flow-charge { stroke: #f97316; opacity: 1; filter: drop-shadow(0 0 5px #f97316); animation: dash-charge 0.6s linear infinite; }
+        .flow-discharge { stroke: #06b6d4; opacity: 1; filter: drop-shadow(0 0 5px #06b6d4); animation: dash-discharge 0.6s linear infinite; }
         @keyframes dash-charge { from { stroke-dashoffset: 14; } to { stroke-dashoffset: 0; } }
         @keyframes dash-discharge { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 14; } }
 
-        /* GRADIENT CÁC THẺ THÔNG SỐ */
-        .grad-blue { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(29,78,216,0.25)); border-top: 2px solid #3b82f6; }
-        .grad-red { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(185,28,28,0.25)); border-top: 2px solid #ef4444; }
-        .grad-orange { background: linear-gradient(135deg, rgba(249,115,22,0.15), rgba(194,65,12,0.25)); border-top: 2px solid #f97316; }
-        .grad-green { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(4,120,87,0.25)); border-top: 2px solid #10b981; }
+        .battery-body { background: #0f172a; border: 2px solid #06b6d4; box-shadow: 0 0 15px rgba(6,182,212,0.4), inset 0 0 15px rgba(0,0,0,0.8); }
 
-        /* CỤC PIN SCI-FI */
-        .battery-body { background: #0f172a; border: 2px solid #06b6d4; box-shadow: 0 0 20px rgba(6,182,212,0.4), inset 0 0 20px rgba(0,0,0,0.9); }
-        .neon-text { text-shadow: 0 0 10px currentColor; }
-
-        /* CUSTOM TOGGLE SCI-FI PHÁT SÁNG */
+        /* FIX CÔNG TẮC */
         .toggle-checkbox:checked { right: 0; border-color: #06b6d4; background-color: #06b6d4; }
-        .toggle-checkbox:checked + .toggle-label { background-color: rgba(6,182,212,0.25); border: 1px solid #06b6d4; box-shadow: 0 0 20px rgba(6,182,212,0.7); }
-        .toggle-checkbox { right: 1.25rem; z-index: 1; border-color: #334155; background-color: #0f172a; transition: all 0.3s; }
-        .toggle-label { background-color: #1e293b; border: 1px solid #334155; transition: all 0.3s; }
+        .toggle-checkbox:checked + .toggle-label { background-color: rgba(6,182,212,0.25); border: 1px solid #06b6d4; box-shadow: 0 0 15px rgba(6,182,212,0.6); }
+        .toggle-checkbox { right: 24px; z-index: 1; border-color: #334155; background-color: #0f172a; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
+        .toggle-label { background-color: #1e293b; border: 1px solid #334155; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
+
+        .nav-active { border-top: 3px solid #06b6d4; color: #06b6d4 !important; background: linear-gradient(0deg, rgba(6,182,212,0.15), transparent); }
         
-        .setting-scroll::-webkit-scrollbar { width: 5px; }
-        .setting-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 5px; }
-        .nav-active { border-top: 3px solid #06b6d4; color: #06b6d4 !important; background: linear-gradient(0deg, rgba(6,182,212,0.2), transparent); }
+        /* Mobile scrollbar */
+        .setting-scroll::-webkit-scrollbar { width: 3px; }
+        .setting-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 3px; }
     </style>
 </head>
-<body class="min-h-screen pb-24">
+<body class="min-h-screen pb-20">
 
-    <header class="bg-[#090e17] border-b border-cyan-900/50 p-4 sticky top-0 z-50 shadow-[0_5px_30px_rgba(0,0,0,0.6)]">
-        <div class="flex justify-between items-center max-w-4xl mx-auto">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-[#0f172a] rounded-xl flex items-center justify-center border border-cyan-500 shadow-[0_0_15px_#06b6d4]">
-                    <i class="fas fa-atom text-2xl text-cyan-400 animate-spin-slow"></i>
+    <header class="bg-[#090e17] border-b border-cyan-900/50 p-3 sticky top-0 z-50">
+        <div class="flex justify-between items-center max-w-xl mx-auto">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-[#0f172a] rounded flex items-center justify-center border border-cyan-500 shadow-[0_0_10px_#06b6d4]">
+                    <i class="fas fa-atom text-cyan-400 animate-spin-slow"></i>
                 </div>
                 <div>
-                    <h1 class="font-black text-xl tracking-widest text-cyan-50 neon-text uppercase">BMS Command Center</h1>
-                    <span class="text-[10px] text-cyan-400 tracking-[0.3em] font-bold">NGUYỄN NGỌC TÚ • VERSION 6.5</span>
+                    <h1 class="font-black text-sm tracking-widest text-cyan-50 neon-text">BMS MOBILE</h1>
+                    <span class="text-[9px] text-cyan-400 tracking-widest block mt-0.5">THẦY TÚ • PRO FULL</span>
                 </div>
             </div>
-            <div id="mqtt-status-badge" class="bg-gray-800 border border-gray-700 px-3 py-1.5 rounded-lg text-[10px] font-black text-gray-400">
-                <div class="w-2 h-2 rounded-full bg-gray-500 inline-block mr-2" id="mqtt-dot"></div>
-                <span id="mqtt-status" class="uppercase tracking-widest">Searching...</span>
+            <div id="mqtt-status-badge" class="bg-gray-800 border border-gray-700 px-2 py-1 rounded text-[9px] font-black text-gray-400 flex items-center">
+                <div class="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5" id="mqtt-dot"></div>
+                <span id="mqtt-status">WAIT...</span>
             </div>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto p-3 mt-4">
+    <main class="max-w-xl mx-auto p-2.5 mt-2">
         
-        <div class="card-scifi p-2.5 flex justify-between items-center mb-6 border-cyan-500/40">
-            <div class="text-cyan-500 px-3 py-1 font-black text-xs tracking-widest flex items-center gap-2">
-                <i class="fas fa-satellite"></i> UNIT_SELECT:
-            </div>
-            <select id="device-selector" class="flex-1 ml-2 bg-transparent text-cyan-100 border-none font-bold outline-none cursor-pointer appearance-none text-sm tracking-widest" onchange="switchDevice()">
-                <option value="b1" class="bg-gray-900">MASTER PACK: 314Ah</option>
-                <option value="b2" class="bg-gray-900">SLAVE PACK: 280Ah</option>
+        <div class="card-scifi p-2 flex justify-between items-center mb-4">
+            <div class="text-cyan-500 pl-1 font-black text-[10px] tracking-widest"><i class="fas fa-server"></i> UNIT:</div>
+            <select id="device-selector" class="flex-1 ml-2 bg-transparent text-cyan-100 border-none font-bold outline-none text-xs" onchange="switchDevice()">
+                <option value="b1" class="bg-gray-900">MASTER: 314Ah</option>
+                <option value="b2" class="bg-gray-900">SLAVE: 280Ah</option>
             </select>
-            <div class="pr-3 text-cyan-400 text-[10px] font-black neon-text" id="bt_rssi">BT: -- dBm</div>
         </div>
 
-        <div id="tab-home" class="tab-content active space-y-6">
+        <div id="tab-home" class="tab-content active space-y-4">
             
-            <div class="card-scifi p-6 relative h-64 w-full flex items-center justify-center overflow-hidden border-cyan-500/30">
-                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#06b6d4 1px, transparent 1px); background-size: 30px 30px;"></div>
+            <div class="card-scifi p-4 relative h-52 w-full flex items-center justify-center overflow-hidden">
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#06b6d4 1px, transparent 1px); background-size: 20px 20px;"></div>
                 
-                <div class="absolute top-4 z-30 bg-[#070b14]/90 px-6 py-2 rounded-full border border-cyan-500 shadow-[0_0_20px_#06b6d4] flex items-center gap-3">
-                    <i id="pwr-icon" class="fas fa-bolt text-gray-500"></i>
-                    <span class="text-3xl font-black tracking-tighter neon-text text-gray-400" id="main_power">-- W</span>
+                <div class="absolute top-2 z-30 bg-[#070b14]/90 px-4 py-1.5 rounded-full border border-cyan-500 shadow-[0_0_15px_#06b6d4] flex items-center gap-2">
+                    <i id="pwr-icon" class="fas fa-bolt text-gray-500 text-sm"></i>
+                    <span class="text-xl font-black neon-text text-gray-400" id="main_power">0 W</span>
                 </div>
 
-                <svg viewBox="0 0 400 200" class="absolute inset-0 w-full h-full z-10" preserveAspectRatio="xMidYMid meet">
-                    <g transform="translate(65, 115) scale(0.9)" stroke="#f97316" stroke-width="2" fill="rgba(249,115,22,0.1)">
+                <svg viewBox="0 0 300 150" class="absolute inset-0 w-full h-full z-10" preserveAspectRatio="xMidYMid meet">
+                    <g transform="translate(45, 90) scale(0.65)" stroke="#f97316" stroke-width="2" fill="rgba(249,115,22,0.1)">
                         <polygon points="0,-15 13,-7.5 13,7.5 0,15 -13,7.5 -13,-7.5" fill="rgba(249,115,22,0.5)" filter="drop-shadow(0 0 5px #f97316)"/>
                         <polygon points="26,-30 39,-22.5 39,-7.5 26,0 13,-7.5 13,-22.5" />
                         <polygon points="-26,-30 -13,-22.5 -13,-7.5 -26,0 -39,-7.5 -39,-22.5" />
                         <polygon points="26,0 39,7.5 39,22.5 26,30 13,22.5 13,7.5" />
                         <polygon points="-26,0 -13,7.5 -13,22.5 -26,30 -39,22.5 -39,7.5" />
                     </g>
-                    <text x="65" y="175" fill="#f97316" font-size="10" font-weight="bold" text-anchor="middle" letter-spacing="2">SOLAR ACTIVE</text>
-
-                    <g transform="translate(335, 115)" stroke="#06b6d4" stroke-width="2" fill="none">
-                        <circle cx="0" cy="0" r="22" fill="rgba(6,182,212,0.1)" filter="drop-shadow(0 0 3px #06b6d4)"/>
-                        <path d="M-10,5 L-10,18 L10,18 L10,5 M0,-12 L0,5 M-6,-5 L6,-5" />
+                    <g transform="translate(255, 90) scale(0.8)" stroke="#06b6d4" stroke-width="2" fill="none">
+                        <circle cx="0" cy="0" r="18" fill="rgba(6,182,212,0.1)" filter="drop-shadow(0 0 3px #06b6d4)"/>
+                        <path d="M-8,4 L-8,14 L8,14 L8,4 M0,-10 L0,4 M-4,-4 L4,-4" />
                     </g>
-                    <text x="335" y="155" fill="#06b6d4" font-size="10" font-weight="bold" text-anchor="middle" letter-spacing="2">OUTPUT LOAD</text>
-
-                    <path d="M 110 115 L 160 115" stroke="#1e293b" stroke-width="5" fill="none" />
-                    <path id="path-solar" d="M 110 115 L 160 115" stroke-width="5" fill="none" class="energy-path" />
-                    
-                    <path d="M 240 115 L 305 115" stroke="#1e293b" stroke-width="5" fill="none" />
-                    <path id="path-load" d="M 240 115 L 305 115" stroke-width="5" fill="none" class="energy-path" />
+                    <path d="M 75 90 L 115 90" stroke="#1e293b" stroke-width="4" fill="none" />
+                    <path id="path-solar" d="M 75 90 L 115 90" stroke-width="4" fill="none" class="energy-path" />
+                    <path d="M 185 90 L 230 90" stroke="#1e293b" stroke-width="4" fill="none" />
+                    <path id="path-load" d="M 185 90 L 230 90" stroke-width="4" fill="none" class="energy-path" />
                 </svg>
 
-                <div class="relative z-20 flex flex-col items-center mt-10">
-                    <div class="w-14 h-3 bg-gray-600 rounded-t border border-cyan-500/50 shadow-lg"></div>
-                    <div class="relative w-[85px] h-[110px] battery-body rounded-xl rounded-t-none overflow-hidden flex flex-col justify-end p-0.5 border-2 border-cyan-400">
-                        <div id="bat_fill_level" class="w-full bg-gradient-to-t from-cyan-600 to-cyan-300 transition-all duration-1000 ease-in-out relative" style="height: 0%; box-shadow: 0 0 15px #06b6d4;">
-                            <div class="absolute inset-0 opacity-25" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 4px, #000 4px, #000 8px);"></div>
-                        </div>
+                <div class="relative z-20 flex flex-col items-center mt-6">
+                    <div class="w-10 h-2 bg-gray-600 rounded-t border border-cyan-500/50"></div>
+                    <div class="relative w-[60px] h-[80px] battery-body rounded-lg rounded-t-none overflow-hidden flex flex-col justify-end p-0.5">
+                        <div id="bat_fill_level" class="w-full bg-gradient-to-t from-cyan-600 to-cyan-300 transition-all duration-1000 relative" style="height: 0%;"></div>
                         <div class="absolute inset-0 flex items-center justify-center z-20">
-                            <span class="text-white font-black text-2xl neon-text drop-shadow-[0_0_10px_rgba(0,0,0,1)]" id="bat_percent_text">-- %</span>
+                            <span class="text-white font-black text-lg neon-text drop-shadow-[0_0_8px_#000]" id="bat_percent_text">-- %</span>
                         </div>
                     </div>
-                    <div class="mt-2 text-[9px] text-cyan-400 font-black tracking-widest uppercase shadow-sm">Power Storage</div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="card-scifi grad-orange p-4 border-orange-500/30">
-                    <p class="text-[10px] text-orange-200 font-black uppercase tracking-widest mb-2"><i class="fas fa-charging-station mr-1"></i> Số điện còn lại</p>
+            <div class="grid grid-cols-2 gap-2.5">
+                <div class="card-scifi bg-gradient-to-br from-blue-900/40 to-blue-800/10 border-blue-500/30 p-3">
+                    <p class="text-[9px] text-blue-300 font-bold uppercase mb-1"><i class="fas fa-bolt"></i> Voltage / Amp</p>
                     <div class="flex justify-between items-baseline">
-                        <span class="text-3xl font-black text-white neon-text" id="kwh_remaining">-- kWh</span>
-                        <span class="text-[10px] text-orange-300 font-bold">Max: <span id="kwh_total">--</span></span>
+                        <span class="text-lg font-black text-blue-100 neon-text" id="main_voltage">--</span>
+                        <span class="text-lg font-black text-blue-100 neon-text" id="main_current">--</span>
                     </div>
                 </div>
-                <div class="card-scifi grad-green p-4 border-green-500/30">
-                    <p class="text-[10px] text-green-200 font-black uppercase tracking-widest mb-2"><i class="fas fa-battery-half mr-1"></i> Dung lượng Ah</p>
-                    <div class="flex justify-between items-baseline">
-                        <span class="text-3xl font-black text-white neon-text" id="main_energy_now">-- Ah</span>
-                        <span class="text-[10px] text-green-300 font-bold">Set: <span id="main_capacity">--</span></span>
+                <div class="card-scifi bg-gradient-to-br from-red-900/40 to-red-800/10 border-red-500/30 p-3">
+                    <p class="text-[9px] text-red-300 font-bold uppercase mb-1"><i class="fas fa-tachometer-alt"></i> Hiệu suất</p>
+                    <div class="flex justify-between items-end">
+                        <span class="text-xl font-black text-red-100 neon-text" id="main_soc">--</span>
+                        <span class="text-[9px] text-red-400 font-bold mb-0.5">P: <span id="main_power_card">--</span> W</span>
                     </div>
                 </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="card-scifi grad-blue p-4 border-blue-500/30">
-                    <p class="text-[10px] text-blue-200 font-black uppercase tracking-widest mb-2"><i class="fas fa-bolt mr-1"></i> Điện áp/Dòng</p>
+                <div class="card-scifi bg-gradient-to-br from-orange-900/40 to-orange-800/10 border-orange-500/30 p-3">
+                    <p class="text-[9px] text-orange-300 font-bold uppercase mb-1"><i class="fas fa-charging-station"></i> Điện năng</p>
                     <div class="flex justify-between items-baseline">
-                        <span class="text-2xl font-black text-white neon-text" id="main_voltage">-- V</span>
-                        <span class="text-2xl font-black text-white neon-text" id="main_current">-- A</span>
+                        <span class="text-xl font-black text-white neon-text" id="kwh_remaining">--</span>
+                        <span class="text-[9px] text-orange-400">/ <span id="kwh_total">--</span> kWh</span>
                     </div>
                 </div>
-                <div class="card-scifi grad-red p-4 border-red-500/30">
-                    <p class="text-[10px] text-red-200 font-black uppercase tracking-widest mb-2"><i class="fas fa-tachometer-alt mr-1"></i> Hiệu suất</p>
+                <div class="card-scifi bg-gradient-to-br from-green-900/40 to-green-800/10 border-green-500/30 p-3">
+                    <p class="text-[9px] text-green-300 font-bold uppercase mb-1"><i class="fas fa-battery-half"></i> Dung lượng</p>
                     <div class="flex justify-between items-baseline">
-                        <span class="text-2xl font-black text-white neon-text" id="main_soc">-- %</span>
-                        <span class="text-[10px] text-red-300 font-bold">P: <span id="main_power_card">-- W</span></span>
+                        <span class="text-xl font-black text-white neon-text" id="main_energy_now">--</span>
+                        <span class="text-[9px] text-green-400">/ <span id="main_capacity">--</span> Ah</span>
                     </div>
                 </div>
             </div>
 
-            <div class="card-scifi overflow-hidden border-cyan-900/50">
-                <div class="bg-[#0f172a] text-cyan-400 p-3 font-bold text-[10px] tracking-widest border-b border-cyan-900/50 uppercase flex items-center gap-2">
-                    <i class="fas fa-microscope text-cyan-300"></i> Analytics Telemetry Matrix
+            <div class="card-scifi overflow-hidden">
+                <div class="bg-[#0f172a] text-cyan-400 p-2.5 text-[10px] font-bold tracking-widest border-b border-cyan-900/50 uppercase">
+                    <i class="fas fa-microscope"></i> Thông số kỹ thuật
                 </div>
-                <div class="p-5 grid grid-cols-2 gap-x-10 gap-y-3 text-[11px] text-gray-400">
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Hệ thống Volt:</span><span class="text-cyan-300 font-black" id="pack_v">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Dòng điện:</span><span class="text-cyan-300 font-black" id="pack_a">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Công suất:</span><span class="text-cyan-300 font-black" id="pack_p">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Lệch Cell Δ:</span><span class="text-red-400 font-black" id="pack_delta">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt Mosfet:</span><span class="text-orange-400 font-black" id="pack_t_bms">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Dung lượng Ah:</span><span class="text-cyan-300 font-black" id="pack_cap_now">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt độ T1:</span><span class="text-cyan-300 font-black" id="pack_t1">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Cell Min:</span><span class="text-red-400 font-black" id="pack_min">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt độ T2:</span><span class="text-cyan-300 font-black" id="pack_t2">--</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Cell Max:</span><span class="text-blue-400 font-black" id="pack_max">--</span></div>
+                <div class="p-3 grid grid-cols-2 gap-x-4 gap-y-2.5 text-[10px] text-gray-400">
+                    <div class="flex justify-between border-b border-gray-800 pb-1"><span>Điện áp:</span><span class="text-cyan-300 font-bold" id="pack_v">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1"><span>Dòng điện:</span><span class="text-cyan-300 font-bold" id="pack_a">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1"><span>Lệch Cell:</span><span class="text-red-400 font-bold" id="pack_delta">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1"><span>Nhiệt Mosfet:</span><span class="text-orange-400 font-bold" id="pack_t_bms">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1"><span>Cell Min:</span><span class="text-red-400 font-bold" id="pack_min">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1"><span>Nhiệt độ Pin:</span><span class="text-cyan-300 font-bold" id="pack_t1">--</span></div>
                 </div>
             </div>
 
-            <div class="card-scifi overflow-hidden border-cyan-900/50">
-                <div class="bg-[#0f172a] text-cyan-400 p-3 font-bold text-[10px] tracking-widest border-b border-cyan-900/50 uppercase flex items-center gap-2">
-                    <i class="fas fa-layer-group text-cyan-300"></i> Individual Cell Voltage
+            <div class="card-scifi overflow-hidden mb-6">
+                <div class="bg-[#0f172a] text-cyan-400 p-2.5 text-[10px] font-bold tracking-widest border-b border-cyan-900/50 uppercase">
+                    <i class="fas fa-layer-group"></i> Điện áp 16 Cell
                 </div>
-                <div class="p-5 grid grid-cols-2 gap-x-12 gap-y-2.5 text-gray-400" id="cells_grid"></div>
+                <div class="p-3 grid grid-cols-2 gap-x-6 gap-y-2 text-[10px]" id="cells_grid">
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C01</span><span class="font-black text-cyan-300 font-mono" id="c1">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C02</span><span class="font-black text-cyan-300 font-mono" id="c2">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C03</span><span class="font-black text-cyan-300 font-mono" id="c3">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C04</span><span class="font-black text-cyan-300 font-mono" id="c4">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C05</span><span class="font-black text-cyan-300 font-mono" id="c5">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C06</span><span class="font-black text-cyan-300 font-mono" id="c6">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C07</span><span class="font-black text-cyan-300 font-mono" id="c7">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C08</span><span class="font-black text-cyan-300 font-mono" id="c8">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C09</span><span class="font-black text-cyan-300 font-mono" id="c9">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C10</span><span class="font-black text-cyan-300 font-mono" id="c10">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C11</span><span class="font-black text-cyan-300 font-mono" id="c11">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C12</span><span class="font-black text-cyan-300 font-mono" id="c12">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C13</span><span class="font-black text-cyan-300 font-mono" id="c13">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C14</span><span class="font-black text-cyan-300 font-mono" id="c14">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C15</span><span class="font-black text-cyan-300 font-mono" id="c15">--</span></div>
+                    <div class="flex justify-between border-b border-gray-800/50 pb-1"><span class="text-gray-500 font-bold">C16</span><span class="font-black text-cyan-300 font-mono" id="c16">--</span></div>
+                </div>
             </div>
         </div>
 
         <div id="tab-settings" class="tab-content space-y-4">
-            <div class="card-scifi overflow-hidden border-yellow-500/20">
-                <div class="bg-[#0f172a] text-cyan-400 p-4 font-black text-[11px] tracking-[0.2em] flex justify-between items-center border-b border-cyan-900/50 uppercase shadow-lg">
-                    <span class="flex items-center gap-2"><i class="fas fa-tools text-yellow-400"></i> Configuration Panel</span>
+            <div class="card-scifi overflow-hidden">
+                <div class="bg-[#0f172a] text-yellow-400 p-3 font-bold text-[10px] tracking-widest border-b border-yellow-900/50 uppercase">
+                    <i class="fas fa-tools"></i> Configuration
                 </div>
                 
-                <div class="p-5 space-y-8 h-[65vh] overflow-y-auto setting-scroll bg-[#0b1121]/50">
+                <div class="p-3 space-y-5 h-[65vh] overflow-y-auto setting-scroll">
                     
-                    <div class="bg-[#111827] p-4 rounded-xl border border-cyan-900/50 flex justify-between items-center shadow-inner">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-id-card text-cyan-500 text-lg"></i>
-                            <span class="text-cyan-600 font-black tracking-widest text-[10px] uppercase">BMS Passcode:</span>
-                        </div>
-                        <div class="font-mono font-black text-cyan-400 tracking-widest text-lg neon-text" id="pack_passcode">SCANNING...</div>
+                    <div class="bg-[#111827] p-3 rounded-lg border border-cyan-900/50 flex justify-between items-center shadow-inner">
+                        <span class="text-cyan-600 font-bold text-[10px] uppercase">Passcode:</span>
+                        <div class="font-mono font-black text-cyan-400 tracking-widest text-sm neon-text" id="pack_passcode">SCANNING...</div>
                     </div>
                     
-                    <div class="bg-[#0f172a] p-5 rounded-xl border border-gray-800 shadow-2xl">
-                        <h3 class="text-[10px] font-black text-cyan-700 uppercase tracking-widest mb-6 border-b border-gray-800 pb-3">Mosfet Switch Control</h3>
-                        <div class="space-y-6">
+                    <div class="bg-[#0f172a] p-4 rounded-xl border border-gray-800">
+                        <h3 class="text-[9px] font-bold text-cyan-700 uppercase tracking-widest mb-4 border-b border-gray-800 pb-2">Trạng thái Rơ-le</h3>
+                        <div class="space-y-5">
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-300 font-bold text-xs"><i class="fas fa-plug text-green-500 w-6"></i> BẬT/TẮT SẠC (CHARGE)</span>
-                                <div class="relative inline-block w-12 align-middle select-none">
+                                <span class="text-gray-300 font-bold text-[11px]"><i class="fas fa-plug text-green-500 w-5"></i> SẠC (CHARGE)</span>
+                                <div class="relative inline-block w-12 align-middle">
                                     <input type="checkbox" id="sw_charging" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('charging', this.checked)"/>
                                     <label for="sw_charging" class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer"></label>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-300 font-bold text-xs"><i class="fas fa-bolt text-red-500 w-6"></i> BẬT/TẮT XẢ (DISCHARGE)</span>
-                                <div class="relative inline-block w-12 align-middle select-none">
+                                <span class="text-gray-300 font-bold text-[11px]"><i class="fas fa-bolt text-red-500 w-5"></i> XẢ (DISCHARGE)</span>
+                                <div class="relative inline-block w-12 align-middle">
                                     <input type="checkbox" id="sw_discharging" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('discharging', this.checked)"/>
                                     <label for="sw_discharging" class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer"></label>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-300 font-bold text-xs"><i class="fas fa-balance-scale text-blue-500 w-6"></i> CÂN BẰNG (BALANCER)</span>
-                                <div class="relative inline-block w-12 align-middle select-none">
+                                <span class="text-gray-300 font-bold text-[11px]"><i class="fas fa-balance-scale text-blue-500 w-5"></i> CÂN BẰNG</span>
+                                <div class="relative inline-block w-12 align-middle">
                                     <input type="checkbox" id="sw_balancer" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('balancer', this.checked)"/>
                                     <label for="sw_balancer" class="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer"></label>
                                 </div>
@@ -243,45 +217,129 @@
                         </div>
                     </div>
 
-                    <div class="space-y-6">
-                        <div class="flex text-[9px] text-gray-500 font-black uppercase mb-3 border-b border-gray-800 pb-2 px-1">
-                            <div class="w-[45%]">Tên thông số</div>
-                            <div class="w-[30%] text-center">Cài đặt</div>
-                            <div class="w-[25%] text-right">Chức năng</div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <script>
-                                function renderSetting(id, label, unit, desc) {
-                                    document.write(`
-                                    <div class="flex items-center border-b border-gray-800/50 py-3 hover:bg-cyan-900/10 transition px-1 rounded-lg">
-                                        <div class="w-[45%] text-gray-300 text-[11px] font-bold">${label}</div>
-                                        <div class="w-[30%] flex items-center justify-center gap-1.5">
-                                            <input type="number" id="val_${id}" class="bg-[#0f172a] border border-cyan-900 rounded p-1.5 w-16 text-center font-black text-cyan-400 text-xs outline-none focus:border-cyan-400 shadow-inner">
-                                            <span class="text-gray-600 font-bold text-[9px] w-4">${unit}</span>
-                                            <button class="bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-1.5 rounded font-black text-[8px] hover:bg-cyan-600 hover:text-white transition shadow-lg active:scale-95" onclick="sendVal('${id}')">SAVE</button>
-                                        </div>
-                                        <div class="w-[25%] text-right text-[9px] text-gray-500 font-bold italic leading-tight">${desc}</div>
-                                    </div>`);
-                                }
-                                // NHÓM 1: ĐIỆN ÁP & CÂN BẰNG
-                                renderSetting('bal_start_v', 'Start Balance', 'V', 'Mức áp bắt đầu cân');
-                                renderSetting('bal_trig_v', 'Balance Trigger', 'V', 'Độ lệch mở cân bằng');
-                                renderSetting('cell_ovp', 'Cell OVP', 'V', 'Bảo vệ quá áp cell');
-                                renderSetting('cell_ovpr', 'Cell OVPR', 'V', 'Áp phục hồi quá áp');
-                                renderSetting('cell_uvp', 'Cell UVP', 'V', 'Bảo vệ thấp áp cell');
-                                renderSetting('cell_uvpr', 'Cell UVPR', 'V', 'Áp phục hồi thấp áp');
-                                
-                                // NHÓM 2: DÒNG ĐIỆN & DUNG LƯỢNG
-                                renderSetting('max_chg_current', 'Max Charge', 'A', 'Giới hạn dòng sạc');
-                                renderSetting('max_dis_current', 'Max Discharge', 'A', 'Giới hạn dòng xả');
-                                renderSetting('bat_cap', 'Capacity Design', 'Ah', 'Dung lượng thực pin');
-
-                                // NHÓM 3: NHIỆT ĐỘ
-                                renderSetting('chg_otp', 'Charge Heat', '°C', 'Bảo vệ nóng khi sạc');
-                                renderSetting('dis_otp', 'Discharge Heat', '°C', 'Bảo vệ nóng khi xả');
-                                renderSetting('mos_otp', 'MOSFET Heat', '°C', 'Bảo vệ nhiệt bo mạch');
-                            </script>
+                    <div>
+                        <h3 class="text-[9px] font-black text-cyan-600 uppercase mb-2 border-l-2 border-cyan-600 pl-2">Thông số vật lý</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Áp mở cân bằng<br><span class="text-[8px] text-gray-500">(Start Balance)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_bal_start_v" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('bal_start_v')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Độ lệch cân<br><span class="text-[8px] text-gray-500">(Balance Trigger)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_bal_trig_v" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('bal_trig_v')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Quá áp Cell<br><span class="text-[8px] text-gray-500">(Cell OVP)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_cell_ovp" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('cell_ovp')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Phục hồi quá áp<br><span class="text-[8px] text-gray-500">(Cell OVPR)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_cell_ovpr" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('cell_ovpr')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Thấp áp Cell<br><span class="text-[8px] text-gray-500">(Cell UVP)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_cell_uvp" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('cell_uvp')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Phục hồi thấp áp<br><span class="text-[8px] text-gray-500">(Cell UVPR)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_cell_uvpr" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">V</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('cell_uvpr')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Dòng Sạc MAX<br><span class="text-[8px] text-gray-500">(Max Charge)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_max_chg_current" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">A</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('max_chg_current')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Dòng Xả MAX<br><span class="text-[8px] text-gray-500">(Max Discharge)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_max_dis_current" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">A</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('max_dis_current')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Dung lượng Pin<br><span class="text-[8px] text-gray-500">(Capacity)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_bat_cap" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">Ah</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('bat_cap')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Bảo vệ Nóng Sạc<br><span class="text-[8px] text-gray-500">(Charge OTP)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_chg_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('chg_otp')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Phục hồi Nóng Sạc<br><span class="text-[8px] text-gray-500">(Charge OTPR)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_chg_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('chg_otpr')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Bảo vệ Nóng Xả<br><span class="text-[8px] text-gray-500">(Discharge OTP)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_dis_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('dis_otp')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Phục hồi Nóng Xả<br><span class="text-[8px] text-gray-500">(Discharge OTPR)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_dis_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('dis_otpr')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Bảo vệ Nhiệt Mạch<br><span class="text-[8px] text-gray-500">(MOS OTP)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_mos_otp" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('mos_otp')">LƯU</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-gray-800/50 pb-2">
+                                <div class="text-gray-300 text-[10px] font-bold w-1/2">Phục hồi Nhiệt Mạch<br><span class="text-[8px] text-gray-500">(MOS OTPR)</span></div>
+                                <div class="flex items-center justify-end gap-1.5 w-1/2">
+                                    <input type="number" id="val_mos_otpr" class="bg-[#0f172a] border border-cyan-900 rounded p-1 w-14 text-center font-bold text-cyan-400 text-[10px] outline-none">
+                                    <span class="text-gray-600 font-bold text-[9px] w-3">°C</span>
+                                    <button class="bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600" onclick="sendVal('mos_otpr')">LƯU</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -289,30 +347,31 @@
         </div>
 
         <div id="tab-wifi" class="tab-content space-y-4">
-             <div class="card-scifi overflow-hidden border-purple-500/20">
-                <div class="bg-[#0f172a] text-purple-400 p-4 font-black text-[11px] tracking-[0.2em] border-b border-purple-900/50 uppercase">Network Telemetry Station</div>
-                <div class="p-6 space-y-6">
-                     <div class="flex justify-between items-center bg-[#111827] p-5 rounded-xl border border-gray-800 shadow-inner">
-                        <span class="text-gray-500 text-[10px] font-black tracking-widest uppercase">WiFi SSID:</span>
-                        <span id="wifi_current_ssid" class="text-cyan-400 font-black tracking-widest text-lg neon-text">SCANNING...</span>
+             <div class="card-scifi overflow-hidden">
+                <div class="bg-[#0f172a] text-purple-400 p-3 text-[10px] font-bold border-b border-purple-900/50 uppercase">Network / Telemetry</div>
+                <div class="p-4 space-y-4">
+                     <div class="flex justify-between items-center bg-[#111827] p-3.5 rounded-lg border border-gray-800">
+                        <span class="text-gray-500 text-[9px] font-bold uppercase">WiFi Tên:</span>
+                        <span id="wifi_current_ssid" class="text-cyan-400 font-bold text-xs neon-text">SCANNING...</span>
                      </div>
-                     <div class="flex justify-between items-center bg-[#111827] p-5 rounded-xl border border-gray-800 shadow-inner">
-                        <span class="text-gray-500 text-[10px] font-black tracking-widest uppercase">Signal Strength:</span>
-                        <div class="flex items-center gap-3">
-                            <span id="wifi_current_signal" class="text-cyan-400 font-black text-xl neon-text">-- dBm</span>
-                            <i class="fas fa-broadcast-tower text-cyan-600 text-lg"></i>
+                     <div class="flex justify-between items-center bg-[#111827] p-3.5 rounded-lg border border-gray-800">
+                        <span class="text-gray-500 text-[9px] font-bold uppercase">WiFi Sóng:</span>
+                        <div class="flex items-center gap-2">
+                            <span id="wifi_current_signal" class="text-cyan-400 font-bold text-xs neon-text">-- dBm</span>
+                            <i class="fas fa-wifi text-cyan-600"></i>
                         </div>
                      </div>
-                     <div class="pt-4 border-t border-gray-800">
-                        <p class="text-[9px] text-gray-600 font-bold mb-4 uppercase tracking-[0.3em]">Bluetooth Link RSSI</p>
-                        <div class="grid grid-cols-2 gap-4 text-[11px]">
-                            <div class="bg-gray-900/50 p-3 rounded border border-gray-800 flex justify-between">
-                                <span class="text-gray-500 font-bold">PACK_01:</span>
-                                <span class="text-cyan-500 font-black" id="bt_rssi_1">-- dBm</span>
+                     
+                     <div class="pt-3 border-t border-gray-800">
+                        <p class="text-[9px] text-gray-500 font-bold mb-3 uppercase">Sóng Bluetooth (RSSI)</p>
+                        <div class="grid grid-cols-2 gap-3 text-[10px]">
+                            <div class="bg-[#111827] p-2.5 rounded border border-gray-800 flex flex-col items-center">
+                                <span class="text-gray-500 font-bold mb-1">PACK_01 (314Ah)</span>
+                                <span class="text-cyan-500 font-black text-xs" id="bt_rssi_1">-- dBm</span>
                             </div>
-                            <div class="bg-gray-900/50 p-3 rounded border border-gray-800 flex justify-between">
-                                <span class="text-gray-500 font-bold">PACK_02:</span>
-                                <span class="text-cyan-500 font-black" id="bt_rssi_2">-- dBm</span>
+                            <div class="bg-[#111827] p-2.5 rounded border border-gray-800 flex flex-col items-center">
+                                <span class="text-gray-500 font-bold mb-1">PACK_02 (280Ah)</span>
+                                <span class="text-cyan-500 font-black text-xs" id="bt_rssi_2">-- dBm</span>
                             </div>
                         </div>
                      </div>
@@ -322,23 +381,23 @@
 
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#090e17]/95 backdrop-blur-xl border-t border-cyan-900/50 flex justify-around p-3 z-50">
-        <button onclick="nav('home')" class="flex flex-col items-center text-gray-500 w-full py-1 nav-btn nav-active transition-all" id="nav-home">
-            <i class="fas fa-chart-pie mb-1.5 text-lg"></i><span class="text-[9px] font-black uppercase tracking-widest">Dash</span>
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#090e17]/95 backdrop-blur-md border-t border-cyan-900/50 flex justify-around p-2 z-50">
+        <button onclick="nav('home')" class="flex flex-col items-center text-gray-500 w-full py-1 nav-btn nav-active" id="nav-home">
+            <i class="fas fa-chart-line mb-1 text-lg"></i><span class="text-[9px] font-black uppercase tracking-widest">Home</span>
         </button>
-        <button onclick="nav('settings')" class="flex flex-col items-center text-gray-500 w-full py-1 nav-btn transition-all" id="nav-settings">
-            <i class="fas fa-cogs mb-1.5 text-lg"></i><span class="text-[9px] font-black uppercase tracking-widest">Config</span>
+        <button onclick="nav('settings')" class="flex flex-col items-center text-gray-500 w-full py-1 nav-btn" id="nav-settings">
+            <i class="fas fa-sliders-h mb-1 text-lg"></i><span class="text-[9px] font-black uppercase tracking-widest">Config</span>
         </button>
-        <button onclick="nav('wifi')" class="flex flex-col items-center text-gray-500 w-full py-1 nav-btn transition-all" id="nav-wifi">
-            <i class="fas fa-wave-square mb-1.5 text-lg"></i><span class="text-[9px] font-black uppercase tracking-widest">Net</span>
+        <button onclick="nav('wifi')" class="flex flex-col items-center text-gray-500 w-full py-1 nav-btn" id="nav-wifi">
+            <i class="fas fa-network-wired mb-1 text-lg"></i><span class="text-[9px] font-black uppercase tracking-widest">Network</span>
         </button>
     </nav>
 
     <script>
         const config = {
             host: "broker.emqx.io",
-            port: 8084, // Cổng bảo mật TLS
-            clientId: "WebUI_SciFi_Pro_" + Math.random().toString(16).substr(2, 6)
+            port: 8084,
+            clientId: "WebUI_Mob_" + Math.random().toString(16).substr(2, 5)
         };
 
         const client = new Paho.MQTT.Client(config.host, config.port, config.clientId);
@@ -347,20 +406,16 @@
         let bmsCache = { b1: {}, b2: {} };
         let isEspConnected = false;
 
-        function resetUIToDash() {
-            const elements = [
-                'main_voltage', 'pack_v', 'pack_delta', 'pack_min', 'pack_max',
-                'main_current', 'pack_a', 'main_power_card', 'pack_p',
-                'main_soc', 'pack_soc', 'bat_percent_text', 'main_energy_now', 
-                'main_capacity', 'pack_cap_now', 'kwh_remaining', 'kwh_total', 
-                'pack_t_bms', 'pack_t1', 'pack_t2'
-            ];
-            elements.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = "--"; });
+        function resetUI() {
+            const elIds = ['main_voltage','main_current','main_power_card','main_soc',
+                           'kwh_remaining','kwh_total','main_energy_now','main_capacity',
+                           'pack_v','pack_a','pack_delta','pack_t_bms','pack_min','pack_t1'];
+            elIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = "--"; });
             for(let i=1; i<=16; i++) { if(document.getElementById('c'+i)) document.getElementById('c'+i).innerText = "--"; }
             
             document.getElementById('bat_fill_level').style.height = "0%";
             document.getElementById('main_power').innerText = "0 W";
-            document.getElementById('main_power').style.color = "#4b5563";
+            document.getElementById('main_power').style.color = "#6b7280";
             document.getElementById('pwr-icon').className = "fas fa-bolt text-gray-600";
             document.getElementById('path-solar').className.baseVal = "energy-path";
             document.getElementById('path-load').className.baseVal = "energy-path";
@@ -375,48 +430,35 @@
                 client.subscribe(`${prefix}/text_sensor/+/state`);
                 client.subscribe(`${prefix}/number/+/state`);
                 client.subscribe(`${prefix}/switch/+/state`);
-                client.subscribe(`${prefix}/wifi/+/state`); 
             }
         });
 
-        // TẠO GRID 16 CELL (KHÔNG CẮT BỚT)
-        const grid = document.getElementById('cells_grid');
-        for (let i = 1; i <= 16; i++) {
-            grid.innerHTML += `
-                <div class="flex justify-between border-b border-gray-800/50 pb-1.5 text-[10px]">
-                    <span class="text-gray-500 font-bold">C${i.toString().padStart(2, '0')}</span>
-                    <span class="font-black text-cyan-300 font-mono" id="c${i}">--</span>
-                </div>
-            `;
-        }
-
         client.onMessageArrived = (msg) => {
             const topic = msg.destinationName;
-            const payload = msg.payloadString;
+            const val = msg.payloadString;
 
             if (topic === `${prefix}/status`) {
-                isEspConnected = (payload === "online");
+                isEspConnected = (val === "online");
                 const badge = document.getElementById('mqtt-status-badge');
-                const dot = document.getElementById('mqtt-dot');
                 if (isEspConnected) {
                     document.getElementById('mqtt-status').innerText = "ONLINE";
-                    badge.className = "bg-cyan-900/30 border border-cyan-500/50 px-3 py-1.5 rounded-lg text-[10px] font-black text-cyan-400 transition-all";
-                    dot.className = "w-2 h-2 rounded-full bg-cyan-400 animate-pulse inline-block mr-2";
+                    badge.className = "bg-cyan-900/30 border border-cyan-500/50 px-2 py-1 rounded text-[9px] font-black text-cyan-400 flex items-center";
+                    document.getElementById('mqtt-dot').className = "w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse mr-1.5";
                 } else {
                     document.getElementById('mqtt-status').innerText = "OFFLINE";
-                    badge.className = "bg-red-900/30 border border-red-500/50 px-3 py-1.5 rounded-lg text-[10px] font-black text-red-500";
-                    dot.className = "w-2 h-2 rounded-full bg-red-500 inline-block mr-2";
-                    resetUIToDash();
+                    badge.className = "bg-red-900/30 border border-red-500/50 px-2 py-1 rounded text-[9px] font-black text-red-500 flex items-center";
+                    document.getElementById('mqtt-dot').className = "w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5";
+                    resetUI();
                 }
                 return;
             }
 
             if (!isEspConnected) return;
 
-            // Xử lý Telemetry Network
-            if (topic.includes("wifi_ssid/state")) document.getElementById('wifi_current_ssid').innerText = payload;
-            if (topic.includes("wifi_signal/state")) document.getElementById('wifi_current_signal').innerText = payload + " dBm";
-
+            // Xử lý Telemetry
+            if (topic.includes("wifi_ssid")) document.getElementById('wifi_current_ssid').innerText = val;
+            if (topic.includes("wifi_signal")) document.getElementById('wifi_current_signal').innerText = val;
+            
             const parts = topic.split('/');
             if (parts.length < 3) return;
             const type = parts[1];
@@ -425,87 +467,67 @@
             const key = fullId.substring(3);
 
             if (!bmsCache[devId]) bmsCache[devId] = {};
-            bmsCache[devId][key] = { value: payload, type: type };
+            bmsCache[devId][key] = { value: val, type: type };
 
-            if (devId === activeBms) applyUI(key, payload, type);
-            
-            // Bluetooth RSSI (Luôn hiển thị)
+            if (devId === activeBms) updateScreen(key, val, type);
+
+            // Cập nhật Bluetooth liên tục
             if (key === 'rssi') {
-                document.getElementById('bt_rssi').innerText = `BT: ${payload} dBm`;
-                if(devId === 'b1') document.getElementById('bt_rssi_1').innerText = payload + " dBm";
-                if(devId === 'b2') document.getElementById('bt_rssi_2').innerText = payload + " dBm";
+                document.getElementById(`bt_rssi_${devId === 'b1' ? '1' : '2'}`).innerText = val + " dBm";
             }
         };
 
-        function applyUI(key, val, type) {
-            const map = {
-                'voltage': ['main_voltage', 'pack_v'],
-                'current': ['main_current', 'pack_a'],
-                'power': ['main_power_card', 'pack_p'],
-                'soc': ['main_soc', 'pack_soc'],
-                'capacity_remaining': ['main_energy_now', 'pack_cap_now'],
-                'bat_cap': ['main_capacity'], 
-                'delta_cell_voltage': ['pack_delta'],
-                'temperature_sensor_1': ['pack_t_bms'],
-                'temperature_sensor_2': ['pack_t1'],
-                'temperature_sensor_3': ['pack_t2'],
-                'min_cell_voltage': ['pack_min'],
-                'max_cell_voltage': ['pack_max'],
-                'setup_passcode': ['pack_passcode']
+        function updateScreen(key, val, type) {
+            const maps = {
+                'voltage': ['main_voltage', 'pack_v'], 'current': ['main_current', 'pack_a'],
+                'soc': ['main_soc'], 'capacity_remaining': ['main_energy_now'], 'bat_cap': ['main_capacity'], 
+                'delta_cell_voltage': ['pack_delta'], 'temperature_sensor_1': ['pack_t_bms'], 'temperature_sensor_2': ['pack_t1'],
+                'min_cell_voltage': ['pack_min'], 'power': ['main_power_card'], 'setup_passcode': ['pack_passcode']
             };
 
-            if (map[key]) {
-                map[key].forEach(elId => {
-                    const el = document.getElementById(elId);
+            if (maps[key]) {
+                maps[key].forEach(id => {
+                    const el = document.getElementById(id);
                     if (el) {
-                        if (elId === 'pack_passcode') el.innerText = val;
-                        else el.innerText = (key.includes('voltage') || key.includes('delta')) ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
+                        if (id === 'pack_passcode') el.innerText = val;
+                        else el.innerText = (key.includes('voltage') || key === 'delta_cell_voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
                     }
                 });
             }
 
             if (key.startsWith('cell_voltage_')) {
-                const n = key.split('_')[2];
-                const c = document.getElementById('c' + n);
+                const c = document.getElementById('c' + key.split('_')[2]);
                 if (c) c.innerText = parseFloat(val).toFixed(3);
             }
 
-            // XỬ LÝ ĐỒ HỌA DÒNG CHẢY NĂNG LƯỢNG (+/-)
             if (key === 'current' || key === 'voltage') {
                 const A = parseFloat(bmsCache[activeBms]['current']?.value || 0);
                 const V = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
                 const P = Math.abs(A * V).toFixed(0);
                 
-                const pwrEl = document.getElementById('main_power');
-                const pwrIcon = document.getElementById('pwr-icon');
+                const pEl = document.getElementById('main_power');
+                const pIcon = document.getElementById('pwr-icon');
                 const pSolar = document.getElementById('path-solar');
                 const pLoad = document.getElementById('path-load');
                 
                 if (A >= 0.1) {
-                    pwrEl.innerText = "+" + P + " W";
-                    pwrEl.style.color = "#f97316"; // Cam sạc
-                    pwrIcon.className = "fas fa-plug text-orange-500 animate-pulse";
-                    pSolar.className.baseVal = "energy-path flow-charge";
-                    pLoad.className.baseVal = "energy-path";
+                    pEl.innerText = "+" + P + " W"; pEl.className = "text-xl font-black text-[#f97316] neon-text";
+                    pIcon.className = "fas fa-plug text-orange-500 animate-pulse text-sm";
+                    pSolar.className.baseVal = "energy-path flow-charge"; pLoad.className.baseVal = "energy-path";
                 } else if (A <= -0.1) {
-                    pwrEl.innerText = "-" + P + " W";
-                    pwrEl.style.color = "#06b6d4"; // Xanh xả
-                    pwrIcon.className = "fas fa-bolt text-cyan-400";
-                    pLoad.className.baseVal = "energy-path flow-discharge";
-                    pSolar.className.baseVal = "energy-path";
+                    pEl.innerText = "-" + P + " W"; pEl.className = "text-xl font-black text-[#06b6d4] neon-text";
+                    pIcon.className = "fas fa-bolt text-cyan-400 text-sm";
+                    pLoad.className.baseVal = "energy-path flow-discharge"; pSolar.className.baseVal = "energy-path";
                 } else {
-                    pwrEl.innerText = "0 W";
-                    pwrEl.style.color = "#4b5563";
-                    pwrIcon.className = "fas fa-bolt text-gray-600";
-                    pSolar.className.baseVal = "energy-path";
-                    pLoad.className.baseVal = "energy-path";
+                    pEl.innerText = "0 W"; pEl.className = "text-xl font-black text-gray-500";
+                    pIcon.className = "fas fa-bolt text-gray-600 text-sm";
+                    pSolar.className.baseVal = "energy-path"; pLoad.className.baseVal = "energy-path";
                 }
 
-                // TÍNH TOÁN KWH
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
-                document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2) + " kWh";
-                document.getElementById('kwh_total').innerText = ((AhMax * V) / 1000).toFixed(1) + " số";
+                document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2);
+                document.getElementById('kwh_total').innerText = ((AhMax * V) / 1000).toFixed(1);
             }
 
             if (key === 'soc') {
@@ -513,34 +535,39 @@
                 document.getElementById('bat_percent_text').innerText = Math.round(val) + "%";
             }
 
-            // ĐỊNH DẠNG CÀI ĐẶT DÒNG ĐIỆN (BỎ THẬP PHÂN)
             if (type === 'number') {
-                const inp = document.getElementById('val_' + key);
-                if (inp) inp.value = key.includes('current') ? Math.round(val) : parseFloat(val).toFixed(3);
+                const i = document.getElementById('val_' + key);
+                if (i) i.value = key.includes('current') ? Math.round(val) : parseFloat(val).toFixed(3);
             }
 
             if (type === 'switch') {
                 const sw = document.getElementById('sw_' + key);
-                if (sw) sw.checked = (val.toUpperCase() === 'ON' || val === 'true');
+                if (sw) sw.checked = (val.toUpperCase() === 'ON' || val === 'true' || val === '1');
             }
         }
 
         function switchDevice() {
             activeBms = document.getElementById('device-selector').value;
-            resetUIToDash();
+            resetUI();
             const d = bmsCache[activeBms];
-            if (d) Object.keys(d).forEach(k => applyUI(k, d[k].value, d[k].type));
+            if (d) Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
         }
 
         function nav(t) {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
             document.getElementById('tab-' + t).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('nav-' + t).classList.add('nav-active');
+            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('nav-active'); b.classList.replace('text-cyan-400', 'text-gray-500'); });
+            const act = document.getElementById('nav-' + t);
+            act.classList.add('nav-active'); act.classList.replace('text-gray-500', 'text-cyan-400');
         }
 
         function sendCmd(t, s) { client.send(`${prefix}/switch/${activeBms}_${t}/command`, s ? "ON" : "OFF"); }
-        function sendVal(id) { client.send(`${prefix}/number/${activeBms}_${id}/command`, document.getElementById('val_' + id).value); }
+        function sendVal(id) {
+            const btn = event.target;
+            client.send(`${prefix}/number/${activeBms}_${id}/command`, document.getElementById('val_' + id).value);
+            btn.innerText = "OK"; btn.className = "bg-green-600 text-white px-2 py-1.5 rounded font-bold text-[8px] transition";
+            setTimeout(() => { btn.innerText = "LƯU"; btn.className = "bg-cyan-900 text-cyan-100 border border-cyan-700 px-2 py-1.5 rounded font-bold text-[8px] hover:bg-cyan-600 active:bg-green-600"; }, 1000);
+        }
     </script>
 </body>
 </html>
