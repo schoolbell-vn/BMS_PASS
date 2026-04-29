@@ -32,6 +32,7 @@
         .nav-active { border-top: 3px solid #06b6d4; color: #06b6d4 !important; background: linear-gradient(0deg, rgba(6,182,212,0.15), transparent); }
         .setting-scroll::-webkit-scrollbar { width: 5px; }
         .setting-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 5px; }
+        .nowrap { white-space: nowrap; }
     </style>
 </head>
 <body class="min-h-screen pb-28">
@@ -74,7 +75,7 @@
                 
                 <div class="absolute top-3 z-30 bg-[#070b14]/90 px-6 py-2.5 rounded-full border border-cyan-500 shadow-[0_0_20px_#06b6d4] flex items-center gap-3">
                     <i id="pwr-icon" class="fas fa-bolt text-gray-500 text-xl"></i>
-                    <span class="text-3xl font-black neon-text text-gray-400 whitespace-nowrap"><span id="main_power">0</span> <span class="text-xl">W</span></span>
+                    <span class="text-3xl font-black neon-text text-gray-400 nowrap"><span id="main_power">0</span> <span class="text-xl">W</span></span>
                 </div>
 
                 <svg viewBox="0 0 300 150" class="absolute inset-0 w-full h-full z-10" preserveAspectRatio="xMidYMid meet">
@@ -100,7 +101,7 @@
                     <div class="relative w-[80px] h-[100px] battery-body rounded-lg rounded-t-none overflow-hidden flex flex-col justify-end p-1 border-2 border-cyan-400">
                         <div id="bat_fill_level" class="w-full bg-gradient-to-t from-cyan-600 to-cyan-300 transition-all duration-1000 relative" style="height: 0%;"></div>
                         <div class="absolute inset-0 flex items-center justify-center z-20">
-                            <span class="text-white font-black text-2xl neon-text drop-shadow-[0_0_8px_#000] whitespace-nowrap"><span id="bat_percent_text">--</span> %</span>
+                            <span class="text-white font-black text-2xl neon-text drop-shadow-[0_0_8px_#000] nowrap"><span id="bat_percent_text">--</span> %</span>
                         </div>
                     </div>
                 </div>
@@ -110,29 +111,29 @@
                 <div class="card-scifi bg-gradient-to-br from-blue-900/40 to-blue-800/10 border-blue-500/30 p-5 flex flex-col justify-center">
                     <p class="text-xs text-blue-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-bolt"></i> Volt & Amp</p>
                     <div class="flex justify-between items-end gap-1">
-                        <span class="text-2xl font-black text-blue-100 neon-text whitespace-nowrap"><span id="main_voltage">--</span><span class="text-sm text-blue-400 ml-1">V</span></span>
-                        <span class="text-2xl font-black text-blue-100 neon-text whitespace-nowrap"><span id="main_current">--</span><span class="text-sm text-blue-400 ml-1">A</span></span>
+                        <span class="text-2xl font-black text-blue-100 neon-text nowrap"><span id="main_voltage">--</span><span class="text-sm text-blue-400 ml-1">V</span></span>
+                        <span class="text-2xl font-black text-blue-100 neon-text nowrap"><span id="main_current">--</span><span class="text-sm text-blue-400 ml-1">A</span></span>
                     </div>
                 </div>
                 <div class="card-scifi bg-gradient-to-br from-red-900/40 to-red-800/10 border-red-500/30 p-5 flex flex-col justify-center">
                     <p class="text-xs text-red-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-tachometer-alt"></i> Hiệu suất</p>
                     <div class="flex justify-between items-end gap-1">
-                        <span class="text-3xl font-black text-red-100 neon-text whitespace-nowrap"><span id="main_soc">--</span><span class="text-lg text-red-400 ml-1">%</span></span>
-                        <span class="text-xs text-red-400 font-bold mb-1.5 whitespace-nowrap">P: <span id="main_power_card" class="text-sm text-red-200">--</span> W</span>
+                        <span class="text-3xl font-black text-red-100 neon-text nowrap"><span id="main_soc">--</span><span class="text-lg text-red-400 ml-1">%</span></span>
+                        <span class="text-xs text-red-400 font-bold mb-1.5 nowrap">P: <span id="main_power_card" class="text-sm text-red-200">--</span> W</span>
                     </div>
                 </div>
                 <div class="card-scifi bg-gradient-to-br from-orange-900/40 to-orange-800/10 border-orange-500/30 p-5 flex flex-col justify-center">
                     <p class="text-xs text-orange-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-charging-station"></i> Điện năng</p>
                     <div class="flex justify-between items-end gap-1">
-                        <span class="text-3xl font-black text-white neon-text whitespace-nowrap"><span id="kwh_remaining">--</span></span>
-                        <span class="text-xs text-orange-400 font-bold mb-1.5 whitespace-nowrap">/ <span id="kwh_total">--</span> kWh</span>
+                        <span class="text-3xl font-black text-white neon-text nowrap"><span id="kwh_remaining">--</span></span>
+                        <span class="text-xs text-orange-400 font-bold mb-1.5 nowrap">/ <span id="kwh_total">--</span> kWh</span>
                     </div>
                 </div>
                 <div class="card-scifi bg-gradient-to-br from-green-900/40 to-green-800/10 border-green-500/30 p-5 flex flex-col justify-center">
                     <p class="text-xs text-green-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-battery-half"></i> Dung lượng</p>
                     <div class="flex justify-between items-end gap-1">
-                        <span class="text-3xl font-black text-white neon-text whitespace-nowrap"><span id="main_energy_now">--</span></span>
-                        <span class="text-xs text-green-400 font-bold mb-1.5 whitespace-nowrap">/ <span id="main_capacity">--</span> Ah</span>
+                        <span class="text-3xl font-black text-white neon-text nowrap"><span id="main_energy_now">--</span></span>
+                        <span class="text-xs text-green-400 font-bold mb-1.5 nowrap">/ <span id="main_capacity">--</span> Ah</span>
                     </div>
                 </div>
             </div>
@@ -144,51 +145,55 @@
                 <div class="p-4 grid grid-cols-2 gap-3">
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Hệ thống Volt</span>
-                        <span class="text-cyan-300 font-black text-lg whitespace-nowrap"><span id="pack_v">--</span> V</span>
+                        <span class="text-cyan-300 font-black text-lg nowrap"><span id="pack_v">--</span> V</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Dòng tải</span>
-                        <span class="text-cyan-300 font-black text-lg whitespace-nowrap"><span id="pack_a">--</span> A</span>
+                        <span class="text-cyan-300 font-black text-lg nowrap"><span id="pack_a">--</span> A</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Lệch Cell Δ</span>
-                        <span class="text-red-400 font-black text-lg whitespace-nowrap"><span id="pack_delta">--</span> V</span>
+                        <span class="text-red-400 font-black text-lg nowrap"><span id="pack_delta">--</span> V</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Công suất</span>
-                        <span class="text-cyan-300 font-black text-lg whitespace-nowrap"><span id="pack_p">--</span> W</span>
+                        <span class="text-cyan-300 font-black text-lg nowrap"><span id="pack_p">--</span> W</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Nhiệt độ MOS</span>
-                        <span class="text-orange-400 font-black text-lg whitespace-nowrap"><span id="pack_t_bms">--</span> °C</span>
+                        <span class="text-orange-400 font-black text-lg nowrap"><span id="pack_t_bms">--</span> °C</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Ah Hiện tại</span>
-                        <span class="text-cyan-300 font-black text-lg whitespace-nowrap"><span id="pack_cap_now">--</span> Ah</span>
+                        <span class="text-cyan-300 font-black text-lg nowrap"><span id="pack_cap_now">--</span> Ah</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Chu kỳ sạc</span>
-                        <span class="text-cyan-300 font-black text-lg whitespace-nowrap"><span id="pack_cycles">--</span></span>
+                        <span class="text-cyan-300 font-black text-lg nowrap"><span id="pack_cycles">--</span></span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Nhiệt độ T1</span>
-                        <span class="text-cyan-300 font-black text-lg whitespace-nowrap"><span id="pack_t1">--</span> °C</span>
+                        <span class="text-cyan-300 font-black text-lg nowrap"><span id="pack_t1">--</span> °C</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Tổng Ah Sạc</span>
-                        <span class="text-cyan-300 font-black text-lg whitespace-nowrap"><span id="main_total_charge">--</span> Ah</span>
+                        <span class="text-cyan-300 font-black text-lg nowrap"><span id="main_total_charge">--</span> Ah</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Nhiệt độ T2</span>
-                        <span class="text-cyan-300 font-black text-lg whitespace-nowrap"><span id="pack_t2">--</span> °C</span>
+                        <span class="text-cyan-300 font-black text-lg nowrap"><span id="pack_t2">--</span> °C</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Cell Thấp nhất</span>
-                        <span class="text-red-500 font-black text-lg whitespace-nowrap neon-text"><span id="pack_min">--</span> V</span>
+                        <span class="text-red-500 font-black text-lg nowrap neon-text"><span id="pack_min">--</span> V</span>
                     </div>
                     <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center">
                         <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Cell Cao nhất</span>
-                        <span class="text-purple-400 font-black text-lg whitespace-nowrap neon-text"><span id="pack_max">--</span> V</span>
+                        <span class="text-purple-400 font-black text-lg nowrap neon-text"><span id="pack_max">--</span> V</span>
+                    </div>
+                    <div class="bg-[#111827] p-3 rounded-lg border border-gray-800/80 flex flex-col items-center justify-center col-span-2">
+                        <span class="text-gray-500 font-bold mb-1.5 text-[11px] uppercase tracking-widest">Thời gian hoạt động</span>
+                        <span class="text-green-400 font-black text-lg nowrap neon-text"><span id="pack_uptime">--</span> Ngày</span>
                     </div>
                 </div>
             </div>
@@ -198,22 +203,29 @@
                     <i class="fas fa-layer-group"></i> Điện áp 16 Cell
                 </div>
                 <div class="p-5 grid grid-cols-2 gap-x-8 gap-y-3.5 text-base">
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C01</span><span id="c1" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C09</span><span id="c9" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C02</span><span id="c2" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C10</span><span id="c10" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C03</span><span id="c3" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C11</span><span id="c11" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C04</span><span id="c4" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C12</span><span id="c12" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C05</span><span id="c5" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C13</span><span id="c13" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C06</span><span id="c6" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C14</span><span id="c14" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C07</span><span id="c7" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C15</span><span id="c15" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C08</span><span id="c8" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
-                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C16</span><span id="c16" class="font-black text-cyan-300 font-mono whitespace-nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C01</span><span id="c1" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C09</span><span id="c9" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C02</span><span id="c2" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C10</span><span id="c10" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C03</span><span id="c3" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C11</span><span id="c11" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C04</span><span id="c4" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C12</span><span id="c12" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C05</span><span id="c5" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C13</span><span id="c13" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C06</span><span id="c6" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C14</span><span id="c14" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C07</span><span id="c7" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C15</span><span id="c15" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C08</span><span id="c8" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C16</span><span id="c16" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
                 </div>
             </div>
         </div>
@@ -232,7 +244,7 @@
                     </div>
                     
                     <div class="bg-[#0f172a] p-6 rounded-xl border border-gray-800 shadow-lg">
-                        <h3 class="text-base font-bold text-cyan-700 uppercase tracking-widest mb-6 border-b border-gray-800 pb-3">Công tắc Rơ-le (Mosfet)</h3>
+                        <h3 class="text-base font-bold text-cyan-700 uppercase tracking-widest mb-6 border-b border-gray-800 pb-3">Công tắc Rơ-le</h3>
                         <div class="space-y-7">
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-300 font-bold text-base"><i class="fas fa-plug text-green-500 w-6"></i> BẬT SẠC (CHARGE)</span>
@@ -528,12 +540,12 @@
                 <div class="p-6 space-y-6">
                      <div class="flex justify-between items-center bg-[#111827] p-5 rounded-xl border border-gray-800 shadow-inner">
                         <span class="text-gray-500 text-sm font-bold uppercase">WiFi Tên (SSID):</span>
-                        <span id="wifi_current_ssid" class="text-cyan-400 font-black text-lg neon-text whitespace-nowrap">SCANNING...</span>
+                        <span id="wifi_current_ssid" class="text-cyan-400 font-black text-lg neon-text nowrap">SCANNING...</span>
                      </div>
                      <div class="flex justify-between items-center bg-[#111827] p-5 rounded-xl border border-gray-800 shadow-inner">
                         <span class="text-gray-500 text-sm font-bold uppercase">Sóng WiFi:</span>
                         <div class="flex items-center gap-3">
-                            <span id="wifi_current_signal" class="text-cyan-400 font-black text-2xl neon-text whitespace-nowrap">-- dBm</span>
+                            <span id="wifi_current_signal" class="text-cyan-400 font-black text-2xl neon-text nowrap">-- dBm</span>
                             <i class="fas fa-wifi text-cyan-600 text-3xl"></i>
                         </div>
                      </div>
@@ -543,11 +555,11 @@
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div class="bg-[#111827] p-5 rounded-xl border border-gray-800 flex flex-col items-center shadow-inner">
                                 <span class="text-gray-500 font-bold mb-2 text-center text-xs tracking-wider">MASTER 01<br>(314 Ah)</span>
-                                <span class="text-cyan-500 font-black text-xl whitespace-nowrap" id="bt_rssi_1">-- dBm</span>
+                                <span class="text-cyan-500 font-black text-xl nowrap" id="bt_rssi_1">-- dBm</span>
                             </div>
                             <div class="bg-[#111827] p-5 rounded-xl border border-gray-800 flex flex-col items-center shadow-inner">
                                 <span class="text-gray-500 font-bold mb-2 text-center text-xs tracking-wider">SLAVE 02<br>(280 Ah)</span>
-                                <span class="text-cyan-500 font-black text-xl whitespace-nowrap" id="bt_rssi_2">-- dBm</span>
+                                <span class="text-cyan-500 font-black text-xl nowrap" id="bt_rssi_2">-- dBm</span>
                             </div>
                         </div>
                      </div>
@@ -559,13 +571,13 @@
 
     <nav class="fixed bottom-0 left-0 right-0 bg-[#090e17]/95 backdrop-blur-md border-t border-cyan-900/50 flex justify-around p-3 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
         <button onclick="nav('home')" class="flex flex-col items-center text-gray-500 w-full py-1.5 nav-btn nav-active transition-all duration-300 rounded-lg" id="nav-home">
-            <i class="fas fa-chart-line mb-1 text-2xl"></i><span class="text-xs font-black uppercase tracking-widest mt-1">Home</span>
+            <i class="fas fa-chart-line mb-1 text-2xl"></i><span class="text-[11px] font-black uppercase tracking-widest mt-1">Home</span>
         </button>
         <button onclick="nav('settings')" class="flex flex-col items-center text-gray-500 w-full py-1.5 nav-btn transition-all duration-300 rounded-lg" id="nav-settings">
-            <i class="fas fa-sliders-h mb-1 text-2xl"></i><span class="text-xs font-black uppercase tracking-widest mt-1">Config</span>
+            <i class="fas fa-sliders-h mb-1 text-2xl"></i><span class="text-[11px] font-black uppercase tracking-widest mt-1">Config</span>
         </button>
         <button onclick="nav('wifi')" class="flex flex-col items-center text-gray-500 w-full py-1.5 nav-btn transition-all duration-300 rounded-lg" id="nav-wifi">
-            <i class="fas fa-network-wired mb-1 text-2xl"></i><span class="text-xs font-black uppercase tracking-widest mt-1">Network</span>
+            <i class="fas fa-network-wired mb-1 text-2xl"></i><span class="text-[11px] font-black uppercase tracking-widest mt-1">Network</span>
         </button>
     </nav>
 
@@ -592,13 +604,13 @@
             const elIds = ['main_voltage','main_current','main_power_card','main_soc',
                            'kwh_remaining','kwh_total','main_energy_now','main_capacity',
                            'pack_v','pack_a','pack_delta','pack_t_bms','pack_min','pack_max',
-                           'pack_t1','pack_t2','pack_cycles','main_total_charge','pack_p'];
+                           'pack_t1','pack_t2','pack_cycles','main_total_charge','pack_p', 'pack_uptime'];
             elIds.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = "--"; });
             for(let i=1; i<=16; i++) { 
                 const c = document.getElementById('c'+i); 
                 if(c) {
                     c.innerText = "-- V"; 
-                    c.className = "font-black text-cyan-300 font-mono whitespace-nowrap text-lg"; 
+                    c.parentElement.className = "font-black text-cyan-300 font-mono nowrap text-lg"; 
                 } 
             }
             if (document.getElementById('bat_fill_level')) document.getElementById('bat_fill_level').style.height = "0%";
@@ -661,7 +673,7 @@
                     return;
                 }
                 if (topic.includes("wifi_signal")) {
-                    if (document.getElementById('wifi_current_signal')) document.getElementById('wifi_current_signal').innerText = val;
+                    if (document.getElementById('wifi_current_signal')) document.getElementById('wifi_current_signal').innerText = val + " dBm";
                     return;
                 }
                 
@@ -708,7 +720,8 @@
                 'capacity_remaining': ['main_energy_now', 'pack_cap_now'], 'bat_cap': ['main_capacity'], 
                 'temperature_sensor_1': ['pack_t_bms'], 
                 'temperature_sensor_2': ['pack_t1'], 'temperature_sensor_3': ['pack_t2'],
-                'charging_cycles': ['pack_cycles'], 'total_charging_cycle_capacity': ['main_total_charge']
+                'charging_cycles': ['pack_cycles'], 'total_charging_cycle_capacity': ['main_total_charge'],
+                'uptime': ['pack_uptime']
             };
 
             if (maps[key]) {
@@ -716,6 +729,7 @@
                     const el = document.getElementById(id);
                     if (el) {
                         if (id === 'pack_cycles') el.innerText = parseInt(val);
+                        else if (id === 'pack_uptime') el.innerText = Math.round(parseFloat(val));
                         else el.innerText = (key.includes('voltage') || key === 'delta_cell_voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
                     }
                 });
@@ -748,9 +762,9 @@
                                 cEl.innerText = currentV + " V";
                                 
                                 // Tự động tô màu Toàn bộ cụm chữ và số
-                                if (i === minIdx) cEl.className = "font-black text-red-500 font-mono whitespace-nowrap text-lg neon-text";
-                                else if (i === maxIdx) cEl.className = "font-black text-purple-400 font-mono whitespace-nowrap text-lg neon-text";
-                                else cEl.className = "font-black text-cyan-300 font-mono whitespace-nowrap text-lg";
+                                if (i === minIdx) cEl.className = "font-black text-red-500 font-mono nowrap text-lg neon-text";
+                                else if (i === maxIdx) cEl.className = "font-black text-purple-400 font-mono nowrap text-lg neon-text";
+                                else cEl.className = "font-black text-cyan-300 font-mono nowrap text-lg";
                             }
                         }
                     }
@@ -763,7 +777,8 @@
 
             if (key === 'current' || key === 'power') {
                 const A = parseFloat(bmsCache[activeBms]['current']?.value || 0);
-                const P = Math.round(parseFloat(bmsCache[activeBms]['power']?.value || 0));
+                const P_val = parseFloat(bmsCache[activeBms]['power']?.value || 0);
+                const P_display = Math.round(P_val);
                 
                 const pEl = document.getElementById('main_power');
                 const pCard = document.getElementById('main_power_card');
@@ -772,26 +787,26 @@
                 const pSolar = document.getElementById('path-solar');
                 const pLoad = document.getElementById('path-load');
                 
-                let absP = Math.abs(P);
+                let absP = Math.abs(P_display);
                 if (pDiag) pDiag.innerText = (A >= 0.1 ? "+" : (A <= -0.1 ? "-" : "")) + absP;
                 if (pCard) pCard.innerText = (A >= 0.1 ? "+" : (A <= -0.1 ? "-" : "")) + absP;
 
                 if (A >= 0.1) {
-                    if (pEl) { pEl.innerText = "+" + absP; pEl.parentElement.className = "text-3xl font-black text-[#f97316] neon-text whitespace-nowrap"; }
+                    if (pEl) { pEl.innerText = "+" + absP; pEl.parentElement.className = "text-3xl font-black text-[#f97316] neon-text nowrap"; }
                     if (pIcon) pIcon.className = "fas fa-plug text-orange-500 animate-pulse text-2xl";
-                    if (pSolar) pSolar.className.baseVal = "energy-path flow-charge";
+                    if (pSolar) pSolar.className.baseVal = "energy-path flow-charge"; 
                     if (pLoad) pLoad.className.baseVal = "energy-path";
                 } else if (A <= -0.1) {
-                    if (pEl) { pEl.innerText = "-" + absP; pEl.parentElement.className = "text-3xl font-black text-[#06b6d4] neon-text whitespace-nowrap"; }
+                    if (pEl) { pEl.innerText = "-" + absP; pEl.parentElement.className = "text-3xl font-black text-[#06b6d4] neon-text nowrap"; }
                     if (pIcon) pIcon.className = "fas fa-bolt text-cyan-400 text-2xl";
-                    if (pLoad) pLoad.className.baseVal = "energy-path flow-discharge";
+                    if (pLoad) pLoad.className.baseVal = "energy-path flow-discharge"; 
                     if (pSolar) pSolar.className.baseVal = "energy-path";
                 } else {
-                    if (pEl) { pEl.innerText = "0"; pEl.parentElement.className = "text-3xl font-black text-gray-500 whitespace-nowrap"; }
-                    if (pCard) pCard.innerText = "0";
-                    if (pDiag) pDiag.innerText = "0";
+                    if (pEl) { pEl.innerText = "0"; pEl.parentElement.className = "text-3xl font-black text-gray-500 nowrap"; }
+                    if (pCard) { pCard.innerText = "0"; }
+                    if (pDiag) { pDiag.innerText = "0"; }
                     if (pIcon) pIcon.className = "fas fa-bolt text-gray-600 text-2xl";
-                    if (pSolar) pSolar.className.baseVal = "energy-path";
+                    if (pSolar) pSolar.className.baseVal = "energy-path"; 
                     if (pLoad) pLoad.className.baseVal = "energy-path";
                 }
             }
@@ -814,15 +829,21 @@
                 const i = document.getElementById('val_' + key);
                 if (i && !pendingCommands[pendingKey]) {
                     let v = parseFloat(val);
-                    if (key === 'max_bal_current' || key.includes('_v') || key.includes('ovp') || key.includes('uvp')) i.value = v.toFixed(3);
-                    else if (key.includes('otp') || key.includes('utp')) i.value = v.toFixed(1);
-                    else i.value = Math.round(v);
+                    if (key === 'max_bal_current' || key.includes('_v') || key.includes('ovp') || key.includes('uvp')) {
+                        i.value = v.toFixed(3);
+                    } else if (key.includes('otp') || key.includes('utp')) {
+                        i.value = v.toFixed(1);
+                    } else {
+                        i.value = Math.round(v);
+                    }
                 }
             }
 
             if (type === 'switch') {
                 const sw = document.getElementById('sw_' + key);
-                if (sw && !pendingCommands[pendingKey]) sw.checked = (val.toUpperCase() === 'ON' || val === 'true');
+                if (sw && !pendingCommands[pendingKey]) {
+                    sw.checked = (val.toUpperCase() === 'ON' || val === 'true' || val === '1');
+                }
             }
         }
 
@@ -845,41 +866,68 @@
             if (document.getElementById('tab-' + t)) document.getElementById('tab-' + t).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('nav-active'); b.classList.replace('text-cyan-400', 'text-gray-500'); });
             const act = document.getElementById('nav-' + t);
-            if (act) { act.classList.add('nav-active'); act.classList.replace('text-gray-500', 'text-cyan-400'); }
+            if (act) {
+                act.classList.add('nav-active'); 
+                act.classList.replace('text-gray-500', 'text-cyan-400');
+            }
         }
 
         function sendCmd(t, s) { 
-            if (!isEspConnected) { alert("ESP32 OFFLINE!"); return; }
-            const message = new Paho.MQTT.Message(s ? "ON" : "OFF");
-            message.destinationName = `${prefix}/switch/${activeBms}_${t}/command`;
-            client.send(message);
-            pendingCommands[`${activeBms}_${t}`] = { expectedValue: s };
+            if (!isEspConnected) {
+                alert("CẢNH BÁO: Đang mất kết nối mạng. Không thể gửi lệnh!");
+                return;
+            }
+            try {
+                const payload = s ? "ON" : "OFF";
+                const message = new Paho.MQTT.Message(payload);
+                message.destinationName = `${prefix}/switch/${activeBms}_${t}/command`;
+                client.send(message);
+                pendingCommands[`${activeBms}_${t}`] = { expectedValue: s };
+            } catch (error) {
+                console.error("Lỗi gửi lệnh:", error);
+            }
         }
 
         function sendVal(e, id) {
-            if (!isEspConnected) { alert("ESP32 OFFLINE!"); return; }
+            if (!isEspConnected) {
+                alert("CẢNH BÁO: Đang mất kết nối mạng. Không thể gửi thông số!");
+                return;
+            }
             const input = document.getElementById('val_' + id);
-            if (!input || input.value === "") return;
-            const val = parseFloat(input.value);
-            const message = new Paho.MQTT.Message(val.toString());
-            message.destinationName = `${prefix}/number/${activeBms}_${id}/command`;
-            client.send(message);
+            if (!input || input.value === "") {
+                alert("Bạn chưa nhập giá trị hợp lệ!");
+                return;
+            }
             
-            const btn = e.target;
-            btn.innerText = "SENDING"; 
-            btn.className = "bg-yellow-600 text-white px-5 py-3 rounded-lg font-black text-sm animate-pulse shadow-[0_0_10px_#ca8a04]";
-            const pKey = `${activeBms}_${id}`;
-            if (pendingCommands[pKey] && pendingCommands[pKey].timeout) clearTimeout(pendingCommands[pKey].timeout);
-            pendingCommands[pKey] = {
-                btnElement: btn,
-                expectedValue: val,
-                timeout: setTimeout(() => {
-                    btn.innerText = "TIMEOUT";
-                    btn.className = "bg-red-600 text-white px-5 py-3 rounded-lg font-black text-sm shadow-[0_0_15px_#dc2626]";
-                    delete pendingCommands[pKey];
-                    setTimeout(() => resetBtn(btn), 3000);
-                }, 8000)
-            };
+            try {
+                const expectedValue = parseFloat(input.value);
+                const message = new Paho.MQTT.Message(expectedValue.toString());
+                message.destinationName = `${prefix}/number/${activeBms}_${id}/command`;
+                client.send(message);
+                
+                if (e && e.target) {
+                    const btn = e.target;
+                    btn.innerText = "SENDING"; 
+                    btn.className = "bg-yellow-600 text-white px-5 py-3 rounded-lg font-black text-sm transition animate-pulse shadow-[0_0_15px_#ca8a04]";
+                    
+                    const pKey = `${activeBms}_${id}`;
+                    if (pendingCommands[pKey] && pendingCommands[pKey].timeout) clearTimeout(pendingCommands[pKey].timeout);
+                    
+                    pendingCommands[pKey] = {
+                        btnElement: btn,
+                        expectedValue: expectedValue,
+                        timeout: setTimeout(() => {
+                            btn.innerText = "TIMEOUT";
+                            btn.className = "bg-red-600 text-white px-5 py-3 rounded-lg font-black text-sm transition shadow-[0_0_15px_#dc2626]";
+                            delete pendingCommands[pKey];
+                            setTimeout(() => resetBtn(btn), 3000);
+                        }, 8000)
+                    };
+                }
+            } catch (error) {
+                console.error("Lỗi gửi MQTT:", error);
+                alert("Không thể gửi gói tin MQTT.");
+            }
         }
     </script>
 </body>
