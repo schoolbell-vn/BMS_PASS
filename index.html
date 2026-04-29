@@ -221,7 +221,6 @@
                     </div>
 
                     <div class="pb-8">
-                        
                         <h3 class="text-base font-black text-cyan-600 uppercase mb-5 border-l-4 border-cyan-600 pl-3">1. Điện áp (Voltage)</h3>
                         <div class="space-y-5 mb-10">
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-3">
@@ -609,15 +608,14 @@
 
                 if (!isEspConnected) return;
 
-                // Sửa sóng Bluetooth: Dò theo chữ chứa trong Topic
                 if (topic.includes("b1_rssi")) {
                     if (document.getElementById('bt_rssi_1')) document.getElementById('bt_rssi_1').innerText = val + " dBm";
-                    if (activeBms === 'b1' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val;
+                    if (activeBms === 'b1' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val + " dBm";
                     return;
                 }
                 if (topic.includes("b2_rssi")) {
                     if (document.getElementById('bt_rssi_2')) document.getElementById('bt_rssi_2').innerText = val + " dBm";
-                    if (activeBms === 'b2' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val;
+                    if (activeBms === 'b2' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val + " dBm";
                     return;
                 }
 
@@ -681,19 +679,26 @@
                     const el = document.getElementById(id);
                     if (el) {
                         if (id === 'pack_cycles') el.innerText = parseInt(val);
-                        else el.innerText = key.includes('voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
+                        else {
+                            let formatted = key.includes('voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
+                            if (id.includes('voltage') || id === 'pack_v') formatted += " V";
+                            if (id.includes('current') || id === 'pack_a') formatted += " A";
+                            if (id === 'main_soc' || id === 'pack_soc') formatted += " %";
+                            if (id.includes('t1') || id.includes('t2') || id.includes('t_bms')) formatted += " °C";
+                            if (id === 'pack_cap_now' || id === 'main_total_charge' || id === 'main_energy_now' || id === 'main_capacity') formatted += " Ah";
+                            
+                            el.innerText = formatted;
+                        }
                     }
                 });
             }
 
-            // TÍNH TOÁN LẠI MIN/MAX/DELTA CELL ĐỂ ĐẢM BẢO CHUẨN XÁC VÀ TÔ MÀU
-            if (key.startsWith('cell_voltage_')) {
-                let minV = 999.0;
-                let maxV = 0.0;
-                let minIdx = -1;
-                let maxIdx = -1;
+            if (key === 'setup_passcode') {
+                if (document.getElementById('pack_passcode')) document.getElementById('pack_passcode').innerText = val;
+            }
 
-                // Cập nhật giá trị hiển thị 16 Cell
+            if (key.startsWith('cell_voltage_')) {
+                let minV = 999.0; let maxV = 0.0; let minIdx = -1; let maxIdx = -1;
                 for (let i = 1; i <= 16; i++) {
                     const cKey = `cell_voltage_${i}`;
                     const cEl = document.getElementById('c' + i);
@@ -705,7 +710,6 @@
                     }
                 }
 
-                // Tô màu Đỏ (Min) / Tím (Max)
                 if (minIdx !== -1 && maxIdx !== -1) {
                     for (let i = 1; i <= 16; i++) {
                         const cEl = document.getElementById('c' + i);
@@ -715,7 +719,6 @@
                             else cEl.className = "font-black text-cyan-300 font-mono text-base";
                         }
                     }
-                    // Cập nhật chẩn đoán
                     const deltaV = (maxV - minV).toFixed(3);
                     if(document.getElementById('pack_min')) document.getElementById('pack_min').innerText = minV.toFixed(3) + " V";
                     if(document.getElementById('pack_max')) document.getElementById('pack_max').innerText = maxV.toFixed(3) + " V";
@@ -723,7 +726,6 @@
                 }
             }
 
-            // ĐỒNG BỘ 100% CÔNG SUẤT (P) CHUẨN XÁC 3 VỊ TRÍ
             if (key === 'current' || key === 'power') {
                 const A = parseFloat(bmsCache[activeBms]['current']?.value || 0);
                 const P = Math.round(parseFloat(bmsCache[activeBms]['power']?.value || 0));
@@ -790,16 +792,13 @@
             activeBms = document.getElementById('device-selector').value;
             resetUI();
             const d = bmsCache[activeBms];
-            if (d) Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
-            
-            // Tìm lại Sóng Bluetooth sau khi đổi Trạm
-            const headerBt = document.getElementById('bt_rssi_header');
-            const btId = (activeBms === 'b1') ? 'bt_rssi_1' : 'bt_rssi_2';
-            const btValEl = document.getElementById(btId);
-            if (headerBt && btValEl && btValEl.innerText !== '-- dBm') {
-                headerBt.innerText = "BT: " + btValEl.innerText.replace(" dBm", "");
-            } else if (headerBt) {
-                headerBt.innerText = "BT: --";
+            if (d) {
+                Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
+                const h = document.getElementById('bt_rssi_header');
+                if (h) {
+                    if (d['rssi']) h.innerText = "BT: " + d['rssi'].value + " dBm";
+                    else h.innerText = "BT: --";
+                }
             }
         }
 
@@ -830,7 +829,7 @@
             
             const btn = e.target;
             btn.innerText = "SENDING"; 
-            btn.className = "bg-yellow-600 text-white px-5 py-3 rounded font-black text-sm animate-pulse shadow-[0_0_15px_#ca8a04]";
+            btn.className = "bg-yellow-600 text-white px-5 py-3 rounded font-black text-sm animate-pulse shadow-[0_0_10px_#ca8a04]";
             const pKey = `${activeBms}_${id}`;
             if (pendingCommands[pKey] && pendingCommands[pKey].timeout) clearTimeout(pendingCommands[pKey].timeout);
             pendingCommands[pKey] = {
