@@ -532,7 +532,7 @@
         </button>
     </nav>
 
-    <script>
+    <script><script>
         const config = {
             host: "broker.emqx.io",
             port: 8084,
@@ -549,7 +549,7 @@
 
         function resetBtn(btn) {
             btn.innerText = "OK"; 
-            btn.className = "bg-cyan-900 text-cyan-100 border border-cyan-700 px-4 py-2.5 rounded font-bold text-xs hover:bg-cyan-600 active:bg-green-600 transition";
+            btn.className = "bg-cyan-900 text-cyan-100 border border-cyan-700 px-5 py-2.5 rounded font-black text-sm hover:bg-cyan-600 active:bg-green-600 transition";
         }
 
         function resetUI() {
@@ -558,21 +558,30 @@
                            'kwh_remaining','kwh_total','main_energy_now','main_capacity',
                            'pack_v','pack_a','pack_delta','pack_t_bms','pack_min','pack_max',
                            'pack_t1','pack_t2','pack_cycles','main_total_charge','pack_p'];
-            elIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = "--"; });
-            for(let i=1; i<=16; i++) { if(document.getElementById('c'+i)) document.getElementById('c'+i).innerText = "-- V"; }
+            elIds.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = "--"; });
+            for(let i=1; i<=16; i++) { const c = document.getElementById('c'+i); if(c) c.innerText = "-- V"; }
             
-            document.getElementById('bat_fill_level').style.height = "0%";
-            document.getElementById('main_power').innerText = "0 W";
-            document.getElementById('main_power').style.color = "#6b7280";
-            document.getElementById('pwr-icon').className = "fas fa-bolt text-gray-600 text-lg";
-            document.getElementById('path-solar').className.baseVal = "energy-path";
-            document.getElementById('path-load').className.baseVal = "energy-path";
+            const fill = document.getElementById('bat_fill_level');
+            if (fill) fill.style.height = "0%";
+            
+            const mPower = document.getElementById('main_power');
+            if (mPower) { mPower.innerText = "0 W"; mPower.style.color = "#6b7280"; }
+            
+            const pIcon = document.getElementById('pwr-icon');
+            if (pIcon) pIcon.className = "fas fa-bolt text-gray-600 text-lg";
+            
+            const pSolar = document.getElementById('path-solar');
+            if (pSolar) pSolar.className.baseVal = "energy-path";
+            
+            const pLoad = document.getElementById('path-load');
+            if (pLoad) pLoad.className.baseVal = "energy-path";
         }
 
         client.connect({
             useSSL: true,
             onSuccess: () => {
-                document.getElementById('mqtt-status').innerText = "LINKED";
+                const s = document.getElementById('mqtt-status');
+                if (s) s.innerText = "LINKED";
                 client.subscribe(`${prefix}/status`); 
                 client.subscribe(`${prefix}/sensor/+/state`);
                 client.subscribe(`${prefix}/text_sensor/+/state`);
@@ -582,50 +591,73 @@
         });
 
         client.onMessageArrived = (msg) => {
-            const topic = msg.destinationName;
-            const val = msg.payloadString;
+            try {
+                const topic = msg.destinationName;
+                const val = msg.payloadString;
 
-            if (topic === `${prefix}/status`) {
-                isEspConnected = (val === "online");
-                const badge = document.getElementById('mqtt-status-badge');
-                if (isEspConnected) {
-                    document.getElementById('mqtt-status').innerText = "ONLINE";
-                    badge.className = "bg-cyan-900/30 border border-cyan-500/50 px-3 py-1.5 rounded text-xs font-black text-cyan-400 flex items-center shadow-md";
-                    document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-cyan-400 animate-pulse mr-2";
-                } else {
-                    document.getElementById('mqtt-status').innerText = "OFFLINE";
-                    badge.className = "bg-red-900/30 border border-red-500/50 px-3 py-1.5 rounded text-xs font-black text-red-500 flex items-center shadow-md";
-                    document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-red-500 mr-2";
-                    resetUI();
+                if (topic === `${prefix}/status`) {
+                    isEspConnected = (val === "online");
+                    const badge = document.getElementById('mqtt-status-badge');
+                    const dot = document.getElementById('mqtt-dot');
+                    const sTxt = document.getElementById('mqtt-status');
+                    
+                    if (isEspConnected) {
+                        if(sTxt) sTxt.innerText = "ONLINE";
+                        if(badge) badge.className = "bg-cyan-900/30 border border-cyan-500/50 px-3 py-1.5 rounded text-xs font-black text-cyan-400 flex items-center shadow-md";
+                        if(dot) dot.className = "w-2 h-2 rounded-full bg-cyan-400 animate-pulse mr-2";
+                    } else {
+                        if(sTxt) sTxt.innerText = "OFFLINE";
+                        if(badge) badge.className = "bg-red-900/30 border border-red-500/50 px-3 py-1.5 rounded text-xs font-black text-red-500 flex items-center shadow-md";
+                        if(dot) dot.className = "w-2 h-2 rounded-full bg-red-500 mr-2";
+                        resetUI();
+                    }
+                    return;
                 }
-                return;
-            }
 
-            if (!isEspConnected) return;
+                if (!isEspConnected) return;
 
-            if (topic.includes("wifi_ssid")) document.getElementById('wifi_current_ssid').innerText = val;
-            if (topic.includes("wifi_signal")) document.getElementById('wifi_current_signal').innerText = val;
-            
-            const parts = topic.split('/');
-            if (parts.length < 3) return;
-            const type = parts[1];
-            const fullId = parts[2];
-            const devId = fullId.substring(0, 2);
-            const key = fullId.substring(3);
+                if (topic.includes("wifi_ssid")) {
+                    const el = document.getElementById('wifi_current_ssid');
+                    if (el) el.innerText = val;
+                }
+                if (topic.includes("wifi_signal")) {
+                    const el = document.getElementById('wifi_current_signal');
+                    if (el) el.innerText = val;
+                }
+                
+                const parts = topic.split('/');
+                if (parts.length < 4) return;
+                const type = parts[1];
+                const fullId = parts[2];
+                
+                if (!fullId.startsWith('b1_') && !fullId.startsWith('b2_')) return;
+                
+                const devId = fullId.substring(0, 2);
+                const key = fullId.substring(3);
 
-            if (!bmsCache[devId]) bmsCache[devId] = {};
-            bmsCache[devId][key] = { value: val, type: type };
+                if (!bmsCache[devId]) bmsCache[devId] = {};
+                bmsCache[devId][key] = { value: val, type: type };
 
-            if (devId === activeBms) updateScreen(key, val, type);
+                if (devId === activeBms) updateScreen(key, val, type);
 
-            if (key === 'rssi') {
-                if(devId === 'b1') document.getElementById('bt_rssi_1').innerText = val + " dBm";
-                if(devId === 'b2') document.getElementById('bt_rssi_2').innerText = val + " dBm";
+                if (key === 'rssi') {
+                    const r1 = document.getElementById('bt_rssi_1');
+                    if(r1 && devId === 'b1') r1.innerText = val + " dBm";
+                    
+                    const r2 = document.getElementById('bt_rssi_2');
+                    if(r2 && devId === 'b2') r2.innerText = val + " dBm";
+                    
+                    if (devId === activeBms) {
+                        const h = document.getElementById('bt_rssi_header');
+                        if (h) h.innerText = "BT: " + val;
+                    }
+                }
+            } catch (e) {
+                console.error("Lỗi giải mã MQTT:", e);
             }
         };
 
         function updateScreen(key, val, type) {
-            
             const pendingKey = `${activeBms}_${key}`;
             if (pendingCommands[pendingKey]) {
                 const pending = pendingCommands[pendingKey];
@@ -643,7 +675,7 @@
                     const btn = pending.btnElement;
                     if (btn) {
                         btn.innerText = "SUCCESS";
-                        btn.className = "bg-green-500 text-white px-4 py-2.5 rounded font-bold text-xs transition shadow-[0_0_15px_#22c55e]";
+                        btn.className = "bg-green-500 text-white px-5 py-2.5 rounded font-black text-sm transition shadow-[0_0_15px_#22c55e]";
                         setTimeout(() => resetBtn(btn), 2500);
                     }
                     delete pendingCommands[pendingKey];
@@ -677,7 +709,7 @@
                 if (c) c.innerText = parseFloat(val).toFixed(3) + " V";
             }
 
-            if (key === 'current' || key === 'voltage') {
+            if (key === 'current' || key === 'voltage' || key === 'capacity_remaining' || key === 'bat_cap') {
                 const A = parseFloat(bmsCache[activeBms]['current']?.value || 0);
                 const V = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
                 const P = Math.abs(A * V).toFixed(0);
@@ -688,37 +720,37 @@
                 const pLoad = document.getElementById('path-load');
                 
                 if (A >= 0.1) {
-                    pEl.innerText = "+" + P + " W"; 
-                    pEl.className = "text-3xl font-black text-[#f97316] neon-text";
-                    pIcon.className = "fas fa-plug text-orange-500 animate-pulse text-2xl";
-                    pSolar.className.baseVal = "energy-path flow-charge"; 
-                    pLoad.className.baseVal = "energy-path";
+                    if (pEl) { pEl.innerText = "+" + P + " W"; pEl.className = "text-3xl font-black text-[#f97316] neon-text"; }
+                    if (pIcon) pIcon.className = "fas fa-plug text-orange-500 animate-pulse text-2xl";
+                    if (pSolar) pSolar.className.baseVal = "energy-path flow-charge"; 
+                    if (pLoad) pLoad.className.baseVal = "energy-path";
                 } else if (A <= -0.1) {
-                    pEl.innerText = "-" + P + " W"; 
-                    pEl.className = "text-3xl font-black text-[#06b6d4] neon-text";
-                    pIcon.className = "fas fa-bolt text-cyan-400 text-2xl";
-                    pLoad.className.baseVal = "energy-path flow-discharge"; 
-                    pSolar.className.baseVal = "energy-path";
+                    if (pEl) { pEl.innerText = "-" + P + " W"; pEl.className = "text-3xl font-black text-[#06b6d4] neon-text"; }
+                    if (pIcon) pIcon.className = "fas fa-bolt text-cyan-400 text-2xl";
+                    if (pLoad) pLoad.className.baseVal = "energy-path flow-discharge"; 
+                    if (pSolar) pSolar.className.baseVal = "energy-path";
                 } else {
-                    pEl.innerText = "0 W"; 
-                    pEl.className = "text-3xl font-black text-gray-500";
-                    pIcon.className = "fas fa-bolt text-gray-600 text-2xl";
-                    pSolar.className.baseVal = "energy-path"; 
-                    pLoad.className.baseVal = "energy-path";
+                    if (pEl) { pEl.innerText = "0 W"; pEl.className = "text-3xl font-black text-gray-500"; }
+                    if (pIcon) pIcon.className = "fas fa-bolt text-gray-600 text-2xl";
+                    if (pSolar) pSolar.className.baseVal = "energy-path"; 
+                    if (pLoad) pLoad.className.baseVal = "energy-path";
                 }
 
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
-                document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2);
-                document.getElementById('kwh_total').innerText = ((AhMax * V) / 1000).toFixed(1);
+                const kr = document.getElementById('kwh_remaining');
+                if (kr) kr.innerText = ((AhNow * V) / 1000).toFixed(2);
+                const kt = document.getElementById('kwh_total');
+                if (kt) kt.innerText = ((AhMax * V) / 1000).toFixed(1);
             }
 
             if (key === 'soc') {
-                document.getElementById('bat_fill_level').style.height = val + "%";
-                document.getElementById('bat_percent_text').innerText = Math.round(val) + " %";
+                const fl = document.getElementById('bat_fill_level');
+                if (fl) fl.style.height = val + "%";
+                const pt = document.getElementById('bat_percent_text');
+                if (pt) pt.innerText = Math.round(val) + " %";
             }
 
-            // ĐỊNH DẠNG CỠ CHỮ THẬP PHÂN THÔNG MINH CHO CÀI ĐẶT
             if (type === 'number') {
                 const i = document.getElementById('val_' + key);
                 if (i && !pendingCommands[`${activeBms}_${key}`]) {
@@ -745,15 +777,31 @@
             activeBms = document.getElementById('device-selector').value;
             resetUI();
             const d = bmsCache[activeBms];
-            if (d) Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
+            if (d) {
+                Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
+                // Cập nhật lại RSSI khi chuyển Tab
+                const h = document.getElementById('bt_rssi_header');
+                if (h) {
+                    if (d['rssi']) h.innerText = "BT: " + d['rssi'].value;
+                    else h.innerText = "BT: --";
+                }
+            }
         }
 
         function nav(t) {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
-            document.getElementById('tab-' + t).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('nav-active'); b.classList.replace('text-cyan-400', 'text-gray-500'); });
+            const tb = document.getElementById('tab-' + t);
+            if (tb) tb.classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => { 
+                b.classList.remove('nav-active'); 
+                b.classList.replace('text-cyan-400', 'text-gray-500'); 
+            });
             const act = document.getElementById('nav-' + t);
-            act.classList.add('nav-active'); act.classList.replace('text-gray-500', 'text-cyan-400');
+            if (act) {
+                act.classList.add('nav-active'); 
+                act.classList.replace('text-gray-500', 'text-cyan-400');
+            }
         }
 
         function sendCmd(t, s) { 
@@ -768,7 +816,7 @@
                 client.send(message);
                 pendingCommands[`${activeBms}_${t}`] = { expectedValue: s };
             } catch (error) {
-                console.error("Lỗi gửi:", error);
+                console.error("Lỗi gửi lệnh tắt bật:", error);
             }
         }
 
@@ -792,7 +840,7 @@
                 if (e && e.target) {
                     const btn = e.target;
                     btn.innerText = "SENDING"; 
-                    btn.className = "bg-yellow-600 text-white px-4 py-2.5 rounded font-bold text-xs transition animate-pulse shadow-[0_0_15px_#ca8a04]";
+                    btn.className = "bg-yellow-600 text-white px-5 py-2.5 rounded font-black text-sm transition animate-pulse shadow-[0_0_15px_#ca8a04]";
                     
                     const pKey = `${activeBms}_${id}`;
                     if (pendingCommands[pKey] && pendingCommands[pKey].timeout) clearTimeout(pendingCommands[pKey].timeout);
@@ -802,14 +850,14 @@
                         expectedValue: expectedValue,
                         timeout: setTimeout(() => {
                             btn.innerText = "TIMEOUT";
-                            btn.className = "bg-red-600 text-white px-4 py-2.5 rounded font-bold text-xs transition shadow-[0_0_15px_#dc2626]";
+                            btn.className = "bg-red-600 text-white px-5 py-2.5 rounded font-black text-sm transition shadow-[0_0_15px_#dc2626]";
                             delete pendingCommands[pKey];
                             setTimeout(() => resetBtn(btn), 3000);
                         }, 8000)
                     };
                 }
             } catch (error) {
-                console.error("Lỗi gửi MQTT:", error);
+                console.error("Lỗi gửi thông số MQTT:", error);
                 alert("Không thể gửi gói tin MQTT.");
             }
         }
