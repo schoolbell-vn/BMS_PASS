@@ -16,6 +16,7 @@
         .card-scifi { background: rgba(13, 20, 36, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(6, 182, 212, 0.25); box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(6,182,212,0.05); border-radius: 12px; }
         .neon-text { text-shadow: 0 0 10px currentColor; }
         
+        /* Hiệu ứng Năng lượng */
         .energy-path { stroke-dasharray: 6 8; opacity: 0.1; transition: opacity 0.4s ease; }
         .flow-charge { stroke: #f97316; opacity: 1; filter: drop-shadow(0 0 5px #f97316); animation: dash-charge 0.6s linear infinite; }
         .flow-discharge { stroke: #06b6d4; opacity: 1; filter: drop-shadow(0 0 5px #06b6d4); animation: dash-discharge 0.6s linear infinite; }
@@ -58,11 +59,12 @@
     <main class="max-w-xl mx-auto p-3 mt-2">
         
         <div class="card-scifi p-3 flex justify-between items-center mb-5">
-            <div class="text-cyan-500 pl-2 font-black text-sm tracking-widest uppercase"><i class="fas fa-server mr-1"></i> Trạm:</div>
+            <div class="text-cyan-500 pl-2 font-black text-xs tracking-widest uppercase"><i class="fas fa-server mr-1"></i> Trạm:</div>
             <select id="device-selector" class="flex-1 ml-2 bg-transparent text-cyan-100 border-none font-bold outline-none text-base tracking-widest" onchange="switchDevice()">
-                <option value="b1" class="bg-gray-900">MASTER: 314 Ah</option>
-                <option value="b2" class="bg-gray-900">SLAVE: 280 Ah</option>
+                <option value="b1" class="bg-gray-900 text-cyan-400">ARRAY 01: 314 Ah</option>
+                <option value="b2" class="bg-gray-900 text-cyan-400">ARRAY 02: 280 Ah</option>
             </select>
+            <div class="pr-2 text-cyan-400 text-sm font-black neon-text" id="bt_rssi_header">BT: --</div>
         </div>
 
         <div id="tab-home" class="tab-content active space-y-5">
@@ -144,14 +146,14 @@
                     <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Dòng tải:</span><span class="text-cyan-300 font-bold" id="pack_a">-- A</span></div>
                     <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Lệch Cell Δ:</span><span class="text-red-400 font-bold" id="pack_delta">-- V</span></div>
                     <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Công suất:</span><span class="text-cyan-300 font-bold" id="pack_p">-- W</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Ah Hiện tại:</span><span class="text-cyan-300 font-bold" id="pack_cap_now">-- Ah</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Tổng Ah Sạc:</span><span class="text-cyan-300 font-bold" id="main_total_charge">-- Ah</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Chu kỳ Sạc:</span><span class="text-cyan-300 font-bold" id="pack_cycles">--</span></div>
                     <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt độ MOS:</span><span class="text-orange-400 font-bold" id="pack_t_bms">-- °C</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Cell Min:</span><span class="text-red-400 font-bold" id="pack_min">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Ah Hiện tại:</span><span class="text-cyan-300 font-bold" id="pack_cap_now">-- Ah</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Chu kỳ sạc:</span><span class="text-cyan-300 font-bold" id="pack_cycles">--</span></div>
                     <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt độ T1:</span><span class="text-cyan-300 font-bold" id="pack_t1">-- °C</span></div>
-                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Cell Max:</span><span class="text-blue-400 font-bold" id="pack_max">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Tổng Ah Sạc:</span><span class="text-cyan-300 font-bold" id="main_total_charge">-- Ah</span></div>
                     <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Nhiệt độ T2:</span><span class="text-cyan-300 font-bold" id="pack_t2">-- °C</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Cell Thấp nhất:</span><span class="text-red-400 font-bold" id="pack_min">-- V</span></div>
+                    <div class="flex justify-between border-b border-gray-800 pb-1.5"><span>Cell Cao nhất:</span><span class="text-blue-400 font-bold" id="pack_max">-- V</span></div>
                 </div>
             </div>
 
@@ -194,7 +196,7 @@
                     </div>
                     
                     <div class="bg-[#0f172a] p-5 rounded-xl border border-gray-800 shadow-lg">
-                        <h3 class="text-sm font-bold text-cyan-700 uppercase tracking-widest mb-5 border-b border-gray-800 pb-3">Công tắc Rơ-le</h3>
+                        <h3 class="text-sm font-bold text-cyan-700 uppercase tracking-widest mb-5 border-b border-gray-800 pb-3">Công tắc Rơ-le (Mosfet)</h3>
                         <div class="space-y-6">
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-300 font-bold text-base"><i class="fas fa-plug text-green-500 w-6"></i> BẬT SẠC (CHARGE)</span>
@@ -535,8 +537,8 @@
     <script>
         const config = {
             host: "broker.emqx.io",
-            port: 8084,
-            clientId: "WebUI_MobFull_" + Math.random().toString(16).substr(2, 5)
+            port: 8084, // Cổng bảo mật TLS
+            clientId: "WebUI_SciFi_Pro_" + Math.random().toString(16).substr(2, 6)
         };
 
         const client = new Paho.MQTT.Client(config.host, config.port, config.clientId);
@@ -545,6 +547,7 @@
         let bmsCache = { b1: {}, b2: {} };
         let isEspConnected = false;
         
+        // Theo dõi các lệnh đang chờ phản hồi
         let pendingCommands = {};
 
         function resetBtn(btn) {
@@ -553,7 +556,6 @@
         }
 
         function resetUI() {
-            // Reset số liệu, giữ nguyên công tắc Rơ-le
             const elIds = ['main_voltage','main_current','main_power_card','main_soc',
                            'kwh_remaining','kwh_total','main_energy_now','main_capacity',
                            'pack_v','pack_a','pack_delta','pack_t_bms','pack_min','pack_max',
@@ -640,6 +642,7 @@
 
                 if (devId === activeBms) updateScreen(key, val, type);
 
+                // Cập nhật Sóng Bluetooth (RSSI) - SỬA LỖI HEADER BÁM THEO TRẠM
                 if (key === 'rssi') {
                     const r1 = document.getElementById('bt_rssi_1');
                     if(r1 && devId === 'b1') r1.innerText = val + " dBm";
@@ -647,6 +650,7 @@
                     const r2 = document.getElementById('bt_rssi_2');
                     if(r2 && devId === 'b2') r2.innerText = val + " dBm";
                     
+                    // Nếu sóng của trạm nào gửi lên mà đúng trạm đang mở thì đẩy lên Header
                     if (devId === activeBms) {
                         const h = document.getElementById('bt_rssi_header');
                         if (h) h.innerText = "BT: " + val;
@@ -658,6 +662,8 @@
         };
 
         function updateScreen(key, val, type) {
+            
+            // XỬ LÝ PHẢN HỒI THÀNH CÔNG (SMART FEEDBACK)
             const pendingKey = `${activeBms}_${key}`;
             if (pendingCommands[pendingKey]) {
                 const pending = pendingCommands[pendingKey];
@@ -684,7 +690,7 @@
             
             const maps = {
                 'voltage': ['main_voltage', 'pack_v'], 'current': ['main_current', 'pack_a'],
-                'power': ['main_power_card', 'pack_p'], 'soc': ['main_soc', 'pack_soc'], 
+                'soc': ['main_soc', 'pack_soc'], 
                 'capacity_remaining': ['main_energy_now', 'pack_cap_now'], 'bat_cap': ['main_capacity'], 
                 'delta_cell_voltage': ['pack_delta'], 'temperature_sensor_1': ['pack_t_bms'], 
                 'temperature_sensor_2': ['pack_t1'], 'temperature_sensor_3': ['pack_t2'],
@@ -709,37 +715,52 @@
                 if (c) c.innerText = parseFloat(val).toFixed(3) + " V";
             }
 
-            if (key === 'current' || key === 'voltage' || key === 'capacity_remaining' || key === 'bat_cap') {
+            // ĐỒNG BỘ 100% CÔNG SUẤT 3 VỊ TRÍ
+            if (key === 'current' || key === 'power') {
                 const A = parseFloat(bmsCache[activeBms]['current']?.value || 0);
-                const V = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
-                const P = Math.abs(A * V).toFixed(0);
+                const P_val = parseFloat(bmsCache[activeBms]['power']?.value || 0);
+                const P_display = Math.round(P_val);
                 
                 const pEl = document.getElementById('main_power');
+                const pCard = document.getElementById('main_power_card');
+                const pDiag = document.getElementById('pack_p');
                 const pIcon = document.getElementById('pwr-icon');
                 const pSolar = document.getElementById('path-solar');
                 const pLoad = document.getElementById('path-load');
                 
+                // Cập nhật thẻ chi tiết và thẻ Hiệu suất (Thêm chữ W)
+                if (pDiag) pDiag.innerText = P_display + " W";
+                if (pCard) pCard.innerText = P_display;
+
+                // Xử lý mũi tên và dấu (+/-) trên đỉnh Pin
                 if (A >= 0.1) {
-                    if (pEl) { pEl.innerText = "+" + P + " W"; pEl.className = "text-3xl font-black text-[#f97316] neon-text"; }
+                    if (pEl) { pEl.innerText = "+" + P_display + " W"; pEl.className = "text-3xl font-black text-[#f97316] neon-text"; }
                     if (pIcon) pIcon.className = "fas fa-plug text-orange-500 animate-pulse text-2xl";
                     if (pSolar) pSolar.className.baseVal = "energy-path flow-charge"; 
                     if (pLoad) pLoad.className.baseVal = "energy-path";
                 } else if (A <= -0.1) {
-                    if (pEl) { pEl.innerText = "-" + P + " W"; pEl.className = "text-3xl font-black text-[#06b6d4] neon-text"; }
+                    if (pEl) { pEl.innerText = "-" + P_display + " W"; pEl.className = "text-3xl font-black text-[#06b6d4] neon-text"; }
                     if (pIcon) pIcon.className = "fas fa-bolt text-cyan-400 text-2xl";
                     if (pLoad) pLoad.className.baseVal = "energy-path flow-discharge"; 
                     if (pSolar) pSolar.className.baseVal = "energy-path";
                 } else {
                     if (pEl) { pEl.innerText = "0 W"; pEl.className = "text-3xl font-black text-gray-500"; }
+                    if (pCard) { pCard.innerText = "0"; }
                     if (pIcon) pIcon.className = "fas fa-bolt text-gray-600 text-2xl";
                     if (pSolar) pSolar.className.baseVal = "energy-path"; 
                     if (pLoad) pLoad.className.baseVal = "energy-path";
                 }
+            }
 
+            // TÁCH RIÊNG TÍNH TOÁN KWH
+            if (key === 'voltage' || key === 'capacity_remaining' || key === 'bat_cap') {
+                const V = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
+                
                 const kr = document.getElementById('kwh_remaining');
                 if (kr) kr.innerText = ((AhNow * V) / 1000).toFixed(2);
+                
                 const kt = document.getElementById('kwh_total');
                 if (kt) kt.innerText = ((AhMax * V) / 1000).toFixed(1);
             }
@@ -751,8 +772,10 @@
                 if (pt) pt.innerText = Math.round(val) + " %";
             }
 
+            // ĐỊNH DẠNG CỠ CHỮ THẬP PHÂN THÔNG MINH CHO CÀI ĐẶT
             if (type === 'number') {
                 const i = document.getElementById('val_' + key);
+                // CHỈ CẬP NHẬT KHI KHÔNG ĐANG CHỜ PHẢN HỒI (tránh giật nút)
                 if (i && !pendingCommands[`${activeBms}_${key}`]) {
                     let v = parseFloat(val);
                     if (key === 'max_bal_current' || key.includes('_v') || key.includes('ovp') || key.includes('uvp')) {
@@ -779,7 +802,7 @@
             const d = bmsCache[activeBms];
             if (d) {
                 Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
-                // Cập nhật lại RSSI khi chuyển Tab
+                // Phục hồi lại RSSI khi lật Tab Trạm
                 const h = document.getElementById('bt_rssi_header');
                 if (h) {
                     if (d['rssi']) h.innerText = "BT: " + d['rssi'].value;
@@ -816,7 +839,7 @@
                 client.send(message);
                 pendingCommands[`${activeBms}_${t}`] = { expectedValue: s };
             } catch (error) {
-                console.error("Lỗi gửi lệnh tắt bật:", error);
+                console.error("Lỗi gửi:", error);
             }
         }
 
@@ -857,7 +880,7 @@
                     };
                 }
             } catch (error) {
-                console.error("Lỗi gửi thông số MQTT:", error);
+                console.error("Lỗi gửi MQTT:", error);
                 alert("Không thể gửi gói tin MQTT.");
             }
         }
