@@ -347,8 +347,8 @@
 
     <script>
         const config = {
-            host: "broker.emqx.io", // Sửa chữ 'broker' thành 'host' và thêm dấu phẩy
-            port: 8084,             // Thêm dấu phẩy ở đây
+            host: "broker.emqx.io",
+            port: 8084, // Dùng cổng bảo mật TLS cho ổn định
             user: "",
             pass: "",
             clientId: "WebUI_" + Math.random().toString(16).substr(2, 6)
@@ -359,96 +359,85 @@
         let bmsCache = { b1: {}, b2: {} };
         let isEspConnected = false;
 
+        // 1. HÀM RESET GIAO DIỆN VỀ TRẠNG THÁI CHỜ
         function resetUIToDash() {
-            ['main_voltage', 'pack_v', 'pack_delta', 'pack_min', 'pack_max'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- V"; });
-            ['main_current', 'pack_a'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- A"; });
-            ['main_power', 'main_power_card', 'pack_p', 'main_power_load', 'solar_power'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- W"; });
-            ['main_soc', 'pack_soc', 'bat_percent_text'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- %"; });
-            ['main_energy_now', 'main_capacity', 'pack_cap_now', 'main_total_charge'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- Ah"; });
-            ['pack_t_bms', 'pack_t1', 'pack_t2'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="-- °C"; });
-            ['pack_cycles', 'pack_cycles_card'].forEach(id => { const el=document.getElementById(id); if(el) el.innerText="--"; });
-            for(let i=1; i<=16; i++) { const el=document.getElementById('c'+i); if(el) el.innerText="-- V"; }
-            
+            const elements = [
+                'main_voltage', 'pack_v', 'pack_delta', 'pack_min', 'pack_max',
+                'main_current', 'pack_a', 'main_power', 'main_power_card', 'pack_p',
+                'main_soc', 'pack_soc', 'bat_percent_text', 'main_energy_now', 
+                'main_capacity', 'pack_cap_now', 'main_total_charge', 'kwh_remaining',
+                'kwh_total', 'pack_t_bms', 'pack_t1', 'pack_t2', 'pack_cycles', 'pack_cycles_card'
+            ];
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = id.includes('kwh') ? "-- kWh" : "--";
+            });
+            for (let i = 1; i <= 16; i++) {
+                const el = document.getElementById('c' + i);
+                if (el) el.innerText = "-- V";
+            }
             document.getElementById('bat_fill_level').style.height = "0%";
-            document.getElementById('line-solar').classList.remove('active', 'flow-forward', 'flow-reverse');
-            document.getElementById('line-load').classList.remove('active', 'flow-forward', 'flow-reverse');
             document.getElementById('pack_passcode').innerText = "Đang quét...";
         }
 
-        function setOfflineState() {
-            isEspConnected = false;
-            document.getElementById('mqtt-status').innerText = "ESP32 Ngoại tuyến!";
-            const badge = document.getElementById('mqtt-status-badge');
-            badge.className = "inline-flex items-center gap-1.5 bg-red-500/20 text-red-500 border border-red-500/50 px-2.5 py-1 rounded-full text-xs font-bold";
-            document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-red-500";
-            resetUIToDash();
-        }
-
-        // Vừa tải trang HTML là đưa toàn bộ về dạng -- (Không có số ảo)
-        resetUIToDash();
-
+        // 2. KẾT NỐI VÀ ĐĂNG KÝ TOPIC
         client.connect({
             useSSL: true,
             onSuccess: () => {
                 document.getElementById('mqtt-status').innerText = "Đã kết nối Server";
-                // Bắt buộc phải có _2026 cho khớp với bms.yaml
-                client.subscribe("ngoctuyka_bms_private_2026/status"); 
-                client.subscribe("ngoctuyka_bms_private_2026/sensor/+/state");
-                client.subscribe("ngoctuyka_bms_private_2026/text_sensor/+/state");
-                client.subscribe("ngoctuyka_bms_private_2026/number/+/state");
-                client.subscribe("ngoctuyka_bms_private_2026/switch/+/state");
-                client.subscribe("ngoctuyka_bms_private_2026/wifi/+/state"); 
+                const prefix = "ngoctuyka_bms_private_2026";
+                client.subscribe(`${prefix}/status`);
+                client.subscribe(`${prefix}/sensor/+/state`);
+                client.subscribe(`${prefix}/text_sensor/+/state`);
+                client.subscribe(`${prefix}/number/+/state`);
+                client.subscribe(`${prefix}/switch/+/state`);
+                client.subscribe(`${prefix}/wifi/+/state`);
             }
         });
 
-        const grid = document.getElementById('cells_grid');
-        for (let i = 1; i <= 16; i++) {
-            grid.innerHTML += `
-                <div class="flex justify-between border-b border-gray-100 pb-1.5 hover:bg-gray-50 px-1 rounded transition">
-                    <span class="text-gray-500 font-black text-xs">C${i.toString().padStart(2, '0')}</span>
-                    <span class="font-bold cell-v text-blue-600 bg-blue-50 px-1.5 rounded shadow-inner" id="c${i}">-- V</span>
-                </div>
-            `;
-        }
-
+        // 3. XỬ LÝ DỮ LIỆU ĐỔ VỀ
         client.onMessageArrived = (msg) => {
             const topic = msg.destinationName;
             const payload = msg.payloadString;
+            const prefix = "ngoctuyka_bms_private_2026";
 
-            // Lắng nghe Nhịp tim ESP32
-            if (topic === "ngoctuyka_bms_private_2026/status") {
-                if (payload === "online") {
-                    isEspConnected = true;
-                    document.getElementById('mqtt-status').innerText = "Đang trực tuyến";
-                    const badge = document.getElementById('mqtt-status-badge');
-                    badge.className = "inline-flex items-center gap-1.5 bg-green-500/20 text-emerald-600 border border-emerald-500/50 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-300";
-                    document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+            if (topic === `${prefix}/status`) {
+                isEspConnected = (payload === "online");
+                const badge = document.getElementById('mqtt-status-badge');
+                const dot = document.getElementById('mqtt-dot');
+                const statusTxt = document.getElementById('mqtt-status');
+                
+                if (isEspConnected) {
+                    statusTxt.innerText = "Đang trực tuyến";
+                    badge.className = "inline-flex items-center gap-1.5 bg-green-500/20 text-emerald-600 border border-emerald-500/50 px-2.5 py-1 rounded-full text-xs font-bold transition-colors";
+                    dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
                 } else {
-                    setOfflineState();
+                    statusTxt.innerText = "ESP32 Ngoại tuyến!";
+                    badge.className = "inline-flex items-center gap-1.5 bg-red-500/20 text-red-500 border border-red-500/50 px-2.5 py-1 rounded-full text-xs font-bold";
+                    dot.className = "w-2 h-2 rounded-full bg-red-500";
+                    resetUIToDash();
                 }
                 return;
             }
 
-            // NẾU ESP32 ĐANG TẮT ĐIỆN -> CHẶN HIỂN THỊ DỮ LIỆU
             if (!isEspConnected) return;
 
-           if(topic.includes("ngoctuyka_bms_private_2026/wifi/ssid/state")) {
+            // Xử lý thông tin WiFi
+            if (topic.includes(`${prefix}/wifi/ssid/state`)) {
                 document.getElementById('wifi_current_ssid').innerText = payload;
                 return;
             }
-            if(topic.includes("ngoctuyka_bms_private_2026/wifi/signal/state")) {
+            if (topic.includes(`${prefix}/wifi/signal/state`)) {
                 document.getElementById('wifi_current_signal').innerText = payload + " dBm";
                 return;
             }
 
             const parts = topic.split('/');
             if (parts.length < 4) return;
-            const type = parts[1];
-            const fullId = parts[2];
-            if (!fullId.startsWith('b1_') && !fullId.startsWith('b2_')) return;
-            
-            const devId = fullId.substring(0, 2);
-            const key = fullId.substring(3);
+            const type = parts[1]; // sensor, number, switch...
+            const fullId = parts[2]; // b1_voltage...
+            const devId = fullId.substring(0, 2); // b1 hoặc b2
+            const key = fullId.substring(3); // voltage, current...
 
             if (!bmsCache[devId]) bmsCache[devId] = {};
             bmsCache[devId][key] = { value: payload, type: type };
@@ -458,149 +447,144 @@
             }
         };
 
+        // 4. HÀM HIỂN THỊ DỮ LIỆU LÊN MÀN HÌNH (QUAN TRỌNG NHẤT)
         function applyDataToUI(key, val, type) {
-            if (type === 'sensor' || type === 'text_sensor' || type === 'number') {
-                const mapping = {
-                    'voltage': ['main_voltage', 'pack_v'],
-                    'current': ['main_current', 'pack_a'],
-                    'power': ['main_power', 'main_power_card', 'pack_p'],
-                    'soc': ['main_soc', 'pack_soc'],
-                    'capacity_remaining': ['main_energy_now', 'pack_cap_now'],
-                    'bat_cap': ['main_capacity'], // Đã sửa key
-                    'delta_cell_voltage': ['pack_delta'],
-                    'charging_cycles': ['pack_cycles', 'pack_cycles_card'],
-                    'total_charging_cycle_capacity': ['main_total_charge'], // Đã thêm
-                    'temperature_sensor_1': ['pack_t_bms'],
-                    'temperature_sensor_2': ['pack_t1'],
-                    'temperature_sensor_3': ['pack_t2'],
-                    'min_cell_voltage': ['pack_min'],
-                    'max_cell_voltage': ['pack_max'],
-                    'setup_passcode': ['pack_passcode']
-                };
+            const mapping = {
+                'voltage': ['main_voltage', 'pack_v'],
+                'current': ['main_current', 'pack_a'],
+                'power': ['main_power_card', 'pack_p'],
+                'soc': ['main_soc', 'pack_soc'],
+                'capacity_remaining': ['main_energy_now', 'pack_cap_now'],
+                'bat_cap_setting': ['main_capacity'],
+                'delta_cell_voltage': ['pack_delta'],
+                'charging_cycles': ['pack_cycles', 'pack_cycles_card'],
+                'total_charging_cycle_capacity': ['main_total_charge'],
+                'temperature_sensor_1': ['pack_t_bms'],
+                'temperature_sensor_2': ['pack_t1'],
+                'temperature_sensor_3': ['pack_t2'],
+                'min_cell_voltage': ['pack_min'],
+                'max_cell_voltage': ['pack_max'],
+                'setup_passcode': ['pack_passcode']
+            };
 
-                if (mapping[key]) {
-                    mapping[key].forEach(elId => {
-                        const el = document.getElementById(elId);
-                        if(el) {
-                            if (elId === 'pack_passcode') {
-                                el.innerText = val;
-                            } else {
-                                let formattedVal = val; let unit = "";
-                                if (elId.includes('voltage') || elId.includes('_v') || elId.includes('min') || elId.includes('max') || elId.includes('delta')) {
-                                    formattedVal = parseFloat(val).toFixed(3); unit = " V";
-                                } else if (elId.includes('current') || elId.includes('_a')) {
-                                    formattedVal = parseFloat(val).toFixed(2); unit = " A";
-                                } else if (elId.includes('power') || elId.includes('_p')) {
-                                    formattedVal = parseFloat(val).toFixed(0); unit = " W";
-                                } else if (elId.includes('soc')) {
-                                    formattedVal = parseFloat(val).toFixed(1); unit = " %";
-                                } else if (elId.includes('cap') || elId.includes('now') || elId.includes('total_charge')) {
-                                    formattedVal = parseFloat(val).toFixed(1); unit = " Ah";
-                                } else if (elId.includes('_t')) {
-                                    formattedVal = parseFloat(val).toFixed(1); unit = " °C";
-                                } else if (elId.includes('cycles')) {
-                                    formattedVal = parseInt(val);
-                                } else {
-                                    formattedVal = parseFloat(val).toFixed(2);
-                                }
-                                el.innerText = formattedVal + unit;
-                            }
-                        }
-                    });
-                }
+            // A. Cập nhật các thẻ thông số cơ bản
+            if (mapping[key]) {
+                mapping[key].forEach(elId => {
+                    const el = document.getElementById(elId);
+                    if (!el) return;
+                    if (elId === 'pack_passcode') { el.innerText = val; return; }
+                    
+                    let unit = "";
+                    if (elId.includes('voltage') || elId.includes('min') || elId.includes('max') || elId.includes('delta')) unit = " V";
+                    else if (elId.includes('current') || elId.includes('_a')) unit = " A";
+                    else if (elId.includes('power') || elId.includes('_p')) unit = " W";
+                    else if (elId.includes('soc')) unit = " %";
+                    else if (elId.includes('cap') || elId.includes('now') || elId.includes('total_charge')) unit = " Ah";
+                    else if (elId.includes('_t')) unit = " °C";
 
-                if (key.startsWith('cell_voltage_')) {
-                    const num = key.split('_')[2];
-                    const cellEl = document.getElementById('c' + num);
-                    if (cellEl) cellEl.innerText = parseFloat(val).toFixed(3) + " V";
-                }
-
-                if (key === 'current') {
-                    const current = parseFloat(val);
-                    const lSolar = document.getElementById('line-solar');
-                    const lLoad = document.getElementById('line-load');
-
-                    lSolar.classList.remove('active', 'flow-forward', 'flow-reverse');
-                    lLoad.classList.remove('active', 'flow-forward', 'flow-reverse');
-
-                    const pwr = bmsCache[activeBms]['power'] ? parseFloat(bmsCache[activeBms]['power'].value).toFixed(0) : "0";
-
-                    if (current > 0.5) {
-                        lSolar.classList.add('active', 'flow-forward');
-                        document.getElementById('main_power_load').innerText = "0 W";
-                        document.getElementById('solar_power').innerText = pwr + " W";
-                    } else if (current < -0.5) {
-                        lLoad.classList.add('active', 'flow-forward');
-                        document.getElementById('main_power_load').innerText = pwr + " W";
-                        document.getElementById('solar_power').innerText = "0 W";
-                    } else {
-                        document.getElementById('main_power_load').innerText = "0 W";
-                        document.getElementById('solar_power').innerText = "0 W";
-                    }
-                }
-                if (key === 'soc') {
-                    document.getElementById('bat_fill_level').style.height = val + "%";
-                    document.getElementById('bat_percent_text').innerText = Math.round(val) + "%";
-                }
+                    el.innerText = parseFloat(val).toLocaleString('vi-VN', { minimumFractionDigits: (unit.includes('V')?3:1) }) + unit;
+                });
             }
 
+            // B. Tính toán Công suất (+/-) và Số điện (kWh)
+            if (key === 'current' || key === 'voltage' || key === 'capacity_remaining' || key === 'bat_cap_setting') {
+                const V = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
+                const A = parseFloat(bmsCache[activeBms]['current']?.value || 0);
+                const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
+                const AhMax = parseFloat(bmsCache[activeBms]['bat_cap_setting']?.value || 0);
+
+                // Hiển thị công suất có dấu trên đầu Pin
+                const pwrEl = document.getElementById('main_power');
+                const pwrIcon = document.getElementById('pwr-icon');
+                const P = Math.abs(V * A).toFixed(0);
+                pwrEl.innerText = (A >= 0.1 ? "+" : (A <= -0.1 ? "-" : "")) + P + " W";
+                pwrEl.style.color = A >= 0.1 ? "#4ade80" : (A <= -0.1 ? "#fb7185" : "white");
+                pwrIcon.className = A >= 0.1 ? "fas fa-plug text-green-400" : "fas fa-bolt text-yellow-400";
+
+                // Tính kWh
+                document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2) + " kWh";
+                document.getElementById('kwh_total').innerText = "Thiết kế: " + ((AhMax * V) / 1000).toFixed(1) + " số";
+            }
+
+            // C. Cập nhật 16 Cell
+            if (key.startsWith('cell_voltage_')) {
+                const num = key.split('_')[2];
+                const cellEl = document.getElementById('c' + num);
+                if (cellEl) cellEl.innerText = parseFloat(val).toFixed(3) + " V";
+            }
+
+            // D. Thanh Pin Soc
+            if (key === 'soc') {
+                document.getElementById('bat_fill_level').style.height = val + "%";
+                document.getElementById('bat_percent_text').innerText = Math.round(val) + "%";
+            }
+
+            // E. Trang Cài đặt (Xử lý định dạng số nguyên cho dòng điện)
             if (type === 'number') {
                 const inputEl = document.getElementById('val_' + key);
                 if (inputEl) {
-                    if (key.includes('voltage') || key.includes('_v') || key.includes('ovp') || key.includes('uvp')) {
-                        inputEl.value = parseFloat(val).toFixed(3);
-                    } else {
-                        inputEl.value = parseFloat(val);
-                    }
+                    if (key.includes('current')) inputEl.value = Math.round(parseFloat(val));
+                    else inputEl.value = parseFloat(val).toFixed(3);
                 }
             }
 
+            // F. Công tắc
             if (type === 'switch') {
                 const swEl = document.getElementById('sw_' + key);
                 if (swEl) swEl.checked = (val === 'ON');
             }
         }
 
+        // 5. ĐIỀU KHIỂN VÀ CHUYỂN ĐỔI
         function switchDevice() {
             activeBms = document.getElementById('device-selector').value;
             resetUIToDash();
-            if (isEspConnected) {
-                const data = bmsCache[activeBms];
-                if (data && Object.keys(data).length > 0) {
-                    for (const k in data) applyDataToUI(k, data[k].value, data[k].type);
-                }
+            const data = bmsCache[activeBms];
+            if (data) {
+                for (const k in data) applyDataToUI(k, data[k].value, data[k].type);
             }
         }
 
         function nav(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('text-[#10b981]', 'text-gray-400'));
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-green-50'));
-            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.replace('text-[#10b981]', 'text-gray-400');
+                btn.classList.remove('bg-green-50');
+            });
             const activeBtn = document.getElementById('nav-' + tab);
             activeBtn.classList.replace('text-gray-400', 'text-[#10b981]');
             activeBtn.classList.add('bg-green-50');
         }
 
         function sendCmd(type, state) {
-            const val = state ? "ON" : "OFF";
-            // Đổi bms thành ngoctuyka_bms_private_2026
-            client.send(`ngoctuyka_bms_private_2026/switch/${activeBms}_${type}/command`, val);
+            const topic = `ngoctuyka_bms_private_2026/switch/${activeBms}_${type}/command`;
+            client.send(topic, state ? "ON" : "OFF");
         }
 
-       function sendVal(id) {
+        function sendVal(id) {
             const input = document.getElementById('val_' + id);
-            // Đổi bms thành ngoctuyka_bms_private_2026
-            client.send(`ngoctuyka_bms_private_2026/number/${activeBms}_${id}/command`, input.value);
-            event.target.innerText = "ĐÃ LƯU";
-            event.target.classList.replace('from-emerald-500', 'from-blue-500');
-            event.target.classList.replace('to-green-600', 'to-blue-600');
+            const topic = `ngoctuyka_bms_private_2026/number/${activeBms}_${id}/command`;
+            client.send(topic, input.value);
+            const btn = event.target;
+            btn.innerText = "ĐÃ LƯU";
+            btn.classList.replace('from-emerald-500', 'from-blue-500');
             setTimeout(() => {
-                event.target.innerText = "LƯU";
-                event.target.classList.replace('from-blue-500', 'from-emerald-500');
-                event.target.classList.replace('to-blue-600', 'to-green-600');
+                btn.innerText = "LƯU";
+                btn.classList.replace('from-blue-500', 'from-emerald-500');
             }, 1000);
+        }
+
+        // Khởi tạo 16 cell Grid nếu chưa có (Tránh lỗi DOM)
+        const grid = document.getElementById('cells_grid');
+        if (grid && grid.innerHTML === "") {
+            for (let i = 1; i <= 16; i++) {
+                grid.innerHTML += `
+                    <div class="flex justify-between border-b border-gray-100 pb-1.5 hover:bg-gray-50 px-1 rounded transition">
+                        <span class="text-gray-500 font-black text-xs">C${i.toString().padStart(2, '0')}</span>
+                        <span class="font-bold cell-v text-blue-600 bg-blue-50 px-1.5 rounded shadow-inner" id="c${i}">-- V</span>
+                    </div>`;
+            }
         }
     </script>
 </body>
