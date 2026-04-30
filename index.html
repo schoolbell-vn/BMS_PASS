@@ -679,11 +679,17 @@
                 if (topic.includes("b1_rssi")) {
                     if (document.getElementById('bt_rssi_1')) document.getElementById('bt_rssi_1').innerText = val + " dBm";
                     if (activeBms === 'b1' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val + " dBm";
+                    // THÊM 2 DÒNG NÀY ĐỂ LƯU VÀO BỘ NHỚ TẠM
+                    if (!bmsCache['b1']) bmsCache['b1'] = {};
+                    bmsCache['b1']['rssi'] = { value: val }; 
                     return;
                 }
                 if (topic.includes("b2_rssi")) {
                     if (document.getElementById('bt_rssi_2')) document.getElementById('bt_rssi_2').innerText = val + " dBm";
                     if (activeBms === 'b2' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val + " dBm";
+                    // THÊM 2 DÒNG NÀY ĐỂ LƯU VÀO BỘ NHỚ TẠM
+                    if (!bmsCache['b2']) bmsCache['b2'] = {};
+                    bmsCache['b2']['rssi'] = { value: val }; 
                     return;
                 }
 
