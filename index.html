@@ -79,21 +79,36 @@
                 </div>
 
                 <svg viewBox="0 0 300 150" class="absolute inset-0 w-full h-full z-10" preserveAspectRatio="xMidYMid meet">
-                    <g transform="translate(45, 90) scale(0.65)" stroke="#f97316" stroke-width="2" fill="rgba(249,115,22,0.1)">
-                        <polygon points="0,-15 13,-7.5 13,7.5 0,15 -13,7.5 -13,-7.5" fill="rgba(249,115,22,0.5)" filter="drop-shadow(0 0 5px #f97316)"/>
+                    <!-- 1. CỤM PIN MẶT TRỜI: Màu vàng, tăng số lượng lên 9 ô lục giác -->
+                    <g transform="translate(45, 90) scale(0.55)" stroke="#eab308" stroke-width="2" fill="rgba(234,179,8,0.1)">
+                        <polygon points="0,-15 13,-7.5 13,7.5 0,15 -13,7.5 -13,-7.5" fill="rgba(234,179,8,0.6)" filter="drop-shadow(0 0 5px #eab308)"/>
+                        <!-- Lớp trong -->
                         <polygon points="26,-30 39,-22.5 39,-7.5 26,0 13,-7.5 13,-22.5" />
                         <polygon points="-26,-30 -13,-22.5 -13,-7.5 -26,0 -39,-7.5 -39,-22.5" />
                         <polygon points="26,0 39,7.5 39,22.5 26,30 13,22.5 13,7.5" />
                         <polygon points="-26,0 -13,7.5 -13,22.5 -26,30 -39,22.5 -39,7.5" />
+                        <!-- Lớp ngoài (Thêm các ô mới) -->
+                        <polygon points="0,-45 13,-37.5 13,-22.5 0,-15 -13,-22.5 -13,-37.5" />
+                        <polygon points="0,15 13,22.5 13,37.5 0,45 -13,37.5 -13,22.5" />
+                        <polygon points="52,-15 65,-7.5 65,7.5 52,15 39,7.5 39,-7.5" />
+                        <polygon points="-52,-15 -39,-7.5 -39,7.5 -52,15 -65,7.5 -65,-7.5" />
                     </g>
-                    <g transform="translate(255, 90) scale(0.8)" stroke="#06b6d4" stroke-width="2" fill="none">
+                    
+                    <!-- 2. TẢI TIÊU THỤ: Biểu tượng Ngôi Nhà -->
+                    <g transform="translate(255, 90) scale(1.35)" stroke="#06b6d4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Vòng tròn nền -->
                         <circle cx="0" cy="0" r="18" fill="rgba(6,182,212,0.1)" filter="drop-shadow(0 0 3px #06b6d4)"/>
-                        <path d="M-8,4 L-8,14 L8,14 L8,4 M0,-10 L0,4 M-4,-4 L4,-4" />
+                        <!-- Nét vẽ Ngôi nhà (Mái, Tường, Cửa) -->
+                        <path d="M -12,2 L 0,-10 L 12,2 M -8,-2 L -8,11 L 8,11 L 8,-2 M -3,11 L -3,4 L 3,4 L 3,11" />
                     </g>
-                    <path d="M 75 90 L 115 90" stroke="#1e293b" stroke-width="5" fill="none" />
-                    <path id="path-solar" d="M 75 90 L 115 90" stroke-width="5" fill="none" class="energy-path" />
-                    <path d="M 185 90 L 230 90" stroke="#1e293b" stroke-width="5" fill="none" />
-                    <path id="path-load" d="M 185 90 L 230 90" stroke-width="5" fill="none" class="energy-path" />
+
+                    <!-- ĐƯỜNG DÂY TRUYỀN TẢI -->
+                    <!-- Dịch điểm bắt đầu dây năng lượng mặt trời ra xa một chút (M 85) để không đè lên các ô lục giác mới -->
+                    <path d="M 85 90 L 115 90" stroke="#1e293b" stroke-width="5" fill="none" />
+                    <path id="path-solar" d="M 85 90 L 115 90" stroke-width="5" fill="none" class="energy-path" />
+                    
+                    <path d="M 185 90 L 225 90" stroke="#1e293b" stroke-width="5" fill="none" />
+                    <path id="path-load" d="M 185 90 L 225 90" stroke-width="5" fill="none" class="energy-path" />
                 </svg>
 
                 <div class="relative z-20 flex flex-col items-center mt-12">
