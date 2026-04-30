@@ -626,7 +626,8 @@
                 const c = document.getElementById('c'+i); 
                 if(c) {
                     c.innerText = "-- V"; 
-                    c.parentElement.className = "font-black text-cyan-300 font-mono nowrap text-lg"; 
+                    // ĐÃ SỬA: Chỉ reset class của chính nó
+                    c.className = "font-black text-cyan-300 font-mono nowrap text-lg"; 
                 } 
             }
             if (document.getElementById('bat_fill_level')) document.getElementById('bat_fill_level').style.height = "0%";
