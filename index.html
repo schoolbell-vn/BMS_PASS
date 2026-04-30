@@ -583,8 +583,8 @@
 
     <script>
         const config = {
-            host: "broker.emqx.io",
-            port: 8084,
+            host: "mqtt.flespi.io",
+            port: 443, // Cổng mặc định của Flespi cho Web
             clientId: "WebUI_MobFull_Final_" + Math.random().toString(16).substr(2, 5)
         };
 
@@ -623,7 +623,9 @@
         }
 
         client.connect({
-            useSSL: true,
+            useSSL: true, // Trình duyệt bắt buộc phải là True
+            userName: "rogJG4nHCYRsd6kpWp6fFCXIEX765LSqCBLYOGErtXDk666h4pmwx7W9YsvuVhiC", // Dán token vào đây
+            password: "", // Bắt buộc để trống
             onSuccess: () => {
                 if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "LINKED";
                 client.subscribe(`${prefix}/status`); 
