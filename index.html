@@ -910,8 +910,9 @@
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
                 
                 if (document.getElementById('kwh_remaining')) document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2);
-                if (document.getElementById('kwh_total')) document.getElementById('kwh_total').innerText = ((AhMax * V) / 1000).toFixed(1);
-            }
+                                // Tách riêng: kWh hiện tại (dùng áp thực tế V) và kWh Tổng (dùng áp danh định 51.2V)
+                if (document.getElementById('kwh_total')) document.getElementById('kwh_total').innerText = ((AhMax * 51.2) / 1000).toFixed(1);
+
 
             if (key === 'soc' || key === 'capacity_remaining' || key === 'bat_cap') {
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
