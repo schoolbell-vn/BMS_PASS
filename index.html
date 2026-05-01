@@ -8,7 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #050810; font-family: 'Courier New', Courier, monospace; color: #e2e8f0; -webkit-tap-highlight-color: transparent; }
+        html { font-size: 17px; } /* Phóng to đồng loạt toàn bộ chữ trên trang */
+        body { background-color: #050810; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e2e8f0; -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -37,36 +38,37 @@
 </head>
 <body class="min-h-screen pb-28">
 
-    <header class="bg-[#090e17] border-b border-cyan-900/50 p-4 sticky top-0 z-50">
-        <div class="flex justify-between items-center max-w-xl mx-auto">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-[#0f172a] rounded-xl flex items-center justify-center border border-cyan-500 shadow-[0_0_15px_#06b6d4]">
-                    <i class="fas fa-atom text-cyan-400 text-2xl animate-spin-slow"></i>
+    <!-- HEADER MỚI: Tích hợp Ô Trạm Hệ Thống và Dính chặt trên cùng (Sticky) -->
+    <header class="bg-[#090e17] border-b border-cyan-900/50 p-3 sticky top-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+        <div class="flex flex-col gap-3 max-w-xl mx-auto">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#0f172a] rounded-lg flex items-center justify-center border border-cyan-500 shadow-[0_0_10px_#06b6d4]">
+                        <i class="fas fa-atom text-cyan-400 text-xl animate-spin-slow"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-lg tracking-widest text-cyan-50 neon-text uppercase leading-none">BMS Mobile</h1>
+                        <span class="text-[10px] text-cyan-400 tracking-widest block mt-0.5">THẦY TÚ • PRO</span>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="font-black text-xl tracking-widest text-cyan-50 neon-text uppercase">BMS Mobile</h1>
-                    <span class="text-sm text-cyan-400 tracking-widest block mt-1">THẦY TÚ • PRO</span>
+                <div id="mqtt-status-badge" class="bg-gray-800 border border-gray-700 px-3 py-1.5 rounded-lg text-xs font-black text-gray-400 flex items-center shadow-md">
+                    <div class="w-2 h-2 rounded-full bg-gray-500 mr-2" id="mqtt-dot"></div>
+                    <span id="mqtt-status">WAIT...</span>
                 </div>
             </div>
-            <div id="mqtt-status-badge" class="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-sm font-black text-gray-400 flex items-center shadow-md">
-                <div class="w-2.5 h-2.5 rounded-full bg-gray-500 mr-2" id="mqtt-dot"></div>
-                <span id="mqtt-status">WAIT...</span>
+            
+            <!-- Tích hợp bộ chọn Trạm -->
+            <div class="flex items-center gap-2">
+                <select id="device-selector" class="w-full bg-[#111827] text-cyan-200 border border-cyan-800 rounded-lg p-2 font-bold outline-none text-sm tracking-widest text-center shadow-inner" onchange="switchDevice()">
+                    <option value="b1" class="bg-gray-900 text-cyan-400">MASTER 01 - 314 Ah</option>
+                    <option value="b2" class="bg-gray-900 text-cyan-400">SLAVE 02 - 280 Ah</option>
+                </select>
+                <span class="text-cyan-500 text-xs font-black neon-text whitespace-nowrap w-[70px] text-right" id="bt_rssi_header">BT: --</span>
             </div>
         </div>
     </header>
 
     <main class="max-w-xl mx-auto p-4 mt-2">
-        
-        <div class="card-scifi p-4 flex flex-col gap-3 mb-6">
-            <div class="flex justify-between items-center px-1">
-                <span class="text-cyan-500 font-black text-sm tracking-widest uppercase"><i class="fas fa-server mr-2"></i> Trạm hệ thống</span>
-                <span class="text-cyan-400 text-base font-black neon-text" id="bt_rssi_header">BT: -- dBm</span>
-            </div>
-            <select id="device-selector" class="w-full bg-[#111827] text-cyan-100 border border-cyan-800 rounded-lg p-3 font-bold outline-none text-base tracking-widest text-center" onchange="switchDevice()">
-                <option value="b1" class="bg-gray-900 text-cyan-400">MASTER ARRAY 01 - 314 Ah</option>
-                <option value="b2" class="bg-gray-900 text-cyan-400">SLAVE ARRAY 02 - 280 Ah</option>
-            </select>
-        </div>
 
         <div id="tab-home" class="tab-content active space-y-6">
             
@@ -79,31 +81,26 @@
                 </div>
 
                 <svg viewBox="0 0 300 150" class="absolute inset-0 w-full h-full z-10" preserveAspectRatio="xMidYMid meet">
-                    <!-- 1. CỤM PIN MẶT TRỜI: Màu vàng, tăng số lượng lên 9 ô lục giác -->
+                    <!-- 1. CỤM PIN MẶT TRỜI -->
                     <g transform="translate(45, 90) scale(0.55)" stroke="#eab308" stroke-width="2" fill="rgba(234,179,8,0.1)">
                         <polygon points="0,-15 13,-7.5 13,7.5 0,15 -13,7.5 -13,-7.5" fill="rgba(234,179,8,0.6)" filter="drop-shadow(0 0 5px #eab308)"/>
-                        <!-- Lớp trong -->
                         <polygon points="26,-30 39,-22.5 39,-7.5 26,0 13,-7.5 13,-22.5" />
                         <polygon points="-26,-30 -13,-22.5 -13,-7.5 -26,0 -39,-7.5 -39,-22.5" />
                         <polygon points="26,0 39,7.5 39,22.5 26,30 13,22.5 13,7.5" />
                         <polygon points="-26,0 -13,7.5 -13,22.5 -26,30 -39,22.5 -39,7.5" />
-                        <!-- Lớp ngoài (Thêm các ô mới) -->
                         <polygon points="0,-45 13,-37.5 13,-22.5 0,-15 -13,-22.5 -13,-37.5" />
                         <polygon points="0,15 13,22.5 13,37.5 0,45 -13,37.5 -13,22.5" />
                         <polygon points="52,-15 65,-7.5 65,7.5 52,15 39,7.5 39,-7.5" />
                         <polygon points="-52,-15 -39,-7.5 -39,7.5 -52,15 -65,7.5 -65,-7.5" />
                     </g>
                     
-                    <!-- 2. TẢI TIÊU THỤ: Biểu tượng Ngôi Nhà -->
+                    <!-- 2. TẢI TIÊU THỤ: Ngôi Nhà -->
                     <g transform="translate(255, 90) scale(1.35)" stroke="#06b6d4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <!-- Vòng tròn nền -->
                         <circle cx="0" cy="0" r="18" fill="rgba(6,182,212,0.1)" filter="drop-shadow(0 0 3px #06b6d4)"/>
-                        <!-- Nét vẽ Ngôi nhà (Mái, Tường, Cửa) -->
                         <path d="M -12,2 L 0,-10 L 12,2 M -8,-2 L -8,11 L 8,11 L 8,-2 M -3,11 L -3,4 L 3,4 L 3,11" />
                     </g>
 
-                    <!-- ĐƯỜNG DÂY TRUYỀN TẢI -->
-                    <!-- Dịch điểm bắt đầu dây năng lượng mặt trời ra xa một chút (M 85) để không đè lên các ô lục giác mới -->
+                    <!-- ĐƯỜNG DÂY -->
                     <path d="M 85 90 L 115 90" stroke="#1e293b" stroke-width="5" fill="none" />
                     <path id="path-solar" d="M 85 90 L 115 90" stroke-width="5" fill="none" class="energy-path" />
                     
@@ -122,14 +119,23 @@
                 </div>
             </div>
 
+            <!-- CARDS THÔNG SỐ TỔNG QUAN -->
             <div class="grid grid-cols-2 gap-4">
-                <div class="card-scifi bg-gradient-to-br from-blue-900/40 to-blue-800/10 border-blue-500/30 p-5 flex flex-col justify-center">
-                    <p class="text-xs text-blue-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-bolt"></i> Volt & Amp</p>
-                    <div class="flex justify-between items-end gap-1">
-                        <span class="text-2xl font-black text-blue-100 neon-text nowrap"><span id="main_voltage">--</span><span class="text-sm text-blue-400 ml-1">V</span></span>
-                        <span class="text-2xl font-black text-blue-100 neon-text nowrap"><span id="main_current">--</span><span class="text-sm text-blue-400 ml-1">A</span></span>
+                <!-- ĐÃ SỬA LẠI: Volt và Amp Chia làm 2 dòng để chống tràn chữ -->
+                <div class="card-scifi bg-gradient-to-br from-blue-900/40 to-blue-800/10 border-blue-500/30 p-4 flex flex-col justify-center">
+                    <p class="text-xs text-blue-300 font-bold uppercase mb-2 tracking-wider"><i class="fas fa-bolt"></i> Volt & Amp</p>
+                    <div class="flex flex-col gap-1.5 mt-0.5">
+                        <div class="flex justify-between items-end border-b border-blue-500/20 pb-1.5">
+                            <span class="text-[10px] text-blue-400 font-bold tracking-widest">VOLT</span>
+                            <span class="text-xl font-black text-blue-100 neon-text nowrap"><span id="main_voltage">--</span><span class="text-sm text-blue-400 ml-1">V</span></span>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] text-blue-400 font-bold tracking-widest">AMP</span>
+                            <span class="text-xl font-black text-cyan-200 neon-text nowrap"><span id="main_current">--</span><span class="text-sm text-cyan-400 ml-1">A</span></span>
+                        </div>
                     </div>
                 </div>
+
                 <div class="card-scifi bg-gradient-to-br from-red-900/40 to-red-800/10 border-red-500/30 p-5 flex flex-col justify-center">
                     <p class="text-xs text-red-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-tachometer-alt"></i> Hiệu suất</p>
                     <div class="flex justify-between items-end gap-1">
@@ -217,7 +223,6 @@
                 <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase">
                     <i class="fas fa-layer-group"></i> Điện áp 16 Cell
                 </div>
-                <!-- Đã tăng khoảng cách cột (gap-x-12) và dùng justify-between đẩy giá trị ra rìa cột -->
                 <div class="p-5 grid grid-cols-2 gap-x-12 gap-y-3.5 text-base">
                     <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C01</span><span id="c1" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
                     <div class="flex justify-between items-center border-b border-gray-800/50 pb-2"><span class="text-gray-500 font-bold">C09</span><span id="c9" class="font-black text-cyan-300 font-mono nowrap text-lg">-- V</span></div>
@@ -604,12 +609,21 @@
             clientId: "WebUI_MobFull_Final_" + Math.random().toString(16).substr(2, 5)
         };
 
-        const client = new Paho.MQTT.Client(config.host, config.port, config.clientId);
+        const client = new Paho.MQTT.Client(config.host, config.port, "/mqtt", config.clientId);
         const prefix = "ngoctuyka_bms_private_2026";
-        let activeBms = "b1";
+        
+        // ĐÃ SỬA: Đọc lại trạm pin đang xem từ bộ nhớ trình duyệt, F5 không bị nhảy
+        let activeBms = localStorage.getItem('selected_bms') || "b1"; 
+        
         let bmsCache = { b1: {}, b2: {} };
         let isEspConnected = false;
         let pendingCommands = {};
+
+        // ĐÃ SỬA: Khi web load xong, ép ô Selector hiển thị đúng trạm đang xem
+        window.addEventListener('load', () => {
+            const selector = document.getElementById('device-selector');
+            if (selector) selector.value = activeBms;
+        });
 
         function resetBtn(btn) {
             btn.innerText = "OK"; 
@@ -626,7 +640,6 @@
                 const c = document.getElementById('c'+i); 
                 if(c) {
                     c.innerText = "-- V"; 
-                    // ĐÃ SỬA: Chỉ reset class của chính nó
                     c.className = "font-black text-cyan-300 font-mono nowrap text-lg"; 
                 } 
             }
@@ -639,10 +652,37 @@
             if (document.getElementById('path-load')) document.getElementById('path-load').className.baseVal = "energy-path";
         }
 
+        // ĐÃ SỬA: Hàm tự động kết nối lại khi đứt mạng (Không cần F5)
+        client.onConnectionLost = (responseObject) => {
+            if (responseObject.errorCode !== 0) {
+                console.log("Mất kết nối MQTT: " + responseObject.errorMessage);
+                const badge = document.getElementById('mqtt-status-badge');
+                if (badge) badge.className = "bg-yellow-900/30 border border-yellow-500/50 px-3 py-1.5 rounded-lg text-xs font-black text-yellow-500 flex items-center shadow-md";
+                if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "RECONNECT";
+                if (document.getElementById('mqtt-dot')) document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse mr-2";
+                
+                setTimeout(() => {
+                    client.connect({
+                        useSSL: true,
+                        userName: "rogJG4nHCYRsd6kpWp6fFCXIEX765LSqCBLYOGErtXDk666h4pmwx7W9YsvuVhiC",
+                        password: "",
+                        onSuccess: () => {
+                            if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "ONLINE";
+                            client.subscribe(`${prefix}/status`); 
+                            client.subscribe(`${prefix}/sensor/+/state`);
+                            client.subscribe(`${prefix}/text_sensor/+/state`);
+                            client.subscribe(`${prefix}/number/+/state`);
+                            client.subscribe(`${prefix}/switch/+/state`);
+                        }
+                    });
+                }, 5000);
+            }
+        };
+
         client.connect({
-            useSSL: true, // Trình duyệt bắt buộc phải là True
-            userName: "rogJG4nHCYRsd6kpWp6fFCXIEX765LSqCBLYOGErtXDk666h4pmwx7W9YsvuVhiC", // Dán token vào đây
-            password: "", // Bắt buộc để trống
+            useSSL: true, 
+            userName: "rogJG4nHCYRsd6kpWp6fFCXIEX765LSqCBLYOGErtXDk666h4pmwx7W9YsvuVhiC", 
+            password: "", 
             onSuccess: () => {
                 if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "LINKED";
                 client.subscribe(`${prefix}/status`); 
@@ -662,13 +702,13 @@
                     isEspConnected = (val === "online");
                     const badge = document.getElementById('mqtt-status-badge');
                     if (isEspConnected) {
-                        if (badge) badge.className = "bg-cyan-900/30 border border-cyan-500/50 px-4 py-2 rounded-lg text-sm font-black text-cyan-400 flex items-center shadow-md";
+                        if (badge) badge.className = "bg-cyan-900/30 border border-cyan-500/50 px-3 py-1.5 rounded-lg text-xs font-black text-cyan-400 flex items-center shadow-md";
                         if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "ONLINE";
-                        if (document.getElementById('mqtt-dot')) document.getElementById('mqtt-dot').className = "w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse mr-2";
+                        if (document.getElementById('mqtt-dot')) document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-cyan-400 animate-pulse mr-2";
                     } else {
-                        if (badge) badge.className = "bg-red-900/30 border border-red-500/50 px-4 py-2 rounded-lg text-sm font-black text-red-500 flex items-center shadow-md";
+                        if (badge) badge.className = "bg-red-900/30 border border-red-500/50 px-3 py-1.5 rounded-lg text-xs font-black text-red-500 flex items-center shadow-md";
                         if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "OFFLINE";
-                        if (document.getElementById('mqtt-dot')) document.getElementById('mqtt-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500 mr-2";
+                        if (document.getElementById('mqtt-dot')) document.getElementById('mqtt-dot').className = "w-2 h-2 rounded-full bg-red-500 mr-2";
                         resetUI();
                     }
                     return;
@@ -679,7 +719,6 @@
                 if (topic.includes("b1_rssi")) {
                     if (document.getElementById('bt_rssi_1')) document.getElementById('bt_rssi_1').innerText = val + " dBm";
                     if (activeBms === 'b1' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val + " dBm";
-                    // THÊM 2 DÒNG NÀY ĐỂ LƯU VÀO BỘ NHỚ TẠM
                     if (!bmsCache['b1']) bmsCache['b1'] = {};
                     bmsCache['b1']['rssi'] = { value: val }; 
                     return;
@@ -687,7 +726,6 @@
                 if (topic.includes("b2_rssi")) {
                     if (document.getElementById('bt_rssi_2')) document.getElementById('bt_rssi_2').innerText = val + " dBm";
                     if (activeBms === 'b2' && document.getElementById('bt_rssi_header')) document.getElementById('bt_rssi_header').innerText = "BT: " + val + " dBm";
-                    // THÊM 2 DÒNG NÀY ĐỂ LƯU VÀO BỘ NHỚ TẠM
                     if (!bmsCache['b2']) bmsCache['b2'] = {};
                     bmsCache['b2']['rssi'] = { value: val }; 
                     return;
@@ -755,6 +793,7 @@
                     if (el) {
                         if (id === 'pack_cycles') el.innerText = parseInt(val);
                         else if (id === 'pack_uptime') el.innerText = (parseFloat(val) / 86400).toFixed(1);
+                        else if (id === 'main_voltage') el.innerText = parseFloat(val).toFixed(2); // ĐÃ SỬA: Lấy 2 số thập phân
                         else el.innerText = (key.includes('voltage') || key === 'delta_cell_voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
                     }
                 });
@@ -765,13 +804,11 @@
             }
 
             if (key.startsWith('cell_voltage_')) {
-                // Tối ưu hóa: Chờ 50ms gom đủ 16 cell mới render 1 lần, triệt tiêu hoàn toàn giật lag
                 if(window.cellUpdateTimer) clearTimeout(window.cellUpdateTimer);
                 
                 window.cellUpdateTimer = setTimeout(() => {
                     let minV = 999.0; let maxV = 0.0; let minIdx = -1; let maxIdx = -1;
                     
-                    // Tìm Cell cao nhất và thấp nhất
                     for (let i = 1; i <= 16; i++) {
                         const cKey = `cell_voltage_${i}`;
                         if (bmsCache[activeBms][cKey]) {
@@ -781,7 +818,6 @@
                         }
                     }
 
-                    // Cập nhật lên màn hình 1 lần duy nhất
                     if (minIdx !== -1 && maxIdx !== -1) {
                         for (let i = 1; i <= 16; i++) {
                             const cEl = document.getElementById('c' + i);
@@ -791,10 +827,10 @@
                                     const currentV = parseFloat(bmsCache[activeBms][cKey].value).toFixed(3);
                                     cEl.innerText = currentV + " V";
                                     
-                                    // Bật màu Neon cho Cell Min/Max
-                                    if (i === minIdx) cEl.className = "font-black text-red-500 font-mono nowrap text-lg neon-text";
-                                    else if (i === maxIdx) cEl.className = "font-black text-purple-400 font-mono nowrap text-lg neon-text";
-                                    else cEl.className = "font-black text-cyan-300 font-mono nowrap text-lg";
+                                    // Mã mới (Chữ bự hơn):
+                                    if (i === minIdx) cEl.className = "font-black text-red-500 font-mono nowrap text-xl neon-text";
+                                    else if (i === maxIdx) cEl.className = "font-black text-purple-400 font-mono nowrap text-xl neon-text";
+                                    else cEl.className = "font-black text-cyan-300 font-mono nowrap text-xl";
                                 }
                             }
                         }
@@ -804,7 +840,7 @@
                         if(document.getElementById('pack_delta')) document.getElementById('pack_delta').innerText = deltaV;
                     }
                 }, 50); 
-                return; // Ngắt hàm để tránh lãng phí tài nguyên
+                return; 
             }
 
             if (key === 'current' || key === 'power') {
@@ -881,6 +917,9 @@
 
         function switchDevice() {
             activeBms = document.getElementById('device-selector').value;
+            // ĐÃ SỬA: Lưu lại trạm đang xem vào bộ nhớ trình duyệt
+            localStorage.setItem('selected_bms', activeBms); 
+            
             resetUI();
             const d = bmsCache[activeBms];
             if (d) {
