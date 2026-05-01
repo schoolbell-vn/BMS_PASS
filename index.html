@@ -136,11 +136,18 @@
                     </div>
                 </div>
 
-                <div class="card-scifi bg-gradient-to-br from-red-900/40 to-red-800/10 border-red-500/30 p-5 flex flex-col justify-center">
-                    <p class="text-xs text-red-300 font-bold uppercase mb-3 tracking-wider"><i class="fas fa-tachometer-alt"></i> Hiệu suất</p>
-                    <div class="flex justify-between items-end gap-1">
-                        <span class="text-3xl font-black text-red-100 neon-text nowrap"><span id="main_soc">--</span><span class="text-lg text-red-400 ml-1">%</span></span>
-                        <span class="text-xs text-red-400 font-bold mb-1.5 nowrap">P: <span id="main_power_card" class="text-sm text-red-200">--</span> W</span>
+                <!-- Thẻ Hiệu suất (SOC & Power) - Tách 2 dòng -->
+                <div class="card-scifi bg-gradient-to-br from-red-900/40 to-red-800/10 border-red-500/30 p-4 flex flex-col justify-center">
+                    <p class="text-xs text-red-300 font-bold uppercase mb-2 tracking-wider"><i class="fas fa-tachometer-alt"></i> Hiệu suất</p>
+                    <div class="flex flex-col gap-1.5 mt-0.5">
+                        <div class="flex justify-between items-end border-b border-red-500/20 pb-1.5">
+                            <span class="text-[10px] text-red-400 font-bold tracking-widest">SOC</span>
+                            <span class="text-xl font-black text-red-100 neon-text nowrap"><span id="main_soc">--</span><span class="text-sm text-red-400 ml-1">%</span></span>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] text-red-400 font-bold tracking-widest">POWER</span>
+                            <span class="text-xl font-black text-red-200 neon-text nowrap"><span id="main_power_card">--</span><span class="text-sm text-red-400 ml-1">W</span></span>
+                        </div>
                     </div>
                 </div>
                 <div class="card-scifi bg-gradient-to-br from-orange-900/40 to-orange-800/10 border-orange-500/30 p-5 flex flex-col justify-center">
@@ -787,13 +794,17 @@
                 'uptime': ['pack_uptime']
             };
 
-            if (maps[key]) {
+           if (maps[key]) {
                 maps[key].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) {
                         if (id === 'pack_cycles') el.innerText = parseInt(val);
                         else if (id === 'pack_uptime') el.innerText = (parseFloat(val) / 86400).toFixed(1);
-                        else if (id === 'main_voltage') el.innerText = parseFloat(val).toFixed(2); // ĐÃ SỬA: Lấy 2 số thập phân
+                        else if (id === 'main_voltage') el.innerText = parseFloat(val).toFixed(2);
+                        
+                        // THÊM DÒNG NÀY ĐỂ SOC HIỂN THỊ 2 SỐ THẬP PHÂN
+                        else if (id === 'main_soc') el.innerText = parseFloat(val).toFixed(2);
+                        
                         else el.innerText = (key.includes('voltage') || key === 'delta_cell_voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
                     }
                 });
