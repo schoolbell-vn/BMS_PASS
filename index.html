@@ -158,6 +158,7 @@
                 </div>
             </div>
 
+            <!-- ĐIỆN ÁP 16 CELL (Đã thu gọn + Dashboard 4 thông số Max/Min) -->
             <div class="card-scifi overflow-hidden mb-8 border-cyan-800/50">
                 <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase">
                     <i class="fas fa-layer-group"></i> Điện áp 16 Cell
@@ -547,7 +548,6 @@
              </div>
         </div>
 
-        <!-- BẢN CẬP NHẬT CHART: Chèn khung thông số Max/Min chạy bằng Javascript -->
         <div id="tab-charts" class="tab-content space-y-5">
             
             <div class="card-scifi p-4">
@@ -558,10 +558,10 @@
                         <span class="text-purple-400 font-black text-lg neon-text"><span id="stat_max_v">--</span> V</span>
                     </div>
                 </div>
-                <!-- Ép Y-axis: 50V đến 56V -->
+                <!-- Bỏ giới hạn yaxismin/max để tự động phóng to -->
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-cyan-900/50 bg-[#0f172a]">
                     <iframe width="100%" height="100%" style="border: none;" 
-                        src="https://thingspeak.com/channels/3366132/charts/1?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%2306b6d4&dynamic=true&type=line&update=15&days=1&yaxismin=50&yaxismax=56">
+                        src="https://thingspeak.com/channels/3366132/charts/1?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%2306b6d4&dynamic=true&type=line&update=15&days=1">
                     </iframe>
                 </div>
             </div>
@@ -580,6 +580,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Hiển thị trong 1 ngày (days=1) -->
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-orange-900/50 bg-[#0f172a]">
                     <iframe width="100%" height="100%" style="border: none;" 
                         src="https://thingspeak.com/channels/3366132/charts/2?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%23f97316&dynamic=true&type=line&update=15&days=1">
@@ -591,10 +592,10 @@
                 <div class="flex justify-between items-center mb-4 border-b border-green-900/50 pb-2">
                     <span class="text-green-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-charging-station mr-2"></i>Đã sạc (kWh)</span>
                 </div>
-                <!-- Ép time: 30 ngày -->
+                <!-- Cột tăng dần: dùng days=10 và average=1440 để gộp chính xác 1 cột/ngày -->
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-green-900/50 bg-[#0f172a]">
                     <iframe width="100%" height="100%" style="border: none;" 
-                        src="https://thingspeak.com/channels/3366132/charts/3?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%2322c55e&dynamic=true&type=column&update=15&days=30">
+                        src="https://thingspeak.com/channels/3366132/charts/3?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%2322c55e&dynamic=true&type=column&update=15&days=10&average=1440">
                     </iframe>
                 </div>
             </div>
@@ -603,9 +604,10 @@
                 <div class="flex justify-between items-center mb-4 border-b border-red-900/50 pb-2">
                     <span class="text-red-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-battery-empty mr-2"></i>Đã xả / SOC</span>
                 </div>
+                <!-- Cột tăng dần: dùng days=10 và average=1440 để gộp chính xác 1 cột/ngày -->
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-red-900/50 bg-[#0f172a]">
                     <iframe width="100%" height="100%" style="border: none;" 
-                        src="https://thingspeak.com/channels/3366132/charts/4?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%23ef4444&dynamic=true&type=line&update=15&days=30">
+                        src="https://thingspeak.com/channels/3366132/charts/4?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%23ef4444&dynamic=true&type=column&update=15&days=10&average=1440">
                     </iframe>
                 </div>
             </div>
@@ -936,6 +938,7 @@
                 }
             }
 
+            // TÍNH KWH THEO CHUẨN 51.2V
             if (key === 'capacity_remaining' || key === 'bat_cap') {
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
