@@ -647,7 +647,7 @@
         let pendingCommands = {};
         let voltageChart;
         let chartData = { b1: { labels: [], data: [] }, b2: { labels: [], data: [] } };
-        const MAX_DATA_POINTS = 50; // Hiển thị 50 điểm gần nhất trên đồ thị
+        const MAX_DATA_POINTS = 5000; // Hiển thị 50 điểm gần nhất trên đồ thị
 
         // ĐÃ SỬA: Khi web load xong, ép ô Selector hiển thị đúng trạm đang xem
         window.addEventListener('load', () => {
@@ -676,7 +676,13 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', maxTicksLimit: 5 } },
-                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' }, suggestedMin: 48, suggestedMax: 56 }
+                        y: { 
+    grid: { color: '#1e293b' }, 
+    ticks: { color: '#94a3b8', stepSize: 0.5 }, // Chia vạch mỗi 0.5V
+    min: 52,   // Khóa cứng mốc đáy ở 52V
+    max: 55.5  // Khóa cứng mốc đỉnh ở 55.5V
+}
+
                     },
                     plugins: { legend: { display: false } },
                     animation: false
