@@ -923,13 +923,23 @@
                 }
             }
 
-            if (key === 'voltage' || key === 'capacity_remaining' || key === 'bat_cap') {
-                const V = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
+            if (key === 'capacity_remaining' || key === 'bat_cap') {
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
                 
-                if (document.getElementById('kwh_remaining')) document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2);
-                if (document.getElementById('kwh_total')) document.getElementById('kwh_total').innerText = ((AhMax * V) / 1000).toFixed(1);
+                // Sử dụng điện áp danh định hệ 16S LiFePO4 là 51.2V
+                const NOMINAL_VOLTAGE_16S = 51.2;
+
+                // Tính điện năng còn lại và tổng điện năng (kWh)
+                let kwh_remain = (AhNow * NOMINAL_VOLTAGE_16S) / 1000;
+                let kwh_total = (AhMax * NOMINAL_VOLTAGE_16S) / 1000;
+
+                if (document.getElementById('kwh_remaining')) {
+                    document.getElementById('kwh_remaining').innerText = kwh_remain.toFixed(2);
+                }
+                if (document.getElementById('kwh_total')) {
+                    document.getElementById('kwh_total').innerText = kwh_total.toFixed(1);
+                }
             }
 
             if (key === 'soc' || key === 'capacity_remaining' || key === 'bat_cap') {
