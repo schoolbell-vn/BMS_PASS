@@ -6,10 +6,9 @@
     <title>BMS SCI-FI MOBILE FULL - THẦY TÚ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        html { font-size: 17px; } /* Phóng to đồng loạt toàn bộ chữ trên trang */
+        html { font-size: 17px; } 
         body { background-color: #050810; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e2e8f0; -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
@@ -39,7 +38,6 @@
 </head>
 <body class="min-h-screen pb-28">
 
-    <!-- HEADER MỚI: Tích hợp Ô Trạm Hệ Thống và Dính chặt trên cùng (Sticky) -->
     <header class="bg-[#090e17] border-b border-cyan-900/50 p-3 sticky top-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
         <div class="flex flex-col gap-3 max-w-xl mx-auto">
             <div class="flex justify-between items-center">
@@ -58,7 +56,6 @@
                 </div>
             </div>
             
-            <!-- Tích hợp bộ chọn Trạm -->
             <div class="flex items-center gap-2">
                 <select id="device-selector" class="w-full bg-[#111827] text-cyan-200 border border-cyan-800 rounded-lg p-2 font-bold outline-none text-sm tracking-widest text-center shadow-inner" onchange="switchDevice()">
                     <option value="b1" class="bg-gray-900 text-cyan-400">MASTER 01 - 314 Ah</option>
@@ -82,7 +79,6 @@
                 </div>
 
                 <svg viewBox="0 0 300 150" class="absolute inset-0 w-full h-full z-10" preserveAspectRatio="xMidYMid meet">
-                    <!-- 1. CỤM PIN MẶT TRỜI -->
                     <g transform="translate(45, 90) scale(0.55)" stroke="#eab308" stroke-width="2" fill="rgba(234,179,8,0.1)">
                         <polygon points="0,-15 13,-7.5 13,7.5 0,15 -13,7.5 -13,-7.5" fill="rgba(234,179,8,0.6)" filter="drop-shadow(0 0 5px #eab308)"/>
                         <polygon points="26,-30 39,-22.5 39,-7.5 26,0 13,-7.5 13,-22.5" />
@@ -95,13 +91,11 @@
                         <polygon points="-52,-15 -39,-7.5 -39,7.5 -52,15 -65,7.5 -65,-7.5" />
                     </g>
                     
-                    <!-- 2. TẢI TIÊU THỤ: Ngôi Nhà -->
                     <g transform="translate(255, 90) scale(1.35)" stroke="#06b6d4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="0" cy="0" r="18" fill="rgba(6,182,212,0.1)" filter="drop-shadow(0 0 3px #06b6d4)"/>
                         <path d="M -12,2 L 0,-10 L 12,2 M -8,-2 L -8,11 L 8,11 L 8,-2 M -3,11 L -3,4 L 3,4 L 3,11" />
                     </g>
 
-                    <!-- ĐƯỜNG DÂY -->
                     <path d="M 85 90 L 115 90" stroke="#1e293b" stroke-width="5" fill="none" />
                     <path id="path-solar" d="M 85 90 L 115 90" stroke-width="5" fill="none" class="energy-path" />
                     
@@ -120,9 +114,7 @@
                 </div>
             </div>
 
-            <!-- CARDS THÔNG SỐ TỔNG QUAN -->
             <div class="grid grid-cols-2 gap-4">
-                <!-- ĐÃ SỬA LẠI: Volt và Amp Chia làm 2 dòng để chống tràn chữ -->
                 <div class="card-scifi bg-gradient-to-br from-blue-900/40 to-blue-800/10 border-blue-500/30 p-4 flex flex-col justify-center">
                     <p class="text-xs text-blue-300 font-bold uppercase mb-2 tracking-wider"><i class="fas fa-bolt"></i> Volt & Amp</p>
                     <div class="flex flex-col gap-1.5 mt-0.5">
@@ -137,7 +129,6 @@
                     </div>
                 </div>
 
-                <!-- Thẻ Hiệu suất (SOC & Power) - Tách 2 dòng -->
                 <div class="card-scifi bg-gradient-to-br from-red-900/40 to-red-800/10 border-red-500/30 p-4 flex flex-col justify-center">
                     <p class="text-xs text-red-300 font-bold uppercase mb-2 tracking-wider"><i class="fas fa-tachometer-alt"></i> Hiệu suất</p>
                     <div class="flex flex-col gap-1.5 mt-0.5">
@@ -595,21 +586,53 @@
                 </div>
              </div>
         </div>
-        <!-- TAB 4: THỐNG KÊ BIỂU ĐỒ -->
+
         <div id="tab-charts" class="tab-content space-y-5">
-            <div class="card-scifi p-5">
+            <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-cyan-900/50 pb-2">
-                    <span class="text-cyan-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-chart-area mr-2"></i>Điện áp Pin (Live)</span>
-                    <div class="text-right">
-                        <span class="text-[10px] text-gray-500 font-bold block uppercase">Max Voltage (Hôm nay)</span>
-                        <span class="text-purple-400 font-black text-xl neon-text"><span id="daily_max_v">--</span> V</span>
-                    </div>
+                    <span class="text-cyan-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-chart-area mr-2"></i>Điện áp (V) 24h</span>
                 </div>
-                <div class="relative w-full h-[250px]">
-                    <canvas id="voltageChart"></canvas>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-cyan-900/50 bg-[#0f172a]">
+                    <iframe width="100%" height="100%" style="border: none;" 
+                        src="https://thingspeak.com/channels/3366132/charts/1?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%2306b6d4&dynamic=true&results=200&type=line&update=15">
+                    </iframe>
                 </div>
-                <p class="text-[10px] text-gray-500 text-center mt-3 italic">* Biểu đồ vẽ theo thời gian thực khi mở ứng dụng. Đỉnh điện áp được lưu trong ngày.</p>
             </div>
+
+            <div class="card-scifi p-4">
+                <div class="flex justify-between items-center mb-4 border-b border-orange-900/50 pb-2">
+                    <span class="text-orange-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-bolt mr-2"></i>Dòng điện (A)</span>
+                </div>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-orange-900/50 bg-[#0f172a]">
+                    <iframe width="100%" height="100%" style="border: none;" 
+                        src="https://thingspeak.com/channels/3366132/charts/2?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%23f97316&dynamic=true&results=200&type=line&update=15">
+                    </iframe>
+                </div>
+            </div>
+
+            <div class="card-scifi p-4">
+                <div class="flex justify-between items-center mb-4 border-b border-green-900/50 pb-2">
+                    <span class="text-green-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-charging-station mr-2"></i>Đã sạc (kWh)</span>
+                </div>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-green-900/50 bg-[#0f172a]">
+                    <iframe width="100%" height="100%" style="border: none;" 
+                        src="https://thingspeak.com/channels/3366132/charts/3?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%2322c55e&dynamic=true&results=200&type=column&update=15">
+                    </iframe>
+                </div>
+            </div>
+
+            <div class="card-scifi p-4">
+                <div class="flex justify-between items-center mb-4 border-b border-red-900/50 pb-2">
+                    <span class="text-red-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-battery-empty mr-2"></i>Đã xả (kWh)</span>
+                </div>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-red-900/50 bg-[#0f172a]">
+                    <iframe width="100%" height="100%" style="border: none;" 
+                        src="https://thingspeak.com/channels/3366132/charts/4?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%23ef4444&dynamic=true&results=200&type=column&update=15">
+                    </iframe>
+                </div>
+            </div>
+            
+            <p class="text-[10px] text-gray-500 text-center italic mt-2 px-4">* Dữ liệu được đồng bộ liên tục qua ThingSpeak Cloud. Có thể xem lại lịch sử ngay cả khi đã tắt ứng dụng.</p>
         </div>
 
     </main>
@@ -632,64 +655,22 @@
     <script>
         const config = {
             host: "mqtt.flespi.io",
-            port: 443, // Cổng mặc định của Flespi cho Web
+            port: 443, 
             clientId: "WebUI_MobFull_Final_" + Math.random().toString(16).substr(2, 5)
         };
 
         const client = new Paho.MQTT.Client(config.host, config.port, "/mqtt", config.clientId);
         const prefix = "ngoctuyka_bms_private_2026";
         
-        // ĐÃ SỬA: Đọc lại trạm pin đang xem từ bộ nhớ trình duyệt, F5 không bị nhảy
         let activeBms = localStorage.getItem('selected_bms') || "b1"; 
         
         let bmsCache = { b1: {}, b2: {} };
         let isEspConnected = false;
         let pendingCommands = {};
-        let voltageChart;
-        let chartData = { b1: { labels: [], data: [] }, b2: { labels: [], data: [] } };
-        const MAX_DATA_POINTS = 5000; // Hiển thị 50 điểm gần nhất trên đồ thị
 
-        // ĐÃ SỬA: Khi web load xong, ép ô Selector hiển thị đúng trạm đang xem
         window.addEventListener('load', () => {
             const selector = document.getElementById('device-selector');
             if (selector) selector.value = activeBms;
-            
-            // Khởi tạo đồ thị Chart.js
-            const ctx = document.getElementById('voltageChart').getContext('2d');
-            voltageChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Voltage (V)',
-                        data: [],
-                        borderColor: '#a855f7', // Màu tím giống ảnh của thầy
-                        backgroundColor: 'rgba(168, 85, 247, 0.2)',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', maxTicksLimit: 5 } },
-                        y: { 
-    grid: { color: '#1e293b' }, 
-    ticks: { color: '#94a3b8', stepSize: 0.5 }, // Chia vạch mỗi 0.5V
-    min: 52,   // Khóa cứng mốc đáy ở 52V
-    max: 55.5  // Khóa cứng mốc đỉnh ở 55.5V
-}
-
-                    },
-                    plugins: { legend: { display: false } },
-                    animation: false
-                }
-            });
-            
-            loadMaxVoltage(); // Tải đỉnh điện áp trong ngày
         });
 
         function resetBtn(btn) {
@@ -719,10 +700,8 @@
             if (document.getElementById('path-load')) document.getElementById('path-load').className.baseVal = "energy-path";
         }
 
-        // ĐÃ SỬA: Hàm tự động kết nối lại khi đứt mạng (Không cần F5)
         client.onConnectionLost = (responseObject) => {
             if (responseObject.errorCode !== 0) {
-                console.log("Mất kết nối MQTT: " + responseObject.errorMessage);
                 const badge = document.getElementById('mqtt-status-badge');
                 if (badge) badge.className = "bg-yellow-900/30 border border-yellow-500/50 px-3 py-1.5 rounded-lg text-xs font-black text-yellow-500 flex items-center shadow-md";
                 if (document.getElementById('mqtt-status')) document.getElementById('mqtt-status').innerText = "RECONNECT";
@@ -846,7 +825,6 @@
             
             const maps = {
                 'voltage': ['main_voltage', 'pack_v'], 'current': ['main_current', 'pack_a'],
-                // (Đã xóa dòng soc ở đây)
                 'capacity_remaining': ['main_energy_now', 'pack_cap_now'], 'bat_cap': ['main_capacity'], 
                 'temperature_sensor_1': ['pack_t_bms'], 
                 'temperature_sensor_2': ['pack_t1'], 'temperature_sensor_3': ['pack_t2'],
@@ -861,10 +839,7 @@
                         if (id === 'pack_cycles') el.innerText = parseInt(val);
                         else if (id === 'pack_uptime') el.innerText = (parseFloat(val) / 86400).toFixed(1);
                         else if (id === 'main_voltage') el.innerText = parseFloat(val).toFixed(2);
-                        
-                        // THÊM DÒNG NÀY ĐỂ SOC HIỂN THỊ 2 SỐ THẬP PHÂN
                         else if (id === 'main_soc') el.innerText = parseFloat(val).toFixed(2);
-                        
                         else el.innerText = (key.includes('voltage') || key === 'delta_cell_voltage') ? parseFloat(val).toFixed(3) : parseFloat(val).toFixed(1);
                     }
                 });
@@ -897,8 +872,6 @@
                                 if(bmsCache[activeBms][cKey]) {
                                     const currentV = parseFloat(bmsCache[activeBms][cKey].value).toFixed(3);
                                     cEl.innerText = currentV + " V";
-                                    
-                                    // Mã mới (Chữ bự hơn):
                                     if (i === minIdx) cEl.className = "font-black text-red-500 font-mono nowrap text-xl neon-text";
                                     else if (i === maxIdx) cEl.className = "font-black text-purple-400 font-mono nowrap text-xl neon-text";
                                     else cEl.className = "font-black text-cyan-300 font-mono nowrap text-xl";
@@ -957,57 +930,20 @@
                 
                 if (document.getElementById('kwh_remaining')) document.getElementById('kwh_remaining').innerText = ((AhNow * V) / 1000).toFixed(2);
                 if (document.getElementById('kwh_total')) document.getElementById('kwh_total').innerText = ((AhMax * V) / 1000).toFixed(1);
-
-                // --- XỬ LÝ ĐỈNH ĐIỆN ÁP TRONG NGÀY ---
-                if (key === 'voltage' && V > 0) {
-                    let today = new Date().toLocaleDateString('vi-VN');
-                    let savedDate = localStorage.getItem('maxV_date_' + activeBms);
-                    let currentMaxV = parseFloat(localStorage.getItem('maxV_val_' + activeBms)) || 0;
-
-                    if (savedDate !== today) {
-                        currentMaxV = V; // Sang ngày mới -> Reset đỉnh
-                        localStorage.setItem('maxV_date_' + activeBms, today);
-                    } else if (V > currentMaxV) {
-                        currentMaxV = V; // Phát hiện đỉnh mới -> Cập nhật
-                    }
-                    localStorage.setItem('maxV_val_' + activeBms, currentMaxV);
-                    if (document.getElementById('daily_max_v')) document.getElementById('daily_max_v').innerText = currentMaxV.toFixed(2);
-
-                    // --- CẬP NHẬT BIỂU ĐỒ ---
-                    let now = new Date();
-                    let timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-                    
-                    chartData[activeBms].labels.push(timeString);
-                    chartData[activeBms].data.push(V);
-                    
-                    if (chartData[activeBms].labels.length > MAX_DATA_POINTS) {
-                        chartData[activeBms].labels.shift();
-                        chartData[activeBms].data.shift();
-                    }
-                    
-                    voltageChart.data.labels = chartData[activeBms].labels;
-                    voltageChart.data.datasets[0].data = chartData[activeBms].data;
-                    voltageChart.update();
-                }
             }
 
-            // Tính toán SOC siêu chính xác tới 2 số thập phân từ Ah
             if (key === 'soc' || key === 'capacity_remaining' || key === 'bat_cap') {
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
                 
                 let preciseSoc = 0;
                 if (AhMax > 0 && AhNow > 0) {
-                    preciseSoc = (AhNow / AhMax) * 100; // Tự chia Ah để lấy số thập phân
+                    preciseSoc = (AhNow / AhMax) * 100; 
                 } else if (bmsCache[activeBms]['soc']) {
-                    // Nếu web mới load chưa kịp lấy Ah, dùng tạm số tròn của BMS
                     preciseSoc = parseFloat(bmsCache[activeBms]['soc'].value);
                 }
 
-                // In 2 số thập phân ra thẻ Hiệu suất
                 if (document.getElementById('main_soc')) document.getElementById('main_soc').innerText = preciseSoc.toFixed(2);
-                
-                // Đẩy hoạt ảnh vào lõi Pin
                 if (document.getElementById('bat_fill_level')) document.getElementById('bat_fill_level').style.height = preciseSoc + "%";
                 if (document.getElementById('bat_percent_text')) document.getElementById('bat_percent_text').innerText = Math.round(preciseSoc);
             }
@@ -1036,9 +972,7 @@
 
         function switchDevice() {
             activeBms = document.getElementById('device-selector').value;
-            // ĐÃ SỬA: Lưu lại trạm đang xem vào bộ nhớ trình duyệt
             localStorage.setItem('selected_bms', activeBms); 
-            
             resetUI();
             const d = bmsCache[activeBms];
             if (d) {
@@ -1048,16 +982,6 @@
                     if (d['rssi']) h.innerText = "BT: " + d['rssi'].value + " dBm";
                     else h.innerText = "BT: -- dBm";
                 }
-            }
-        }
-        function loadMaxVoltage() {
-            let today = new Date().toLocaleDateString('vi-VN');
-            if (localStorage.getItem('maxV_date_' + activeBms) === today) {
-                let v = parseFloat(localStorage.getItem('maxV_val_' + activeBms)) || 0;
-                if(v > 0) document.getElementById('daily_max_v').innerText = v.toFixed(2);
-                else document.getElementById('daily_max_v').innerText = "--";
-            } else {
-                document.getElementById('daily_max_v').innerText = "--";
             }
         }
 
