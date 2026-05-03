@@ -553,9 +553,15 @@
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-cyan-900/50 pb-2">
                     <span class="text-cyan-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-chart-area mr-2"></i>Điện áp (V) 24h</span>
-                    <div class="text-right">
-                        <span class="text-[10px] text-gray-500 font-bold block uppercase">Max (Trong Ngày)</span>
-                        <span class="text-purple-400 font-black text-lg neon-text"><span id="stat_max_v">--</span> V</span>
+                    <div class="flex gap-4">
+                        <div class="text-right">
+                            <span class="text-[10px] text-gray-500 font-bold block uppercase">Min Ngày</span>
+                            <span class="text-red-400 font-black text-lg neon-text"><span id="stat_min_v">--</span> V</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-gray-500 font-bold block uppercase">Max Ngày</span>
+                            <span class="text-purple-400 font-black text-lg neon-text"><span id="stat_max_v">--</span> V</span>
+                        </div>
                     </div>
                 </div>
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
@@ -584,7 +590,7 @@
 
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-green-900/50 pb-2">
-                    <span class="text-green-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-charging-station mr-2"></i>Đã sạc (kWh)</span>
+                    <span class="text-green-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-charging-station mr-2"></i>Đã sạc (kWh) - 10 Ngày</span>
                 </div>
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
                     <canvas id="chgChart"></canvas>
@@ -593,7 +599,7 @@
 
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-red-900/50 pb-2">
-                    <span class="text-red-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-battery-empty mr-2"></i>Đã xả (kWh)</span>
+                    <span class="text-red-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-battery-empty mr-2"></i>Đã xả (kWh) - 10 Ngày</span>
                 </div>
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
                     <canvas id="disChart"></canvas>
@@ -648,105 +654,64 @@
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         async function fetchAndDrawCharts() {
             try {
-                // 1. Fetch data 1 Ngày cho Volt & Amp
-                let res1 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=1");
-                let data1 = await res1.json();
+                let res = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&results=8000");
+                let data = await res.json();
+                let labels1 = []; let voltData = []; let ampData = [];
+                let dailyPeakChg = {}; let dailyPeakDis = {};
 
-                let labels1 = [];
-                let voltData = [];
-                let ampData = [];
-
-                data1.feeds.forEach(f => {
+                data.feeds.forEach(f => {
                     if(!f.created_at) return;
-                    let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                    labels1.push(time);
-                    voltData.push(parseFloat(f.field1));
-                    ampData.push(parseFloat(f.field2));
+                    let dObj = new Date(f.created_at);
+                    if (Date.now() - dObj.getTime() < 24*60*60*1000) {
+                        labels1.push(dObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}));
+                        voltData.push(parseFloat(f.field1)); ampData.push(parseFloat(f.field2));
+                    }
+                    let dKey = dObj.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                    let vC = parseFloat(f.field3) || 0; let vD = parseFloat(f.field4) || 0;
+                    if (vC > 100) vC /= 1000.0; if (vD > 100) vD /= 1000.0;
+                    if (!dailyPeakChg[dKey] || vC > dailyPeakChg[dKey]) dailyPeakChg[dKey] = vC;
+                    if (!dailyPeakDis[dKey] || vD > dailyPeakDis[dKey]) dailyPeakDis[dKey] = vD;
                 });
 
-                // 2. Fetch data 10 Ngày cho Năng lượng (Cột)
-                let res10 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=10");
-                let data10 = await res10.json();
+                let labels10 = Object.keys(dailyPeakChg).slice(-10);
+                let chgData = labels10.map(k => dailyPeakChg[k]);
+                let disData = labels10.map(k => dailyPeakDis[k]);
 
-                let dailyChg = {};
-                let dailyDis = {};
-
-                data10.feeds.forEach(f => {
-                    if(!f.created_at) return;
-                    let dateStr = new Date(f.created_at).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
-                    let c = parseFloat(f.field3) || 0;
-                    let d = parseFloat(f.field4) || 0;
-                    // Lọc lấy giá trị MAX trong ngày (Vì công tơ tích lũy tăng dần, đỉnh điểm là cuối ngày)
-                    if (!dailyChg[dateStr] || c > dailyChg[dateStr]) dailyChg[dateStr] = c;
-                    if (!dailyDis[dateStr] || d > dailyDis[dateStr]) dailyDis[dateStr] = d;
-                });
-
-                let labels10 = Object.keys(dailyChg);
-                let chgData = Object.values(dailyChg);
-                let disData = Object.values(dailyDis);
-
-                // Cấu hình chung cho Chart
                 Chart.defaults.color = '#475569';
-                const commonOptions = {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    elements: { point: { radius: 0, hitRadius: 10, hoverRadius: 4 } }, // Ẩn chấm tròn trên đường
-                    interaction: { mode: 'index', intersect: false }
-                };
+                const commonLine = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, elements: { point: { radius: 0 } }, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } }, y: { grid: { color: '#1e293b' } } } };
 
-                // Vẽ Biểu đồ Điện áp (Vùng đổ bóng ngọn núi)
                 if(chartsObj.volt) chartsObj.volt.destroy();
-                let ctxVolt = document.getElementById('voltChart').getContext('2d');
-                let gradVolt = ctxVolt.createLinearGradient(0, 0, 0, 260);
-                gradVolt.addColorStop(0, 'rgba(168, 85, 247, 0.4)'); // Tông màu tím giống app mẫu
-                gradVolt.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+                let ctxV = document.getElementById('voltChart').getContext('2d');
+                let gradV = ctxV.createLinearGradient(0, 0, 0, 260);
+                gradV.addColorStop(0, 'rgba(168, 85, 247, 0.4)'); gradV.addColorStop(1, 'rgba(168, 85, 247, 0)');
+                chartsObj.volt = new Chart(ctxV, { type: 'line', data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradV, fill: true, tension: 0.2 }] }, options: { ...commonLine, scales: { ...commonLine.scales, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } } });
 
-                chartsObj.volt = new Chart(ctxVolt, {
-                    type: 'line',
-                    data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
-                    options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
-                });
-
-                // Vẽ Biểu đồ Dòng điện (Ziczac qua trục 0)
                 if(chartsObj.amp) chartsObj.amp.destroy();
-                chartsObj.amp = new Chart(document.getElementById('ampChart'), {
-                    type: 'line',
-                    data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
-                    options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
-                });
+                chartsObj.amp = new Chart(document.getElementById('ampChart'), { type: 'line', data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', tension: 0.2 }] }, options: commonLine });
 
-                // Vẽ Biểu đồ Cột Sạc (Nhặt giá trị theo ngày)
                 if(chartsObj.chg) chartsObj.chg.destroy();
-                chartsObj.chg = new Chart(document.getElementById('chgChart'), {
-                    type: 'bar',
-                    data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
-                    options: { ...commonOptions, scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
-                });
+                chartsObj.chg = new Chart(document.getElementById('chgChart'), { type: 'bar', data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4, maxBarThickness: 15 }] }, options: { ...commonLine, scales: { x: { grid: { display: false } }, y: { max: 20, grid: { color: '#1e293b' } } } } });
 
-                // Vẽ Biểu đồ Cột Xả (Nhặt giá trị theo ngày)
                 if(chartsObj.dis) chartsObj.dis.destroy();
-                chartsObj.dis = new Chart(document.getElementById('disChart'), {
-                    type: 'bar',
-                    data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
-                    options: { ...commonOptions, scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
-                });
-
-            } catch (error) { console.error("Lỗi vẽ đồ thị ChartJS:", error); }
+                chartsObj.dis = new Chart(document.getElementById('disChart'), { type: 'bar', data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4, maxBarThickness: 15 }] }, options: { ...commonLine, scales: { x: { grid: { display: false } }, y: { max: 20, grid: { color: '#1e293b' } } } } });
+            } catch (e) { console.error("Lỗi vẽ đồ thị ChartJS:", e); }
         }
-
         // ================= KẾT THÚC CHART.JS =================
 
         function loadDailyStats() {
             let today = new Date().toLocaleDateString('vi-VN');
             if (localStorage.getItem('stat_date_' + activeBms) === today) {
                 let mv = parseFloat(localStorage.getItem('max_v_' + activeBms)) || 0;
+                let minv = parseFloat(localStorage.getItem('min_v_' + activeBms)) || 999;
                 let mchg = parseFloat(localStorage.getItem('max_a_chg_' + activeBms)) || 0;
                 let mdis = parseFloat(localStorage.getItem('max_a_dis_' + activeBms)) || 0;
                 if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = mv > 0 ? mv.toFixed(2) : "--";
+                if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (minv > 0 && minv < 999) ? minv.toFixed(2) : "--";
                 if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = mchg > 0 ? "+" + mchg.toFixed(1) : "--";
                 if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = mdis > 0 ? "-" + mdis.toFixed(1) : "--";
             } else {
                 if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = "--";
+                if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = "--";
                 if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = "--";
                 if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = "--";
             }
@@ -900,9 +865,11 @@
             if (localStorage.getItem('stat_date_' + activeBms) !== today) {
                 localStorage.setItem('stat_date_' + activeBms, today);
                 localStorage.setItem('max_v_' + activeBms, 0);
+                localStorage.setItem('min_v_' + activeBms, 999);
                 localStorage.setItem('max_a_chg_' + activeBms, 0);
                 localStorage.setItem('max_a_dis_' + activeBms, 0);
                 if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = "--";
+                if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = "--";
                 if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = "--";
                 if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = "--";
             }
@@ -910,9 +877,15 @@
             if (key === 'voltage') {
                 let V = parseFloat(val);
                 let currentMaxV = parseFloat(localStorage.getItem('max_v_' + activeBms)) || 0;
+                let currentMinV = parseFloat(localStorage.getItem('min_v_' + activeBms)) || 999;
+                
                 if (V > currentMaxV) {
                     localStorage.setItem('max_v_' + activeBms, V);
                     if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = V.toFixed(2);
+                }
+                if (V > 0 && V < currentMinV) {
+                    localStorage.setItem('min_v_' + activeBms, V);
+                    if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = V.toFixed(2);
                 }
             }
 
