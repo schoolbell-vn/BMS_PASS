@@ -6,6 +6,7 @@
     <title>BMS SCI-FI MOBILE FULL - THẦY TÚ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html { font-size: 17px; } 
@@ -158,7 +159,6 @@
                 </div>
             </div>
 
-            <!-- ĐIỆN ÁP 16 CELL (Đã thu gọn + Dashboard 4 thông số Max/Min) -->
             <div class="card-scifi overflow-hidden mb-8 border-cyan-800/50">
                 <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase">
                     <i class="fas fa-layer-group"></i> Điện áp 16 Cell
@@ -558,11 +558,8 @@
                         <span class="text-purple-400 font-black text-lg neon-text"><span id="stat_max_v">--</span> V</span>
                     </div>
                 </div>
-                <!-- Bỏ giới hạn yaxismin/max để tự động phóng to -->
-                <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-cyan-900/50 bg-[#0f172a]">
-                    <iframe width="100%" height="100%" style="border: none;" 
-                        src="https://thingspeak.com/channels/3366132/charts/1?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%2306b6d4&dynamic=true&type=line&update=15&days=1">
-                    </iframe>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
+                    <canvas id="voltChart"></canvas>
                 </div>
             </div>
 
@@ -580,11 +577,8 @@
                         </div>
                     </div>
                 </div>
-                <!-- Hiển thị trong 1 ngày (days=1) -->
-                <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-orange-900/50 bg-[#0f172a]">
-                    <iframe width="100%" height="100%" style="border: none;" 
-                        src="https://thingspeak.com/channels/3366132/charts/2?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%23f97316&dynamic=true&type=line&update=15&days=1">
-                    </iframe>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
+                    <canvas id="ampChart"></canvas>
                 </div>
             </div>
 
@@ -592,27 +586,21 @@
                 <div class="flex justify-between items-center mb-4 border-b border-green-900/50 pb-2">
                     <span class="text-green-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-charging-station mr-2"></i>Đã sạc (kWh)</span>
                 </div>
-                <!-- Cột tăng dần: dùng days=10 và average=1440 để gộp chính xác 1 cột/ngày -->
-                <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-green-900/50 bg-[#0f172a]">
-                    <iframe width="100%" height="100%" style="border: none;" 
-                        src="https://thingspeak.com/channels/3366132/charts/3?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%2322c55e&dynamic=true&type=column&update=15&days=10&average=1440">
-                    </iframe>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
+                    <canvas id="chgChart"></canvas>
                 </div>
             </div>
 
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-red-900/50 pb-2">
-                    <span class="text-red-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-battery-empty mr-2"></i>Đã xả / SOC</span>
+                    <span class="text-red-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-battery-empty mr-2"></i>Đã xả (kWh)</span>
                 </div>
-                <!-- Cột tăng dần: dùng days=10 và average=1440 để gộp chính xác 1 cột/ngày -->
-                <div class="relative w-full h-[260px] rounded-lg overflow-hidden border border-red-900/50 bg-[#0f172a]">
-                    <iframe width="100%" height="100%" style="border: none;" 
-                        src="https://thingspeak.com/channels/3366132/charts/4?api_key=TIYKGXDCN6JHICSJ&bgcolor=%230f172a&color=%23ef4444&dynamic=true&type=column&update=15&days=10&average=1440">
-                    </iframe>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
+                    <canvas id="disChart"></canvas>
                 </div>
             </div>
             
-            <p class="text-[10px] text-gray-500 text-center italic mt-2 px-4">* Thông số Đỉnh (Max) được chốt tự động trong máy và reset vào lúc 0h00 mỗi ngày.</p>
+            <p class="text-[10px] text-gray-500 text-center italic mt-2 px-4">* Thông số đỉnh được tự động chốt trong ngày. Đồ thị vẽ bằng Chart.js siêu mượt.</p>
         </div>
 
     </main>
@@ -646,12 +634,107 @@
         let bmsCache = { b1: {}, b2: {} };
         let isEspConnected = false;
         let pendingCommands = {};
+        
+        // Quản lý biến Chart.js
+        let chartsObj = { volt: null, amp: null, chg: null, dis: null };
+        let isChartsDrawn = false;
 
         window.addEventListener('load', () => {
             const selector = document.getElementById('device-selector');
             if (selector) selector.value = activeBms;
-            loadDailyStats(); // Nạp thống kê Max trong ngày lúc mở app
+            loadDailyStats(); 
         });
+
+        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
+        async function fetchAndDrawCharts() {
+            try {
+                // 1. Fetch data 1 Ngày cho Volt & Amp
+                let res1 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=1");
+                let data1 = await res1.json();
+
+                let labels1 = [];
+                let voltData = [];
+                let ampData = [];
+
+                data1.feeds.forEach(f => {
+                    if(!f.created_at) return;
+                    let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                    labels1.push(time);
+                    voltData.push(parseFloat(f.field1));
+                    ampData.push(parseFloat(f.field2));
+                });
+
+                // 2. Fetch data 10 Ngày cho Năng lượng (Cột)
+                let res10 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=10");
+                let data10 = await res10.json();
+
+                let dailyChg = {};
+                let dailyDis = {};
+
+                data10.feeds.forEach(f => {
+                    if(!f.created_at) return;
+                    let dateStr = new Date(f.created_at).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                    let c = parseFloat(f.field3) || 0;
+                    let d = parseFloat(f.field4) || 0;
+                    // Lọc lấy giá trị MAX trong ngày (Vì công tơ tích lũy tăng dần, đỉnh điểm là cuối ngày)
+                    if (!dailyChg[dateStr] || c > dailyChg[dateStr]) dailyChg[dateStr] = c;
+                    if (!dailyDis[dateStr] || d > dailyDis[dateStr]) dailyDis[dateStr] = d;
+                });
+
+                let labels10 = Object.keys(dailyChg);
+                let chgData = Object.values(dailyChg);
+                let disData = Object.values(dailyDis);
+
+                // Cấu hình chung cho Chart
+                Chart.defaults.color = '#475569';
+                const commonOptions = {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    elements: { point: { radius: 0, hitRadius: 10, hoverRadius: 4 } }, // Ẩn chấm tròn trên đường
+                    interaction: { mode: 'index', intersect: false }
+                };
+
+                // Vẽ Biểu đồ Điện áp (Vùng đổ bóng ngọn núi)
+                if(chartsObj.volt) chartsObj.volt.destroy();
+                let ctxVolt = document.getElementById('voltChart').getContext('2d');
+                let gradVolt = ctxVolt.createLinearGradient(0, 0, 0, 260);
+                gradVolt.addColorStop(0, 'rgba(168, 85, 247, 0.4)'); // Tông màu tím giống app mẫu
+                gradVolt.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+
+                chartsObj.volt = new Chart(ctxVolt, {
+                    type: 'line',
+                    data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
+                    options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
+                });
+
+                // Vẽ Biểu đồ Dòng điện (Ziczac qua trục 0)
+                if(chartsObj.amp) chartsObj.amp.destroy();
+                chartsObj.amp = new Chart(document.getElementById('ampChart'), {
+                    type: 'line',
+                    data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
+                    options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
+                });
+
+                // Vẽ Biểu đồ Cột Sạc (Nhặt giá trị theo ngày)
+                if(chartsObj.chg) chartsObj.chg.destroy();
+                chartsObj.chg = new Chart(document.getElementById('chgChart'), {
+                    type: 'bar',
+                    data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
+                    options: { ...commonOptions, scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
+                });
+
+                // Vẽ Biểu đồ Cột Xả (Nhặt giá trị theo ngày)
+                if(chartsObj.dis) chartsObj.dis.destroy();
+                chartsObj.dis = new Chart(document.getElementById('disChart'), {
+                    type: 'bar',
+                    data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
+                    options: { ...commonOptions, scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
+                });
+
+            } catch (error) { console.error("Lỗi vẽ đồ thị ChartJS:", error); }
+        }
+
+        // ================= KẾT THÚC CHART.JS =================
 
         function loadDailyStats() {
             let today = new Date().toLocaleDateString('vi-VN');
@@ -813,7 +896,6 @@
                 }
             }
             
-            // XỬ LÝ LƯU THỐNG KÊ ĐỈNH (MAX/MIN) TRONG NGÀY
             let today = new Date().toLocaleDateString('vi-VN');
             if (localStorage.getItem('stat_date_' + activeBms) !== today) {
                 localStorage.setItem('stat_date_' + activeBms, today);
@@ -938,7 +1020,6 @@
                 }
             }
 
-            // TÍNH KWH THEO CHUẨN 51.2V
             if (key === 'capacity_remaining' || key === 'bat_cap') {
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
@@ -998,7 +1079,7 @@
             activeBms = document.getElementById('device-selector').value;
             localStorage.setItem('selected_bms', activeBms); 
             resetUI();
-            loadDailyStats(); // Nạp lại thông số Max/Min của trạm tương ứng
+            loadDailyStats(); 
             const d = bmsCache[activeBms];
             if (d) {
                 Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
@@ -1018,6 +1099,11 @@
             if (act) {
                 act.classList.add('nav-active'); 
                 act.classList.replace('text-gray-500', 'text-cyan-400');
+            }
+            // Tự động tải lại đồ thị mỗi khi mở Tab Chart
+            if (t === 'charts' && !isChartsDrawn) {
+                fetchAndDrawCharts();
+                isChartsDrawn = true; // Chống load lại liên tục
             }
         }
 
