@@ -659,6 +659,7 @@
         });
 
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
+        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         async function fetchAndDrawCharts() {
             try {
                 let res = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&results=8000");
@@ -671,10 +672,27 @@
                     let dObj = new Date(f.created_at);
                     if (Date.now() - dObj.getTime() < 24*60*60*1000) {
                         labels1.push(dObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}));
-                        voltData.push(parseFloat(f.field1)); ampData.push(parseFloat(f.field2));
+                        // Chọn field dựa theo thiết bị đang xem (B1 hoặc B2)
+                        if (activeBms === 'b1') {
+                            voltData.push(parseFloat(f.field1)); 
+                            ampData.push(parseFloat(f.field2));
+                        } else {
+                            voltData.push(parseFloat(f.field5)); 
+                            ampData.push(parseFloat(f.field6));
+                        }
                     }
+                    
                     let dKey = dObj.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
-                    let vC = parseFloat(f.field3) || 0; let vD = parseFloat(f.field4) || 0;
+                    let vC = 0, vD = 0;
+                    
+                    if (activeBms === 'b1') {
+                        vC = parseFloat(f.field3) || 0; 
+                        vD = parseFloat(f.field4) || 0;
+                    } else {
+                        vC = parseFloat(f.field7) || 0; 
+                        vD = parseFloat(f.field8) || 0;
+                    }
+
                     if (vC > 100) vC /= 1000.0; if (vD > 100) vD /= 1000.0;
                     if (!dailyPeakChg[dKey] || vC > dailyPeakChg[dKey]) dailyPeakChg[dKey] = vC;
                     if (!dailyPeakDis[dKey] || vD > dailyPeakDis[dKey]) dailyPeakDis[dKey] = vD;
@@ -704,8 +722,7 @@
             } catch (e) { console.error("Lỗi vẽ đồ thị ChartJS:", e); }
         }
         // ================= KẾT THÚC CHART.JS =================
-
-        function loadDailyStats() {
+               function loadDailyStats() {
             let today = new Date().toLocaleDateString('vi-VN');
             if (localStorage.getItem('stat_date_' + activeBms) === today) {
                 let mv = parseFloat(localStorage.getItem('max_v_' + activeBms)) || 0;
