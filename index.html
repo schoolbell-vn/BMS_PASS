@@ -662,6 +662,7 @@
   
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
+        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         async function fetchAndDrawCharts() {
             try {
                 // 1. Fetch data 1 Ngày cho Volt & Amp
@@ -669,8 +670,9 @@
                 let data1 = await res1.json();
 
                 let labels1 = []; let voltData = []; let ampData = [];
-                // Thêm biến để hứng Max/Min trực tiếp từ ThingSpeak
+                // Biến hứng Max/Min từ ThingSpeak
                 let tsMaxV = 0; let tsMinV = 999; 
+                let tsMaxChg = 0; let tsMaxDis = 0;
 
                 data1.feeds.forEach(f => {
                     if(!f.created_at) return;
@@ -678,25 +680,33 @@
                     labels1.push(time);
                     
                     let currentV = 0;
+                    let currentA = 0;
                     
                     if (activeBms === 'b1') {
                         currentV = parseFloat(f.field1);
-                        voltData.push(currentV); 
-                        ampData.push(parseFloat(f.field2));
+                        currentA = parseFloat(f.field2);
                     } else {
                         currentV = parseFloat(f.field5);
-                        voltData.push(currentV); 
-                        ampData.push(parseFloat(f.field6));
+                        currentA = parseFloat(f.field6);
                     }
 
-                    // Tự động dò Max/Min của 24h qua
+                    voltData.push(currentV); 
+                    ampData.push(currentA);
+
+                    // Dò Max/Min Volt 24h qua
                     if (currentV > tsMaxV) tsMaxV = currentV;
                     if (currentV > 0 && currentV < tsMinV) tsMinV = currentV;
+
+                    // Dò Max Sạc / Max Xả 24h qua
+                    if (currentA > tsMaxChg) tsMaxChg = currentA;
+                    if (currentA < 0 && Math.abs(currentA) > tsMaxDis) tsMaxDis = Math.abs(currentA);
                 });
 
-                // Cập nhật số Max/Min lên màn hình ở Tab Chart
+                // Cập nhật số liệu Max/Min lên màn hình ở Tab Chart
                 if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = tsMaxV > 0 ? tsMaxV.toFixed(2) : "--";
                 if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (tsMinV > 0 && tsMinV < 999) ? tsMinV.toFixed(2) : "--";
+                if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = tsMaxChg > 0 ? "+" + tsMaxChg.toFixed(1) : "--";
+                if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = tsMaxDis > 0 ? "-" + tsMaxDis.toFixed(1) : "--";
 
 
                 // 2. Fetch data 10 Ngày cho Năng lượng (Cột)
