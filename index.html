@@ -659,68 +659,103 @@
         });
 
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
-        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
+  
         async function fetchAndDrawCharts() {
             try {
-                let res = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&results=8000");
-                let data = await res.json();
+                // 1. Fetch data 1 Ngày cho Volt & Amp
+                let res1 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=1");
+                let data1 = await res1.json();
+
                 let labels1 = []; let voltData = []; let ampData = [];
-                let dailyPeakChg = {}; let dailyPeakDis = {};
 
-                data.feeds.forEach(f => {
+                data1.feeds.forEach(f => {
                     if(!f.created_at) return;
-                    let dObj = new Date(f.created_at);
-                    if (Date.now() - dObj.getTime() < 24*60*60*1000) {
-                        labels1.push(dObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}));
-                        // Chọn field dựa theo thiết bị đang xem (B1 hoặc B2)
-                        if (activeBms === 'b1') {
-                            voltData.push(parseFloat(f.field1)); 
-                            ampData.push(parseFloat(f.field2));
-                        } else {
-                            voltData.push(parseFloat(f.field5)); 
-                            ampData.push(parseFloat(f.field6));
-                        }
-                    }
-                    
-                    let dKey = dObj.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
-                    let vC = 0, vD = 0;
-                    
+                    let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                    labels1.push(time);
                     if (activeBms === 'b1') {
-                        vC = parseFloat(f.field3) || 0; 
-                        vD = parseFloat(f.field4) || 0;
+                        voltData.push(parseFloat(f.field1)); ampData.push(parseFloat(f.field2));
                     } else {
-                        vC = parseFloat(f.field7) || 0; 
-                        vD = parseFloat(f.field8) || 0;
+                        voltData.push(parseFloat(f.field5)); ampData.push(parseFloat(f.field6));
                     }
-
-                    if (vC > 100) vC /= 1000.0; if (vD > 100) vD /= 1000.0;
-                    if (!dailyPeakChg[dKey] || vC > dailyPeakChg[dKey]) dailyPeakChg[dKey] = vC;
-                    if (!dailyPeakDis[dKey] || vD > dailyPeakDis[dKey]) dailyPeakDis[dKey] = vD;
                 });
 
-                let labels10 = Object.keys(dailyPeakChg).slice(-10);
-                let chgData = labels10.map(k => dailyPeakChg[k]);
-                let disData = labels10.map(k => dailyPeakDis[k]);
+                // 2. Fetch data 10 Ngày cho Năng lượng (Cột)
+                let res10 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=10");
+                let data10 = await res10.json();
 
+                let dailyChg = {}; let dailyDis = {};
+
+                data10.feeds.forEach(f => {
+                    if(!f.created_at) return;
+                    let dateStr = new Date(f.created_at).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                    
+                    let c = 0, d = 0;
+                    if (activeBms === 'b1') {
+                        c = parseFloat(f.field3) || 0;
+                        d = parseFloat(f.field4) || 0;
+                    } else {
+                        c = parseFloat(f.field7) || 0;
+                        d = parseFloat(f.field8) || 0;
+                    }
+
+                    // SỬA LỖI TẠI ĐÂY: Luôn chia 1000 để đổi từ Wh sang kWh
+                    c = c / 1000.0;
+                    d = d / 1000.0;
+
+                    // Lọc lấy giá trị MAX trong ngày
+                    if (!dailyChg[dateStr] || c > dailyChg[dateStr]) dailyChg[dateStr] = c;
+                    if (!dailyDis[dateStr] || d > dailyDis[dateStr]) dailyDis[dateStr] = d;
+                });
+
+                let labels10 = Object.keys(dailyChg);
+                let chgData = Object.values(dailyChg);
+                let disData = Object.values(dailyDis);
+
+                // Cấu hình chung cho Chart
                 Chart.defaults.color = '#475569';
-                const commonLine = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, elements: { point: { radius: 0 } }, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } }, y: { grid: { color: '#1e293b' } } } };
+                const commonOptions = {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    elements: { point: { radius: 0, hitRadius: 10, hoverRadius: 4 } },
+                    interaction: { mode: 'index', intersect: false }
+                };
 
                 if(chartsObj.volt) chartsObj.volt.destroy();
-                let ctxV = document.getElementById('voltChart').getContext('2d');
-                let gradV = ctxV.createLinearGradient(0, 0, 0, 260);
-                gradV.addColorStop(0, 'rgba(168, 85, 247, 0.4)'); gradV.addColorStop(1, 'rgba(168, 85, 247, 0)');
-                chartsObj.volt = new Chart(ctxV, { type: 'line', data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradV, fill: true, tension: 0.2 }] }, options: { ...commonLine, scales: { ...commonLine.scales, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } } });
+                let ctxVolt = document.getElementById('voltChart').getContext('2d');
+                let gradVolt = ctxVolt.createLinearGradient(0, 0, 0, 260);
+                gradVolt.addColorStop(0, 'rgba(168, 85, 247, 0.4)');
+                gradVolt.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+
+                chartsObj.volt = new Chart(ctxVolt, {
+                    type: 'line',
+                    data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
+                    options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
+                });
 
                 if(chartsObj.amp) chartsObj.amp.destroy();
-                chartsObj.amp = new Chart(document.getElementById('ampChart'), { type: 'line', data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', tension: 0.2 }] }, options: commonLine });
+                chartsObj.amp = new Chart(document.getElementById('ampChart'), {
+                    type: 'line',
+                    data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
+                    options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
+                });
 
                 if(chartsObj.chg) chartsObj.chg.destroy();
-                chartsObj.chg = new Chart(document.getElementById('chgChart'), { type: 'bar', data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4, maxBarThickness: 15 }] }, options: { ...commonLine, scales: { x: { grid: { display: false } }, y: { max: 20, grid: { color: '#1e293b' } } } } });
+                chartsObj.chg = new Chart(document.getElementById('chgChart'), {
+                    type: 'bar',
+                    data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
+                    options: { ...commonOptions, scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
+                });
 
                 if(chartsObj.dis) chartsObj.dis.destroy();
-                chartsObj.dis = new Chart(document.getElementById('disChart'), { type: 'bar', data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4, maxBarThickness: 15 }] }, options: { ...commonLine, scales: { x: { grid: { display: false } }, y: { max: 20, grid: { color: '#1e293b' } } } } });
-            } catch (e) { console.error("Lỗi vẽ đồ thị ChartJS:", e); }
+                chartsObj.dis = new Chart(document.getElementById('disChart'), {
+                    type: 'bar',
+                    data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
+                    options: { ...commonOptions, scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
+                });
+
+            } catch (error) { console.error("Lỗi vẽ đồ thị ChartJS:", error); }
         }
+      
         // ================= KẾT THÚC CHART.JS =================
                function loadDailyStats() {
             let today = new Date().toLocaleDateString('vi-VN');
