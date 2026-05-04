@@ -661,6 +661,7 @@
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
   
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
+        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         async function fetchAndDrawCharts() {
             try {
                 // 1. Fetch data 1 Ngày cho Volt & Amp
@@ -668,17 +669,35 @@
                 let data1 = await res1.json();
 
                 let labels1 = []; let voltData = []; let ampData = [];
+                // Thêm biến để hứng Max/Min trực tiếp từ ThingSpeak
+                let tsMaxV = 0; let tsMinV = 999; 
 
                 data1.feeds.forEach(f => {
                     if(!f.created_at) return;
                     let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
                     labels1.push(time);
+                    
+                    let currentV = 0;
+                    
                     if (activeBms === 'b1') {
-                        voltData.push(parseFloat(f.field1)); ampData.push(parseFloat(f.field2));
+                        currentV = parseFloat(f.field1);
+                        voltData.push(currentV); 
+                        ampData.push(parseFloat(f.field2));
                     } else {
-                        voltData.push(parseFloat(f.field5)); ampData.push(parseFloat(f.field6));
+                        currentV = parseFloat(f.field5);
+                        voltData.push(currentV); 
+                        ampData.push(parseFloat(f.field6));
                     }
+
+                    // Tự động dò Max/Min của 24h qua
+                    if (currentV > tsMaxV) tsMaxV = currentV;
+                    if (currentV > 0 && currentV < tsMinV) tsMinV = currentV;
                 });
+
+                // Cập nhật số Max/Min lên màn hình ở Tab Chart
+                if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = tsMaxV > 0 ? tsMaxV.toFixed(2) : "--";
+                if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (tsMinV > 0 && tsMinV < 999) ? tsMinV.toFixed(2) : "--";
+
 
                 // 2. Fetch data 10 Ngày cho Năng lượng (Cột)
                 let res10 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=10");
@@ -699,7 +718,7 @@
                         d = parseFloat(f.field8) || 0;
                     }
 
-                    // SỬA LỖI TẠI ĐÂY: Luôn chia 1000 để đổi từ Wh sang kWh
+                    // Luôn chia 1000 để đổi từ Wh sang kWh
                     c = c / 1000.0;
                     d = d / 1000.0;
 
