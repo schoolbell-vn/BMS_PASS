@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BMS SCI-FI MOBILE FULL - THẦY TÚ</title>
-   <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png?v=2">
     <link rel="apple-touch-icon" href="icon.png?v=2">
     <meta name="mobile-web-app-capable" content="yes">
@@ -14,6 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html { font-size: 17px; } 
@@ -76,6 +77,7 @@
 
     <main class="max-w-xl mx-auto p-4 mt-2">
 
+        <!-- TAB HOME -->
         <div id="tab-home" class="tab-content active space-y-6">
             
             <div class="card-scifi p-4 relative h-64 w-full flex items-center justify-center overflow-hidden border-cyan-500/40">
@@ -165,10 +167,23 @@
                     </div>
                 </div>
             </div>
-
+            <!-- === GIAO DIỆN TÍNH TOÁN VẬT LÝ MỚI === -->
+            <div class="grid grid-cols-2 gap-4 mt-1 mb-4">
+                <div class="card-scifi bg-gradient-to-br from-purple-900/40 to-purple-800/10 border-purple-500/30 p-4">
+                    <p id="time_remain_label" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fas fa-stopwatch"></i> THỜI GIAN</p>
+                    <span class="text-2xl font-black text-purple-100 neon-text nowrap" id="time_remain">STANDBY</span>
+                </div>
+                <div class="card-scifi bg-gradient-to-br from-pink-900/40 to-pink-800/10 border-pink-500/30 p-4">
+                    <p class="text-[10px] text-pink-300 font-bold uppercase tracking-wider mb-1"><i class="fas fa-heartbeat"></i> Nội trở Pin (r)</p>
+                    <span class="text-2xl font-black text-pink-100 neon-text nowrap"><span id="pack_ir">--</span> <span class="text-sm text-pink-400">mΩ</span></span>
+                </div>
+            </div>
+            <!-- ĐIỆN ÁP 16 CELL -->
             <div class="card-scifi overflow-hidden mb-8 border-cyan-800/50">
-                <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase">
-                    <i class="fas fa-layer-group"></i> Điện áp 16 Cell
+                <!-- Đã cập nhật dòng tiêu đề thêm trạng thái Cân Bằng (Balancer) -->
+                <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase flex justify-between items-center">
+                    <span><i class="fas fa-layer-group mr-2"></i> Điện áp 16 Cell</span>
+                    <span id="pack_balancer_status" class="text-[10px] bg-gray-800 text-gray-500 px-2 py-1 rounded border border-gray-700 flex items-center gap-1 shadow-inner transition-all duration-300"><i class="fas fa-balance-scale"></i> WAIT</span>
                 </div>
                 
                 <div class="bg-[#111827] grid grid-cols-4 divide-x divide-gray-800/50 border-b border-gray-800/50">
@@ -648,19 +663,17 @@
         let isEspConnected = false;
         let pendingCommands = {};
         
-        // Quản lý biến Chart.js
         let chartsObj = { volt: null, amp: null, chg: null, dis: null };
         let isChartsDrawn = false;
+        let last_U = { b1: 0, b2: 0 };
+        let last_I = { b1: 0, b2: 0 };
+        let pack_ir = { b1: '--', b2: '--' };
 
         window.addEventListener('load', () => {
             const selector = document.getElementById('device-selector');
             if (selector) selector.value = activeBms;
-            loadDailyStats(); 
         });
 
-        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
-  
-        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         async function fetchAndDrawCharts() {
@@ -670,7 +683,6 @@
                 let data1 = await res1.json();
 
                 let labels1 = []; let voltData = []; let ampData = [];
-                // Biến hứng Max/Min từ ThingSpeak
                 let tsMaxV = 0; let tsMinV = 999; 
                 let tsMaxChg = 0; let tsMaxDis = 0;
 
@@ -693,21 +705,17 @@
                     voltData.push(currentV); 
                     ampData.push(currentA);
 
-                    // Dò Max/Min Volt 24h qua
+                    // Dò Max/Min 24h qua
                     if (currentV > tsMaxV) tsMaxV = currentV;
                     if (currentV > 0 && currentV < tsMinV) tsMinV = currentV;
-
-                    // Dò Max Sạc / Max Xả 24h qua
                     if (currentA > tsMaxChg) tsMaxChg = currentA;
                     if (currentA < 0 && Math.abs(currentA) > tsMaxDis) tsMaxDis = Math.abs(currentA);
                 });
 
-                // Cập nhật số liệu Max/Min lên màn hình ở Tab Chart
                 if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = tsMaxV > 0 ? tsMaxV.toFixed(2) : "--";
                 if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (tsMinV > 0 && tsMinV < 999) ? tsMinV.toFixed(2) : "--";
                 if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = tsMaxChg > 0 ? "+" + tsMaxChg.toFixed(1) : "--";
                 if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = tsMaxDis > 0 ? "-" + tsMaxDis.toFixed(1) : "--";
-
 
                 // 2. Fetch data 10 Ngày cho Năng lượng (Cột)
                 let res10 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=10");
@@ -728,11 +736,9 @@
                         d = parseFloat(f.field8) || 0;
                     }
 
-                    // Luôn chia 1000 để đổi từ Wh sang kWh
                     c = c / 1000.0;
                     d = d / 1000.0;
 
-                    // Lọc lấy giá trị MAX trong ngày
                     if (!dailyChg[dateStr] || c > dailyChg[dateStr]) dailyChg[dateStr] = c;
                     if (!dailyDis[dateStr] || d > dailyDis[dateStr]) dailyDis[dateStr] = d;
                 });
@@ -741,11 +747,13 @@
                 let chgData = Object.values(dailyChg);
                 let disData = Object.values(dailyDis);
 
-                // Cấu hình chung cho Chart
                 Chart.defaults.color = '#475569';
                 const commonOptions = {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: { display: false } // Vô hiệu hóa nhãn số cho biểu đồ đường (Volt/Amp) để tránh rối mắt
+                    },
                     elements: { point: { radius: 0, hitRadius: 10, hoverRadius: 4 } },
                     interaction: { mode: 'index', intersect: false }
                 };
@@ -758,6 +766,7 @@
 
                 chartsObj.volt = new Chart(ctxVolt, {
                     type: 'line',
+                    plugins: [ChartDataLabels],
                     data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
                     options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
                 });
@@ -765,6 +774,7 @@
                 if(chartsObj.amp) chartsObj.amp.destroy();
                 chartsObj.amp = new Chart(document.getElementById('ampChart'), {
                     type: 'line',
+                    plugins: [ChartDataLabels],
                     data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
                     options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
                 });
@@ -772,38 +782,51 @@
                 if(chartsObj.chg) chartsObj.chg.destroy();
                 chartsObj.chg = new Chart(document.getElementById('chgChart'), {
                     type: 'bar',
+                    plugins: [ChartDataLabels], // Khai báo plugin
                     data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
-                    options: { ...commonOptions, scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
+                    options: { 
+                        ...commonOptions, 
+                        plugins: {
+                            ...commonOptions.plugins,
+                            datalabels: {
+                                display: true, // BẬT SỐ CHO CỘT SẠC
+                                color: '#4ade80', // Chữ xanh lá nhạt
+                                anchor: 'end',
+                                align: 'end',
+                                offset: 0,
+                                font: { weight: 'bold', size: 10 },
+                                formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } // Ẩn số 0 cho gọn
+                            }
+                        },
+                        // Thêm grace: '15%' để tự động nới đỉnh đồ thị lên cao hơn cột một khoảng
+                        scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } 
+                    }
                 });
 
                 if(chartsObj.dis) chartsObj.dis.destroy();
                 chartsObj.dis = new Chart(document.getElementById('disChart'), {
                     type: 'bar',
+                    plugins: [ChartDataLabels], // Khai báo plugin
                     data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
-                    options: { ...commonOptions, scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
+                    options: { 
+                        ...commonOptions, 
+                        plugins: {
+                            ...commonOptions.plugins,
+                            datalabels: {
+                                display: true, // BẬT SỐ CHO CỘT XẢ
+                                color: '#f87171', // Chữ đỏ nhạt
+                                anchor: 'end',
+                                align: 'end',
+                                offset: 0,
+                                font: { weight: 'bold', size: 10 },
+                                formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } // Ẩn số 0
+                            }
+                        },
+                        scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } 
+                    }
                 });
 
             } catch (error) { console.error("Lỗi vẽ đồ thị ChartJS:", error); }
-        }
-           
-        // ================= KẾT THÚC CHART.JS =================
-               function loadDailyStats() {
-            let today = new Date().toLocaleDateString('vi-VN');
-            if (localStorage.getItem('stat_date_' + activeBms) === today) {
-                let mv = parseFloat(localStorage.getItem('max_v_' + activeBms)) || 0;
-                let minv = parseFloat(localStorage.getItem('min_v_' + activeBms)) || 999;
-                let mchg = parseFloat(localStorage.getItem('max_a_chg_' + activeBms)) || 0;
-                let mdis = parseFloat(localStorage.getItem('max_a_dis_' + activeBms)) || 0;
-                if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = mv > 0 ? mv.toFixed(2) : "--";
-                if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (minv > 0 && minv < 999) ? minv.toFixed(2) : "--";
-                if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = mchg > 0 ? "+" + mchg.toFixed(1) : "--";
-                if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = mdis > 0 ? "-" + mdis.toFixed(1) : "--";
-            } else {
-                if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = "--";
-                if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = "--";
-                if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = "--";
-                if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = "--";
-            }
         }
 
         function resetBtn(btn) {
@@ -825,6 +848,13 @@
             if (document.getElementById('pwr-icon')) document.getElementById('pwr-icon').className = "fas fa-bolt text-gray-600 text-xl";
             if (document.getElementById('path-solar')) document.getElementById('path-solar').className.baseVal = "energy-path";
             if (document.getElementById('path-load')) document.getElementById('path-load').className.baseVal = "energy-path";
+            
+            // Xử lý Reset luôn cả cái Badge Cân bằng
+            if (document.getElementById('pack_balancer_status')) {
+                const bs = document.getElementById('pack_balancer_status');
+                bs.innerHTML = '<i class="fas fa-balance-scale"></i> WAIT';
+                bs.className = 'text-[10px] bg-gray-800 text-gray-500 px-2 py-1 rounded border border-gray-700 flex items-center gap-1 shadow-inner transition-all duration-300';
+            }
         }
 
         client.onConnectionLost = (responseObject) => {
@@ -949,62 +979,14 @@
                     delete pendingCommands[pendingKey];
                 }
             }
-            
-            let today = new Date().toLocaleDateString('vi-VN');
-            if (localStorage.getItem('stat_date_' + activeBms) !== today) {
-                localStorage.setItem('stat_date_' + activeBms, today);
-                localStorage.setItem('max_v_' + activeBms, 0);
-                localStorage.setItem('min_v_' + activeBms, 999);
-                localStorage.setItem('max_a_chg_' + activeBms, 0);
-                localStorage.setItem('max_a_dis_' + activeBms, 0);
-                if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = "--";
-                if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = "--";
-                if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = "--";
-                if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = "--";
-            }
 
             if (key === 'voltage') {
-                let V = parseFloat(val);
-                let currentMaxV = parseFloat(localStorage.getItem('max_v_' + activeBms)) || 0;
-                let currentMinV = parseFloat(localStorage.getItem('min_v_' + activeBms)) || 999;
-                
-                if (V > currentMaxV) {
-                    localStorage.setItem('max_v_' + activeBms, V);
-                    if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = V.toFixed(2);
-                }
-                if (V > 0 && V < currentMinV) {
-                    localStorage.setItem('min_v_' + activeBms, V);
-                    if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = V.toFixed(2);
-                }
+                document.getElementById('main_voltage').innerText = parseFloat(val).toFixed(2);
             }
 
             if (key === 'current') {
-                let A = parseFloat(val);
-                let maxChg = parseFloat(localStorage.getItem('max_a_chg_' + activeBms)) || 0;
-                let maxDis = parseFloat(localStorage.getItem('max_a_dis_' + activeBms)) || 0;
-                
-                if (A > 0 && A > maxChg) {
-                    localStorage.setItem('max_a_chg_' + activeBms, A);
-                    if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = "+" + A.toFixed(1);
-                } else if (A < 0 && Math.abs(A) > Math.abs(maxDis)) {
-                    localStorage.setItem('max_a_dis_' + activeBms, Math.abs(A));
-                    if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = "-" + Math.abs(A).toFixed(1);
-                }
-            }
-            
-            const maps = {
-                'voltage': ['main_voltage'], 'current': ['main_current', 'pack_a'],
-                'capacity_remaining': ['main_energy_now'], 'bat_cap': ['main_capacity']
-            };
-
-           if (maps[key]) {
-                maps[key].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        if (id === 'main_voltage') el.innerText = parseFloat(val).toFixed(2);
-                        else el.innerText = parseFloat(val).toFixed(1);
-                    }
-                });
+                document.getElementById('main_current').innerText = parseFloat(val).toFixed(1);
+                document.getElementById('pack_a').innerText = parseFloat(val).toFixed(1);
             }
 
             if (key === 'setup_passcode') {
@@ -1044,6 +1026,8 @@
                         if(document.getElementById('pack_min')) document.getElementById('pack_min').innerText = minV.toFixed(3);
                         if(document.getElementById('pack_max')) document.getElementById('pack_max').innerText = maxV.toFixed(3);
                         if(document.getElementById('pack_delta')) document.getElementById('pack_delta').innerText = deltaV;
+                        
+                        updateBalancerBadge(); // GỌI HÀM CẬP NHẬT TRẠNG THÁI CÂN BẰNG
                     }
                 }, 50); 
                 return; 
@@ -1085,18 +1069,15 @@
             if (key === 'capacity_remaining' || key === 'bat_cap') {
                 const AhNow = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 const AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
-                
                 const NOMINAL_VOLTAGE_16S = 51.2;
 
                 let kwh_remain = (AhNow * NOMINAL_VOLTAGE_16S) / 1000;
                 let kwh_total = (AhMax * NOMINAL_VOLTAGE_16S) / 1000;
 
-                if (document.getElementById('kwh_remaining')) {
-                    document.getElementById('kwh_remaining').innerText = kwh_remain.toFixed(2);
-                }
-                if (document.getElementById('kwh_total')) {
-                    document.getElementById('kwh_total').innerText = kwh_total.toFixed(1);
-                }
+                if (document.getElementById('kwh_remaining')) document.getElementById('kwh_remaining').innerText = kwh_remain.toFixed(2);
+                if (document.getElementById('kwh_total')) document.getElementById('kwh_total').innerText = kwh_total.toFixed(1);
+                if (document.getElementById('main_energy_now')) document.getElementById('main_energy_now').innerText = AhNow.toFixed(1);
+                if (document.getElementById('main_capacity')) document.getElementById('main_capacity').innerText = Math.round(AhMax);
             }
 
             if (key === 'soc' || key === 'capacity_remaining' || key === 'bat_cap') {
@@ -1127,6 +1108,7 @@
                         i.value = Math.round(v);
                     }
                 }
+                if (key === 'bal_trig_v') updateBalancerBadge();
             }
 
             if (type === 'switch') {
@@ -1134,6 +1116,77 @@
                 if (sw && !pendingCommands[pendingKey]) {
                     sw.checked = (val.toUpperCase() === 'ON' || val === 'true' || val === '1');
                 }
+                if (key === 'balancer') updateBalancerBadge();
+            }
+            // ================= LOGIC VẬT LÝ: NỘI TRỞ & THỜI GIAN =================
+            setTimeout(() => {
+                let U = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
+                let I = parseFloat(bmsCache[activeBms]['current']?.value || 0);
+                let Ah = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
+                let AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
+
+                // 1. Thuật toán đo Nội Trở (Internal Resistance)
+                if (last_U[activeBms] > 0 && last_I[activeBms] !== 0) {
+                    let dI = Math.abs(I - last_I[activeBms]);
+                    if (dI >= 3.0) { // Lọc nhiễu: Chỉ tính khi dòng điện thay đổi đột ngột >= 3A
+                        let dU = Math.abs(U - last_U[activeBms]);
+                        let r = (dU / dI) * 1000; // Công thức r = dU/dI, nhân 1000 để ra miliOhm
+                        if (r > 0 && r < 100) { // Giới hạn dải mΩ hợp lý để loại bỏ sai số ảo
+                            pack_ir[activeBms] = r.toFixed(1);
+                        }
+                    }
+                }
+                // Chốt lại mốc cũ để dành cho lần so sánh tiếp theo
+                last_U[activeBms] = U;
+                last_I[activeBms] = I;
+                if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = pack_ir[activeBms];
+
+                // 2. Thuật toán tính Thời Gian
+                let timeText = "STANDBY";
+                let label = document.getElementById('time_remain_label');
+                
+                if (I <= -0.5) { // Đang xả (T = Ah / I)
+                    let hours = Ah / Math.abs(I);
+                    let h = Math.floor(hours);
+                    let m = Math.round((hours - h) * 60);
+                    timeText = `${h}h ${m}m`;
+                    if(label) { label.innerText = "CÒN LẠI (XẢ)"; label.className = "text-[10px] text-cyan-300 font-bold uppercase tracking-wider mb-1"; }
+                } else if (I >= 0.5) { // Đang sạc (T = Ah_Cần_Sạc / I)
+                    let hoursToFull = (AhMax - Ah) / I;
+                    if (hoursToFull < 0) hoursToFull = 0;
+                    let h = Math.floor(hoursToFull);
+                    let m = Math.round((hoursToFull - h) * 60);
+                    timeText = `${h}h ${m}m`;
+                    if(label) { label.innerText = "SẠC ĐẦY SAU"; label.className = "text-[10px] text-orange-300 font-bold uppercase tracking-wider mb-1"; }
+                } else {
+                    if(label) { label.innerText = "THỜI GIAN"; label.className = "text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"; }
+                }
+                if(document.getElementById('time_remain')) document.getElementById('time_remain').innerText = timeText;
+
+            }, 200); // Trễ 0.2s để chờ dữ liệu đồng bộ xong
+        }
+
+        // HÀM MỚI: TÍNH TOÁN ĐIỀU KIỆN CÂN BẰNG THỰC TẾ
+        function updateBalancerBadge() {
+            const balStatus = document.getElementById('pack_balancer_status');
+            if (!balStatus) return;
+
+            const balSwitch = bmsCache[activeBms]['balancer']?.value || 'OFF';
+            const isBalOn = (balSwitch.toUpperCase() === 'ON' || balSwitch === 'true' || balSwitch === '1');
+            
+            const deltaText = document.getElementById('pack_delta').innerText;
+            const currentDelta = deltaText === '--' ? 0 : parseFloat(deltaText);
+            const triggerV = parseFloat(bmsCache[activeBms]['bal_trig_v']?.value || 0.010); 
+
+            if (!isBalOn) {
+                balStatus.innerHTML = '<i class="fas fa-power-off"></i> BAL OFF';
+                balStatus.className = 'text-[10px] bg-gray-800 text-gray-500 px-2 py-1 rounded border border-gray-700 flex items-center gap-1 shadow-inner transition-all duration-300';
+            } else if (currentDelta >= triggerV) {
+                balStatus.innerHTML = '<i class="fas fa-balance-scale fa-spin text-blue-400"></i> BALANCING';
+                balStatus.className = 'text-[10px] bg-blue-900/40 text-blue-300 px-2 py-1 rounded border border-blue-500/50 flex items-center gap-1 shadow-[0_0_10px_rgba(59,130,246,0.4)] neon-text transition-all duration-300';
+            } else {
+                balStatus.innerHTML = '<i class="fas fa-check text-green-400"></i> STANDBY';
+                balStatus.className = 'text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-700/50 flex items-center gap-1 shadow-inner transition-all duration-300';
             }
         }
 
@@ -1141,7 +1194,7 @@
             activeBms = document.getElementById('device-selector').value;
             localStorage.setItem('selected_bms', activeBms); 
             resetUI();
-            loadDailyStats(); 
+            
             const d = bmsCache[activeBms];
             if (d) {
                 Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
@@ -1151,6 +1204,7 @@
                     else h.innerText = "BT: -- dBm";
                 }
             }
+            if (document.getElementById('tab-charts').classList.contains('active')) fetchAndDrawCharts();
         }
 
         function nav(t) {
@@ -1162,10 +1216,9 @@
                 act.classList.add('nav-active'); 
                 act.classList.replace('text-gray-500', 'text-cyan-400');
             }
-            // Tự động tải lại đồ thị mỗi khi mở Tab Chart
             if (t === 'charts' && !isChartsDrawn) {
                 fetchAndDrawCharts();
-                isChartsDrawn = true; // Chống load lại liên tục
+                isChartsDrawn = true;
             }
         }
 
