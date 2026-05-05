@@ -77,7 +77,6 @@
 
     <main class="max-w-xl mx-auto p-4 mt-2">
 
-        <!-- TAB HOME -->
         <div id="tab-home" class="tab-content active space-y-6">
             
             <div class="card-scifi p-4 relative h-64 w-full flex items-center justify-center overflow-hidden border-cyan-500/40">
@@ -167,7 +166,6 @@
                     </div>
                 </div>
             </div>
-            <!-- === GIAO DIỆN TÍNH TOÁN VẬT LÝ MỚI === -->
             <div class="grid grid-cols-2 gap-4 mt-1 mb-4">
                 <div class="card-scifi bg-gradient-to-br from-purple-900/40 to-purple-800/10 border-purple-500/30 p-4">
                     <p id="time_remain_label" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fas fa-stopwatch"></i> THỜI GIAN</p>
@@ -178,9 +176,7 @@
                     <span class="text-2xl font-black text-pink-100 neon-text nowrap"><span id="pack_ir">--</span> <span class="text-sm text-pink-400">mΩ</span></span>
                 </div>
             </div>
-            <!-- ĐIỆN ÁP 16 CELL -->
             <div class="card-scifi overflow-hidden mb-8 border-cyan-800/50">
-                <!-- Đã cập nhật dòng tiêu đề thêm trạng thái Cân Bằng (Balancer) -->
                 <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase flex justify-between items-center">
                     <span><i class="fas fa-layer-group mr-2"></i> Điện áp 16 Cell</span>
                     <span id="pack_balancer_status" class="text-[10px] bg-gray-800 text-gray-500 px-2 py-1 rounded border border-gray-700 flex items-center gap-1 shadow-inner transition-all duration-300"><i class="fas fa-balance-scale"></i> WAIT</span>
@@ -665,8 +661,9 @@
         
         let chartsObj = { volt: null, amp: null, chg: null, dis: null };
         let isChartsDrawn = false;
-        let last_U = { b1: 0, b2: 0 };
-        let last_I = { b1: 0, b2: 0 };
+        
+        // CÁC BIẾN CHO THUẬT TOÁN HỒI QUY TUYẾN TÍNH
+        let irData = { b1: [], b2: [] }; 
         let pack_ir = { b1: '--', b2: '--' };
 
         window.addEventListener('load', () => {
@@ -674,7 +671,6 @@
             if (selector) selector.value = activeBms;
         });
 
-        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         // ================= VẼ CHART.JS TỪ THINGSPEAK =================
         async function fetchAndDrawCharts() {
             try {
@@ -1118,6 +1114,7 @@
                 }
                 if (key === 'balancer') updateBalancerBadge();
             }
+
             // ================= LOGIC VẬT LÝ: NỘI TRỞ & THỜI GIAN =================
             setTimeout(() => {
                 let U = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
@@ -1125,23 +1122,49 @@
                 let Ah = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 let AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
 
-                // 1. Thuật toán đo Nội Trở (Internal Resistance)
-                if (last_U[activeBms] > 0 && last_I[activeBms] !== 0) {
-                    let dI = Math.abs(I - last_I[activeBms]);
-                    if (dI >= 3.0) { // Lọc nhiễu: Chỉ tính khi dòng điện thay đổi đột ngột >= 3A
-                        let dU = Math.abs(U - last_U[activeBms]);
-                        let r = (dU / dI) * 1000; // Công thức r = dU/dI, nhân 1000 để ra miliOhm
-                        if (r > 0 && r < 100) { // Giới hạn dải mΩ hợp lý để loại bỏ sai số ảo
-                            pack_ir[activeBms] = r.toFixed(1);
+                // 1. THUẬT TOÁN HỒI QUY TUYẾN TÍNH (LINEAR REGRESSION) ĐO NỘI TRỞ
+                if (U > 0) {
+                    let pts = irData[activeBms];
+                    
+                    // Chỉ nạp thêm điểm vào mảng nếu dòng điện hoặc điện áp có sự nhấp nháy (tránh lưu rác khi pin đứng im)
+                    if (pts.length === 0 || Math.abs(I - pts[pts.length-1].i) > 0.5 || Math.abs(U - pts[pts.length-1].u) > 0.01) {
+                        pts.push({u: U, i: I});
+                        if (pts.length > 30) pts.shift(); // Chỉ giữ 30 mốc lịch sử gần nhất (Window size)
+                    }
+
+                    // Tiến hành tính toán khi thu thập đủ ít nhất 15 điểm
+                    if (pts.length >= 15) {
+                        let sumI = 0, sumU = 0, sumI2 = 0, sumIU = 0;
+                        let minI = pts[0].i, maxI = pts[0].i;
+                        let n = pts.length;
+                        
+                        pts.forEach(p => {
+                            sumI += p.i; sumU += p.u;
+                            sumI2 += p.i * p.i; sumIU += p.i * p.u;
+                            if(p.i < minI) minI = p.i;
+                            if(p.i > maxI) maxI = p.i;
+                        });
+
+                        // Chỉ xuất kết quả khi dải dòng điện trong 30 điểm vừa qua biến thiên đủ rộng (chênh lệch Min-Max >= 5.0A)
+                        if (maxI - minI >= 5.0) {
+                            // Công thức Hồi quy: Hệ số góc (Slope) = [n(Σxy) - (Σx)(Σy)] / [n(Σx^2) - (Σx)^2]
+                            let slope = (n * sumIU - sumI * sumU) / (n * sumI2 - sumI * sumI);
+                            let r_mOhm = slope * 1000; // Đổi ra miliOhm
+                            
+                            // Lọc các giá trị phi thực tế
+                            if (r_mOhm >= 1.0 && r_mOhm <= 20.0) { 
+                                pack_ir[activeBms] = r_mOhm.toFixed(1);
+                                localStorage.setItem('saved_ir_' + activeBms, pack_ir[activeBms]); 
+                            }
                         }
                     }
                 }
-                // Chốt lại mốc cũ để dành cho lần so sánh tiếp theo
-                last_U[activeBms] = U;
-                last_I[activeBms] = I;
-                if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = pack_ir[activeBms];
 
-                // 2. Thuật toán tính Thời Gian
+                // Hiển thị nội trở từ biến hoặc lấy số đã lưu trong điện thoại
+                let display_ir = pack_ir[activeBms] !== '--' ? pack_ir[activeBms] : (localStorage.getItem('saved_ir_' + activeBms) || '--');
+                if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = display_ir;
+
+                // 2. THUẬT TOÁN TÍNH THỜI GIAN
                 let timeText = "STANDBY";
                 let label = document.getElementById('time_remain_label');
                 
@@ -1195,6 +1218,9 @@
             localStorage.setItem('selected_bms', activeBms); 
             resetUI();
             
+            // DÒNG MỚI THÊM: Lấy số nội trở khi đổi trạm
+            if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = localStorage.getItem('saved_ir_' + activeBms) || '--';
+
             const d = bmsCache[activeBms];
             if (d) {
                 Object.keys(d).forEach(k => updateScreen(k, d[k].value, d[k].type));
