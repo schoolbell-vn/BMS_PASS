@@ -77,6 +77,7 @@
 
     <main class="max-w-xl mx-auto p-4 mt-2">
 
+        <!-- TAB HOME -->
         <div id="tab-home" class="tab-content active space-y-6">
             
             <div class="card-scifi p-4 relative h-64 w-full flex items-center justify-center overflow-hidden border-cyan-500/40">
@@ -166,6 +167,7 @@
                     </div>
                 </div>
             </div>
+            <!-- === GIAO DIỆN TÍNH TOÁN VẬT LÝ MỚI === -->
             <div class="grid grid-cols-2 gap-4 mt-1 mb-4">
                 <div class="card-scifi bg-gradient-to-br from-purple-900/40 to-purple-800/10 border-purple-500/30 p-4">
                     <p id="time_remain_label" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fas fa-stopwatch"></i> THỜI GIAN</p>
@@ -176,6 +178,7 @@
                     <span class="text-2xl font-black text-pink-100 neon-text nowrap"><span id="pack_ir">--</span> <span class="text-sm text-pink-400">mΩ</span></span>
                 </div>
             </div>
+            <!-- ĐIỆN ÁP 16 CELL -->
             <div class="card-scifi overflow-hidden mb-8 border-cyan-800/50">
                 <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase flex justify-between items-center">
                     <span><i class="fas fa-layer-group mr-2"></i> Điện áp 16 Cell</span>
@@ -245,6 +248,13 @@
                     <div class="bg-[#0f172a] p-6 rounded-xl border border-gray-800 shadow-lg">
                         <h3 class="text-base font-bold text-cyan-700 uppercase tracking-widest mb-6 border-b border-gray-800 pb-3">Công tắc Rơ-le</h3>
                         <div class="space-y-7">
+                            <div class="flex justify-between items-center pb-4 border-b border-gray-800 mb-4">
+                                <span class="text-cyan-400 font-black text-base"><i class="fas fa-robot text-cyan-500 w-6"></i> SMART BALANCING (AUTO)</span>
+                                <div class="relative inline-block w-16 align-middle">
+                                    <input type="checkbox" id="sw_auto_balance" class="toggle-checkbox absolute block w-8 h-8 rounded-full border-2 appearance-none cursor-pointer" onchange="sendCmd('auto_balance', this.checked)"/>
+                                    <label for="sw_auto_balance" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer"></label>
+                                </div>
+                            </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-300 font-bold text-base"><i class="fas fa-plug text-green-500 w-6"></i> BẬT SẠC (CHARGE)</span>
                                 <div class="relative inline-block w-16 align-middle">
@@ -272,6 +282,14 @@
                     <div class="pb-8">
                         <h3 class="text-base font-black text-cyan-600 uppercase mb-5 border-l-4 border-cyan-600 pl-3">1. Điện áp (Voltage)</h3>
                         <div class="space-y-6 mb-10">
+                            <div class="flex items-center justify-between border-b border-cyan-800/50 pb-4 bg-cyan-900/10 p-2 rounded-lg shadow-inner">
+                                <div class="text-cyan-300 text-sm font-black w-[45%] leading-snug"><i class="fas fa-magic mr-1"></i> Smart Auto Trigger V</div>
+                                <div class="flex items-center justify-end gap-2 w-[55%]">
+                                    <input type="number" id="val_smart_trigger_v" class="bg-[#0f172a] border border-cyan-500 rounded-lg p-3 w-28 text-center font-bold text-cyan-400 text-lg outline-none" step="0.001">
+                                    <span class="text-gray-500 font-bold text-sm w-4">V</span>
+                                    <button class="bg-cyan-700 text-cyan-50 border border-cyan-500 px-5 py-3 rounded-lg font-black text-sm hover:bg-cyan-500 active:bg-green-600 transition shadow-[0_0_10px_rgba(6,182,212,0.4)]" onclick="sendVal(event, 'smart_trigger_v')">OK</button>
+                                </div>
+                            </div>
                             <div class="flex items-center justify-between border-b border-gray-800/50 pb-4">
                                 <div class="text-gray-300 text-sm font-bold w-[45%] leading-snug">Start Balance voltage</div>
                                 <div class="flex items-center justify-end gap-2 w-[55%]">
@@ -748,7 +766,7 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: { 
                         legend: { display: false },
-                        datalabels: { display: false } // Vô hiệu hóa nhãn số cho biểu đồ đường (Volt/Amp) để tránh rối mắt
+                        datalabels: { display: false } 
                     },
                     elements: { point: { radius: 0, hitRadius: 10, hoverRadius: 4 } },
                     interaction: { mode: 'index', intersect: false }
@@ -778,23 +796,22 @@
                 if(chartsObj.chg) chartsObj.chg.destroy();
                 chartsObj.chg = new Chart(document.getElementById('chgChart'), {
                     type: 'bar',
-                    plugins: [ChartDataLabels], // Khai báo plugin
+                    plugins: [ChartDataLabels], 
                     data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
                     options: { 
                         ...commonOptions, 
                         plugins: {
                             ...commonOptions.plugins,
                             datalabels: {
-                                display: true, // BẬT SỐ CHO CỘT SẠC
-                                color: '#4ade80', // Chữ xanh lá nhạt
+                                display: true, 
+                                color: '#4ade80', 
                                 anchor: 'end',
                                 align: 'end',
                                 offset: 0,
                                 font: { weight: 'bold', size: 10 },
-                                formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } // Ẩn số 0 cho gọn
+                                formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } 
                             }
                         },
-                        // Thêm grace: '15%' để tự động nới đỉnh đồ thị lên cao hơn cột một khoảng
                         scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } 
                     }
                 });
@@ -802,20 +819,20 @@
                 if(chartsObj.dis) chartsObj.dis.destroy();
                 chartsObj.dis = new Chart(document.getElementById('disChart'), {
                     type: 'bar',
-                    plugins: [ChartDataLabels], // Khai báo plugin
+                    plugins: [ChartDataLabels], 
                     data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
                     options: { 
                         ...commonOptions, 
                         plugins: {
                             ...commonOptions.plugins,
                             datalabels: {
-                                display: true, // BẬT SỐ CHO CỘT XẢ
-                                color: '#f87171', // Chữ đỏ nhạt
+                                display: true, 
+                                color: '#f87171', 
                                 anchor: 'end',
                                 align: 'end',
                                 offset: 0,
                                 font: { weight: 'bold', size: 10 },
-                                formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } // Ẩn số 0
+                                formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } 
                             }
                         },
                         scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } 
@@ -845,7 +862,6 @@
             if (document.getElementById('path-solar')) document.getElementById('path-solar').className.baseVal = "energy-path";
             if (document.getElementById('path-load')) document.getElementById('path-load').className.baseVal = "energy-path";
             
-            // Xử lý Reset luôn cả cái Badge Cân bằng
             if (document.getElementById('pack_balancer_status')) {
                 const bs = document.getElementById('pack_balancer_status');
                 bs.innerHTML = '<i class="fas fa-balance-scale"></i> WAIT';
@@ -1023,7 +1039,7 @@
                         if(document.getElementById('pack_max')) document.getElementById('pack_max').innerText = maxV.toFixed(3);
                         if(document.getElementById('pack_delta')) document.getElementById('pack_delta').innerText = deltaV;
                         
-                        updateBalancerBadge(); // GỌI HÀM CẬP NHẬT TRẠNG THÁI CÂN BẰNG
+                        updateBalancerBadge(); 
                     }
                 }, 50); 
                 return; 
@@ -1096,7 +1112,7 @@
                 const i = document.getElementById('val_' + key);
                 if (i && !pendingCommands[pendingKey]) {
                     let v = parseFloat(val);
-                    if (key === 'max_bal_current' || key.includes('_v') || key.includes('ovp') || key.includes('uvp')) {
+                    if (key === 'max_bal_current' || key.includes('_v') || key.includes('ovp') || key.includes('uvp') || key === 'smart_trigger_v') {
                         i.value = v.toFixed(3);
                     } else if (key.includes('otp') || key.includes('utp')) {
                         i.value = v.toFixed(1);
@@ -1126,14 +1142,12 @@
                 if (U > 0) {
                     let pts = irData[activeBms];
                     
-                    // Chỉ nạp thêm điểm vào mảng nếu dòng điện hoặc điện áp có sự nhấp nháy (tránh lưu rác khi pin đứng im)
-                    if (pts.length === 0 || Math.abs(I - pts[pts.length-1].i) > 0.5 || Math.abs(U - pts[pts.length-1].u) > 0.01) {
+                    if (pts.length === 0 || Math.abs(I - pts[pts.length-1].i) >= 0.2 || Math.abs(U - pts[pts.length-1].u) >= 0.005) {
                         pts.push({u: U, i: I});
-                        if (pts.length > 30) pts.shift(); // Chỉ giữ 30 mốc lịch sử gần nhất (Window size)
+                        if (pts.length > 30) pts.shift();
                     }
 
-                    // Tiến hành tính toán khi thu thập đủ ít nhất 15 điểm
-                    if (pts.length >= 15) {
+                    if (pts.length >= 6) {
                         let sumI = 0, sumU = 0, sumI2 = 0, sumIU = 0;
                         let minI = pts[0].i, maxI = pts[0].i;
                         let n = pts.length;
@@ -1145,13 +1159,10 @@
                             if(p.i > maxI) maxI = p.i;
                         });
 
-                        // Chỉ xuất kết quả khi dải dòng điện trong 30 điểm vừa qua biến thiên đủ rộng (chênh lệch Min-Max >= 5.0A)
                         if (maxI - minI >= 5.0) {
-                            // Công thức Hồi quy: Hệ số góc (Slope) = [n(Σxy) - (Σx)(Σy)] / [n(Σx^2) - (Σx)^2]
                             let slope = (n * sumIU - sumI * sumU) / (n * sumI2 - sumI * sumI);
-                            let r_mOhm = slope * 1000; // Đổi ra miliOhm
+                            let r_mOhm = slope * 1000; 
                             
-                            // Lọc các giá trị phi thực tế
                             if (r_mOhm >= 1.0 && r_mOhm <= 20.0) { 
                                 pack_ir[activeBms] = r_mOhm.toFixed(1);
                                 localStorage.setItem('saved_ir_' + activeBms, pack_ir[activeBms]); 
@@ -1160,7 +1171,6 @@
                     }
                 }
 
-                // Hiển thị nội trở từ biến hoặc lấy số đã lưu trong điện thoại
                 let display_ir = pack_ir[activeBms] !== '--' ? pack_ir[activeBms] : (localStorage.getItem('saved_ir_' + activeBms) || '--');
                 if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = display_ir;
 
@@ -1168,13 +1178,13 @@
                 let timeText = "STANDBY";
                 let label = document.getElementById('time_remain_label');
                 
-                if (I <= -0.5) { // Đang xả (T = Ah / I)
+                if (I <= -0.5) { 
                     let hours = Ah / Math.abs(I);
                     let h = Math.floor(hours);
                     let m = Math.round((hours - h) * 60);
                     timeText = `${h}h ${m}m`;
                     if(label) { label.innerText = "CÒN LẠI (XẢ)"; label.className = "text-[10px] text-cyan-300 font-bold uppercase tracking-wider mb-1"; }
-                } else if (I >= 0.5) { // Đang sạc (T = Ah_Cần_Sạc / I)
+                } else if (I >= 0.5) { 
                     let hoursToFull = (AhMax - Ah) / I;
                     if (hoursToFull < 0) hoursToFull = 0;
                     let h = Math.floor(hoursToFull);
@@ -1186,10 +1196,9 @@
                 }
                 if(document.getElementById('time_remain')) document.getElementById('time_remain').innerText = timeText;
 
-            }, 200); // Trễ 0.2s để chờ dữ liệu đồng bộ xong
+            }, 200); 
         }
 
-        // HÀM MỚI: TÍNH TOÁN ĐIỀU KIỆN CÂN BẰNG THỰC TẾ
         function updateBalancerBadge() {
             const balStatus = document.getElementById('pack_balancer_status');
             if (!balStatus) return;
@@ -1218,7 +1227,6 @@
             localStorage.setItem('selected_bms', activeBms); 
             resetUI();
             
-            // DÒNG MỚI THÊM: Lấy số nội trở khi đổi trạm
             if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = localStorage.getItem('saved_ir_' + activeBms) || '--';
 
             const d = bmsCache[activeBms];
