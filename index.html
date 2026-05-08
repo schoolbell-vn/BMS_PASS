@@ -1131,45 +1131,95 @@
                 if (key === 'balancer') updateBalancerBadge();
             }
 
-            // ================= LOGIC VẬT LÝ: NỘI TRỞ & THỜI GIAN =================
+            // ================= LOGIC VẬT LÝ: NỘI TRỞ TỐI ƯU SOH =================
             setTimeout(() => {
                 let U = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
                 let I = parseFloat(bmsCache[activeBms]['current']?.value || 0);
+                let SOC = parseFloat(bmsCache[activeBms]['soc']?.value || 0);
                 let Ah = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 let AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
 
-                // 1. THUẬT TOÁN HỒI QUY TUYẾN TÍNH (LINEAR REGRESSION) ĐO NỘI TRỞ
+                // 1. THUẬT TOÁN ĐO NỘI TRỞ CHUẨN SOH (CÓ KIỂM ĐỊNH R-SQUARED)
                 if (U > 0) {
                     let pts = irData[activeBms];
                     
-                    if (pts.length === 0 || Math.abs(I - pts[pts.length-1].i) >= 0.2 || Math.abs(U - pts[pts.length-1].u) >= 0.005) {
-                        pts.push({u: U, i: I});
-                        if (pts.length > 30) pts.shift();
-                    }
+                    // ĐIỀU KIỆN 1: Chỉ lấy mẫu ở "Vùng bình nguyên" (SOC 30% - 80%)
+                    if (SOC >= 30.0 && SOC <= 80.0) {
+                        // Lọc lấy điểm khi dòng điện có nhúc nhích (tránh lưu một đống số 0)
+                        if (pts.length === 0 || Math.abs(I - pts[pts.length-1].i) >= 0.5) {
+                            pts.push({u: U, i: I});
+                            if (pts.length > 40) pts.shift(); // Tăng bộ nhớ đệm lên 40 mốc
+                        }
 
-                    if (pts.length >= 6) {
-                        let sumI = 0, sumU = 0, sumI2 = 0, sumIU = 0;
-                        let minI = pts[0].i, maxI = pts[0].i;
-                        let n = pts.length;
-                        
-                        pts.forEach(p => {
-                            sumI += p.i; sumU += p.u;
-                            sumI2 += p.i * p.i; sumIU += p.i * p.u;
-                            if(p.i < minI) minI = p.i;
-                            if(p.i > maxI) maxI = p.i;
-                        });
-
-                        if (maxI - minI >= 5.0) {
-                            let slope = (n * sumIU - sumI * sumU) / (n * sumI2 - sumI * sumI);
-                            let r_mOhm = slope * 1000; 
+                        if (pts.length >= 10) {
+                            let sumI = 0, sumU = 0, sumI2 = 0, sumIU = 0;
+                            let minI = pts[0].i, maxI = pts[0].i;
+                            let n = pts.length;
                             
-                            if (r_mOhm >= 1.0 && r_mOhm <= 20.0) { 
-                                pack_ir[activeBms] = r_mOhm.toFixed(1);
-                                localStorage.setItem('saved_ir_' + activeBms, pack_ir[activeBms]); 
+                            pts.forEach(p => {
+                                sumI += p.i; sumU += p.u;
+                                sumI2 += p.i * p.i; sumIU += p.i * p.u;
+                                if(p.i < minI) minI = p.i;
+                                if(p.i > maxI) maxI = p.i;
+                            });
+
+                            // ĐIỀU KIỆN 2: Delta I >= 10A để thắng nhiễu sóng
+                            if (maxI - minI >= 10.0) {
+                                let slope = (n * sumIU - sumI * sumU) / (n * sumI2 - sumI * sumI);
+                                let intercept = (sumU - slope * sumI) / n;
+                                
+                                // ĐIỀU KIỆN 3: Kiểm định Hệ số tương quan Pearson (R^2)
+                                let meanU = sumU / n;
+                                let ssTot = 0, ssRes = 0;
+                                pts.forEach(p => {
+                                    ssTot += Math.pow(p.u - meanU, 2);
+                                    let predictedU = slope * p.i + intercept;
+                                    ssRes += Math.pow(p.u - predictedU, 2);
+                                });
+                                
+                                let rSquared = ssTot > 0 ? (1 - (ssRes / ssTot)) : 0;
+                                let r_mOhm = slope * 1000; 
+                                
+                                // Chốt số NẾU: Đường chéo rất thẳng (R^2 > 0.85) và nội trở hợp lý
+                                if (rSquared >= 0.85 && r_mOhm >= 1.0 && r_mOhm <= 12.0) { 
+                                    pack_ir[activeBms] = r_mOhm.toFixed(1);
+                                    localStorage.setItem('saved_ir_' + activeBms, pack_ir[activeBms]); 
+                                }
                             }
                         }
+                    } else {
+                        // Đang ở vùng phân cực (quá đầy hoặc quá cạn) -> Xóa rác, không đo
+                        irData[activeBms] = [];
                     }
                 }
+
+                // Hiển thị nội trở
+                let display_ir = pack_ir[activeBms] !== '--' ? pack_ir[activeBms] : (localStorage.getItem('saved_ir_' + activeBms) || '--');
+                if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = display_ir;
+
+                // 2. THUẬT TOÁN TÍNH THỜI GIAN
+                let timeText = "STANDBY";
+                let label = document.getElementById('time_remain_label');
+                
+                if (I <= -0.5) { 
+                    let hours = Ah / Math.abs(I);
+                    let h = Math.floor(hours);
+                    let m = Math.round((hours - h) * 60);
+                    timeText = `${h}h ${m}m`;
+                    if(label) { label.innerText = "CÒN LẠI (XẢ)"; label.className = "text-[10px] text-cyan-300 font-bold uppercase tracking-wider mb-1"; }
+                } else if (I >= 0.5) { 
+                    let hoursToFull = (AhMax - Ah) / I;
+                    if (hoursToFull < 0) hoursToFull = 0;
+                    let h = Math.floor(hoursToFull);
+                    let m = Math.round((hoursToFull - h) * 60);
+                    timeText = `${h}h ${m}m`;
+                    if(label) { label.innerText = "SẠC ĐẦY SAU"; label.className = "text-[10px] text-orange-300 font-bold uppercase tracking-wider mb-1"; }
+                } else {
+                    if(label) { label.innerText = "THỜI GIAN"; label.className = "text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"; }
+                }
+                if(document.getElementById('time_remain')) document.getElementById('time_remain').innerText = timeText;
+
+            }, 200);
 
                 let display_ir = pack_ir[activeBms] !== '--' ? pack_ir[activeBms] : (localStorage.getItem('saved_ir_' + activeBms) || '--');
                 if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = display_ir;
