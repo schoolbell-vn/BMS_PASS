@@ -1220,33 +1220,6 @@
                 if(document.getElementById('time_remain')) document.getElementById('time_remain').innerText = timeText;
 
             }, 200);
-
-                let display_ir = pack_ir[activeBms] !== '--' ? pack_ir[activeBms] : (localStorage.getItem('saved_ir_' + activeBms) || '--');
-                if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = display_ir;
-
-                // 2. THUẬT TOÁN TÍNH THỜI GIAN
-                let timeText = "STANDBY";
-                let label = document.getElementById('time_remain_label');
-                
-                if (I <= -0.5) { 
-                    let hours = Ah / Math.abs(I);
-                    let h = Math.floor(hours);
-                    let m = Math.round((hours - h) * 60);
-                    timeText = `${h}h ${m}m`;
-                    if(label) { label.innerText = "CÒN LẠI (XẢ)"; label.className = "text-[10px] text-cyan-300 font-bold uppercase tracking-wider mb-1"; }
-                } else if (I >= 0.5) { 
-                    let hoursToFull = (AhMax - Ah) / I;
-                    if (hoursToFull < 0) hoursToFull = 0;
-                    let h = Math.floor(hoursToFull);
-                    let m = Math.round((hoursToFull - h) * 60);
-                    timeText = `${h}h ${m}m`;
-                    if(label) { label.innerText = "SẠC ĐẦY SAU"; label.className = "text-[10px] text-orange-300 font-bold uppercase tracking-wider mb-1"; }
-                } else {
-                    if(label) { label.innerText = "THỜI GIAN"; label.className = "text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"; }
-                }
-                if(document.getElementById('time_remain')) document.getElementById('time_remain').innerText = timeText;
-
-            }, 200); 
         }
 
         function updateBalancerBadge() {
