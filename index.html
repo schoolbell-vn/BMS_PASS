@@ -1124,6 +1124,9 @@
             }
 
             if (type === 'switch') {
+                // THÊM CHỐT CHẶN NÀY: Bỏ qua các bản tin rác khi nhiễu sóng BLE, giữ nguyên trạng thái nút bấm
+                if (val === 'unavailable' || val === 'unknown' || val === 'nan' || val === '') return;
+
                 const sw = document.getElementById('sw_' + key);
                 if (sw && !pendingCommands[pendingKey]) {
                     sw.checked = (val.toUpperCase() === 'ON' || val === 'true' || val === '1');
