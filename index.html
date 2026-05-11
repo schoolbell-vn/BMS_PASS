@@ -1226,22 +1226,49 @@
             const balStatus = document.getElementById('pack_balancer_status');
             if (!balStatus) return;
 
+            // Đọc trạng thái công tắc vật lý và công tắc Auto
             const balSwitch = bmsCache[activeBms]['balancer']?.value || 'OFF';
+            const autoSwitch = bmsCache[activeBms]['auto_balance']?.value || 'OFF';
             const isBalOn = (balSwitch.toUpperCase() === 'ON' || balSwitch === 'true' || balSwitch === '1');
+            const isAutoOn = (autoSwitch.toUpperCase() === 'ON' || autoSwitch === 'true' || autoSwitch === '1');
             
+            // Lấy các tham số đo lường hiện tại
             const deltaText = document.getElementById('pack_delta').innerText;
             const currentDelta = deltaText === '--' ? 0 : parseFloat(deltaText);
             const triggerV = parseFloat(bmsCache[activeBms]['bal_trig_v']?.value || 0.010); 
+            
+            const maxV = parseFloat(document.getElementById('pack_max').innerText) || 0;
+            const smartTriggerV = parseFloat(bmsCache[activeBms]['smart_trigger_v']?.value || 3.400);
+            const current = parseFloat(document.getElementById('pack_a').innerText) || 0;
 
             if (!isBalOn) {
+                // Công tắc đang tắt (do người dùng tắt hoặc Auto ép tắt)
                 balStatus.innerHTML = '<i class="fas fa-power-off"></i> BAL OFF';
                 balStatus.className = 'text-[10px] bg-gray-800 text-gray-500 px-2 py-1 rounded border border-gray-700 flex items-center gap-1 shadow-inner transition-all duration-300';
-            } else if (currentDelta >= triggerV) {
-                balStatus.innerHTML = '<i class="fas fa-balance-scale fa-spin text-blue-400"></i> BALANCING';
-                balStatus.className = 'text-[10px] bg-blue-900/40 text-blue-300 px-2 py-1 rounded border border-blue-500/50 flex items-center gap-1 shadow-[0_0_10px_rgba(59,130,246,0.4)] neon-text transition-all duration-300';
             } else {
-                balStatus.innerHTML = '<i class="fas fa-check text-green-400"></i> STANDBY';
-                balStatus.className = 'text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-700/50 flex items-center gap-1 shadow-inner transition-all duration-300';
+                // Công tắc đang bật. Kiểm tra xem BMS có đang thực sự chạy cân bằng không.
+                let isActuallyBalancing = false;
+                
+                if (isAutoOn) {
+                    // Chế độ Auto: Phải đủ TẤT CẢ điều kiện thì mới tính là đang cân bằng
+                    if (currentDelta >= triggerV && maxV >= smartTriggerV && current > -10 && current < 10) {
+                        isActuallyBalancing = true;
+                    }
+                } else {
+                    // Chế độ Manual: Chỉ cần độ lệch vượt trigger của JK BMS là nó tự cân
+                    if (currentDelta >= triggerV) {
+                        isActuallyBalancing = true;
+                    }
+                }
+
+                if (isActuallyBalancing) {
+                    balStatus.innerHTML = '<i class="fas fa-balance-scale fa-spin text-blue-400"></i> BALANCING';
+                    balStatus.className = 'text-[10px] bg-blue-900/40 text-blue-300 px-2 py-1 rounded border border-blue-500/50 flex items-center gap-1 shadow-[0_0_10px_rgba(59,130,246,0.4)] neon-text transition-all duration-300';
+                } else {
+                    // Đã bật công tắc nhưng độ lệch thấp, hoặc áp chưa tới (ở chế độ Auto) -> Chờ
+                    balStatus.innerHTML = '<i class="fas fa-check text-green-400"></i> STANDBY';
+                    balStatus.className = 'text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-700/50 flex items-center gap-1 shadow-inner transition-all duration-300';
+                }
             }
         }
 
