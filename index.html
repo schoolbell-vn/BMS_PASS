@@ -1235,28 +1235,34 @@
             // Lấy các tham số đo lường hiện tại
             const deltaText = document.getElementById('pack_delta').innerText;
             const currentDelta = deltaText === '--' ? 0 : parseFloat(deltaText);
-            const triggerV = parseFloat(bmsCache[activeBms]['bal_trig_v']?.value || 0.010); 
-            
             const maxV = parseFloat(document.getElementById('pack_max').innerText) || 0;
-            const smartTriggerV = parseFloat(bmsCache[activeBms]['smart_trigger_v']?.value || 3.400);
             const current = parseFloat(document.getElementById('pack_a').innerText) || 0;
+            
+            // Lấy các ngưỡng cài đặt từ BMS
+            const triggerV = parseFloat(bmsCache[activeBms]['bal_trig_v']?.value || 0.010); 
+            const balStartV = parseFloat(bmsCache[activeBms]['bal_start_v']?.value || 3.000); // Ngưỡng Start Balance của mạch JK
+            const smartTriggerV = parseFloat(bmsCache[activeBms]['smart_trigger_v']?.value || 3.400); // Ngưỡng Smart Auto Thầy cài
 
             if (!isBalOn) {
-                // Công tắc đang tắt (do người dùng tắt hoặc Auto ép tắt)
+                // Công tắc đang tắt (do người dùng tắt thủ công hoặc bị chế độ Auto ép tắt)
                 balStatus.innerHTML = '<i class="fas fa-power-off"></i> BAL OFF';
                 balStatus.className = 'text-[10px] bg-gray-800 text-gray-500 px-2 py-1 rounded border border-gray-700 flex items-center gap-1 shadow-inner transition-all duration-300';
             } else {
-                // Công tắc đang bật. Kiểm tra xem BMS có đang thực sự chạy cân bằng không.
+                // Công tắc đang bật. Kiểm tra xem JK BMS có đang THỰC SỰ chạy dòng cân bằng không.
                 let isActuallyBalancing = false;
                 
                 if (isAutoOn) {
-                    // Chế độ Auto: Phải đủ TẤT CẢ điều kiện thì mới tính là đang cân bằng
+                    // Chế độ AUTO: ESP32 quản lý. Phải thỏa mãn đủ bộ 3 điều kiện:
+                    // 1. Độ lệch >= Trigger
+                    // 2. Áp Max >= Smart Trigger
+                    // 3. Dòng điện nhỏ (không xả tải nặng, không nạp dòng quá lớn)
                     if (currentDelta >= triggerV && maxV >= smartTriggerV && current > -10 && current < 10) {
                         isActuallyBalancing = true;
                     }
                 } else {
-                    // Chế độ Manual: Chỉ cần độ lệch vượt trigger của JK BMS là nó tự cân
-                    if (currentDelta >= triggerV) {
+                    // Chế độ MANUAL (Tắt Auto): Phụ thuộc vào phần cứng JK BMS tự quyết định.
+                    // JK BMS chỉ cân bằng khi: Độ lệch >= Trigger VÀ Áp Max >= Start Balance Voltage
+                    if (currentDelta >= triggerV && maxV >= balStartV) {
                         isActuallyBalancing = true;
                     }
                 }
@@ -1265,7 +1271,7 @@
                     balStatus.innerHTML = '<i class="fas fa-balance-scale fa-spin text-blue-400"></i> BALANCING';
                     balStatus.className = 'text-[10px] bg-blue-900/40 text-blue-300 px-2 py-1 rounded border border-blue-500/50 flex items-center gap-1 shadow-[0_0_10px_rgba(59,130,246,0.4)] neon-text transition-all duration-300';
                 } else {
-                    // Đã bật công tắc nhưng độ lệch thấp, hoặc áp chưa tới (ở chế độ Auto) -> Chờ
+                    // Trạng thái chờ: Đã bật công tắc nhưng độ lệch thấp, hoặc áp cell chưa lên tới ngưỡng
                     balStatus.innerHTML = '<i class="fas fa-check text-green-400"></i> STANDBY';
                     balStatus.className = 'text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-700/50 flex items-center gap-1 shadow-inner transition-all duration-300';
                 }
