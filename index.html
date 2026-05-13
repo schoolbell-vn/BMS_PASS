@@ -173,9 +173,15 @@
                     <p id="time_remain_label" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fas fa-stopwatch"></i> THỜI GIAN</p>
                     <span class="text-2xl font-black text-purple-100 neon-text nowrap" id="time_remain">STANDBY</span>
                 </div>
-                <div class="card-scifi bg-gradient-to-br from-pink-900/40 to-pink-800/10 border-pink-500/30 p-4">
-                    <p class="text-[10px] text-pink-300 font-bold uppercase tracking-wider mb-1"><i class="fas fa-heartbeat"></i> Nội trở Pin (r)</p>
-                    <span class="text-2xl font-black text-pink-100 neon-text nowrap"><span id="pack_ir">--</span> <span class="text-sm text-pink-400">mΩ</span></span>
+                <div class="card-scifi bg-gradient-to-br from-teal-900/40 to-teal-800/10 border-teal-500/30 p-3 flex flex-col justify-center gap-2">
+                    <div class="flex justify-between items-end border-b border-teal-500/20 pb-1">
+                        <span class="text-[10px] text-teal-300 font-bold uppercase tracking-wider"><i class="fas fa-random"></i> Dòng cân bằng</span>
+                        <span class="text-lg font-black text-teal-100 neon-text nowrap"><span id="main_bal_current">--</span><span class="text-xs text-teal-400 ml-1">A</span></span>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <span class="text-[10px] text-orange-300 font-bold uppercase tracking-wider"><i class="fas fa-thermometer-half text-orange-400"></i> Nhiệt độ MOS</span>
+                        <span class="text-lg font-black text-orange-100 neon-text nowrap"><span id="main_bms_temp">--</span><span class="text-xs text-orange-400 ml-1">°C</span></span>
+                    </div>
                 </div>
             </div>
             <!-- ĐIỆN ÁP 16 CELL -->
@@ -240,9 +246,9 @@
                 
                 <div class="p-5 space-y-8 h-[65vh] overflow-y-auto setting-scroll">
                     
-                    <div class="bg-[#111827] p-5 rounded-lg border border-cyan-900/50 flex justify-between items-center shadow-inner">
-                        <span class="text-cyan-600 font-bold text-base uppercase tracking-widest">Passcode:</span>
-                        <div class="font-mono font-black text-cyan-400 tracking-widest text-2xl neon-text" id="pack_passcode">SCANNING...</div>
+                    <div class="bg-[#111827] p-5 rounded-lg border border-red-900/50 flex justify-between items-center shadow-inner mt-4 mb-2">
+                        <span class="text-red-500 font-bold text-sm uppercase tracking-widest"><i class="fas fa-power-off mr-2"></i> Khởi động lại</span>
+                        <button onclick="restartESP()" class="bg-red-900 text-red-100 border border-red-700 px-5 py-2 rounded-lg font-black text-sm hover:bg-red-600 active:bg-red-500 transition shadow-md whitespace-nowrap">RESET ESP32</button>
                     </div>
                     
                     <div class="bg-[#0f172a] p-6 rounded-xl border border-gray-800 shadow-lg">
@@ -679,11 +685,7 @@
         
         let chartsObj = { volt: null, amp: null, chg: null, dis: null };
         let isChartsDrawn = false;
-        
-        // CÁC BIẾN CHO THUẬT TOÁN HỒI QUY TUYẾN TÍNH
-        let irData = { b1: [], b2: [] }; 
-        let pack_ir = { b1: '--', b2: '--' };
-
+      
         window.addEventListener('load', () => {
             const selector = document.getElementById('device-selector');
             if (selector) selector.value = activeBms;
@@ -850,7 +852,7 @@
         function resetUI() {
             const elIds = ['main_voltage','main_current','main_power_card','main_soc',
                            'kwh_remaining','kwh_total','main_energy_now','main_capacity',
-                           'pack_a','pack_delta','pack_min','pack_max'];
+                           'pack_a','pack_delta','pack_min','pack_max','main_bal_current','main_bms_temp'];
             elIds.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = "--"; });
             for(let i=1; i<=16; i++) { 
                 const c = document.getElementById('c'+i); 
@@ -1000,6 +1002,13 @@
                 document.getElementById('main_current').innerText = parseFloat(val).toFixed(1);
                 document.getElementById('pack_a').innerText = parseFloat(val).toFixed(1);
             }
+            if (key === 'bal_current') {
+            if(document.getElementById('main_bal_current')) document.getElementById('main_bal_current').innerText = parseFloat(val).toFixed(2);
+            }
+            if (key === 'temperature_sensor_3') {
+                // JK BMS thường xuất nhiệt độ MOS ở cảm biến số 3
+            if(document.getElementById('main_bms_temp')) document.getElementById('main_bms_temp').innerText = parseFloat(val).toFixed(1);
+            }
 
             if (key === 'setup_passcode') {
                 if (document.getElementById('pack_passcode')) document.getElementById('pack_passcode').innerText = val;
@@ -1142,65 +1151,7 @@
                 let Ah = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 let AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
 
-                // 1. THUẬT TOÁN ĐO NỘI TRỞ CHUẨN SOH (CÓ KIỂM ĐỊNH R-SQUARED)
-                if (U > 0) {
-                    let pts = irData[activeBms];
-                    
-                    // ĐIỀU KIỆN 1: Chỉ lấy mẫu ở "Vùng bình nguyên" (SOC 30% - 80%)
-                    if (SOC >= 30.0 && SOC <= 80.0) {
-                        // Lọc lấy điểm khi dòng điện có nhúc nhích (tránh lưu một đống số 0)
-                        if (pts.length === 0 || Math.abs(I - pts[pts.length-1].i) >= 0.5) {
-                            pts.push({u: U, i: I});
-                            if (pts.length > 40) pts.shift(); // Tăng bộ nhớ đệm lên 40 mốc
-                        }
-
-                        if (pts.length >= 10) {
-                            let sumI = 0, sumU = 0, sumI2 = 0, sumIU = 0;
-                            let minI = pts[0].i, maxI = pts[0].i;
-                            let n = pts.length;
-                            
-                            pts.forEach(p => {
-                                sumI += p.i; sumU += p.u;
-                                sumI2 += p.i * p.i; sumIU += p.i * p.u;
-                                if(p.i < minI) minI = p.i;
-                                if(p.i > maxI) maxI = p.i;
-                            });
-
-                            // ĐIỀU KIỆN 2: Delta I >= 10A để thắng nhiễu sóng
-                            if (maxI - minI >= 10.0) {
-                                let slope = (n * sumIU - sumI * sumU) / (n * sumI2 - sumI * sumI);
-                                let intercept = (sumU - slope * sumI) / n;
-                                
-                                // ĐIỀU KIỆN 3: Kiểm định Hệ số tương quan Pearson (R^2)
-                                let meanU = sumU / n;
-                                let ssTot = 0, ssRes = 0;
-                                pts.forEach(p => {
-                                    ssTot += Math.pow(p.u - meanU, 2);
-                                    let predictedU = slope * p.i + intercept;
-                                    ssRes += Math.pow(p.u - predictedU, 2);
-                                });
-                                
-                                let rSquared = ssTot > 0 ? (1 - (ssRes / ssTot)) : 0;
-                                let r_mOhm = slope * 1000; 
-                                
-                                // Chốt số NẾU: Đường chéo rất thẳng (R^2 > 0.85) và nội trở hợp lý
-                                if (rSquared >= 0.85 && r_mOhm >= 1.0 && r_mOhm <= 12.0) { 
-                                    pack_ir[activeBms] = r_mOhm.toFixed(1);
-                                    localStorage.setItem('saved_ir_' + activeBms, pack_ir[activeBms]); 
-                                }
-                            }
-                        }
-                    } else {
-                        // Đang ở vùng phân cực (quá đầy hoặc quá cạn) -> Xóa rác, không đo
-                        irData[activeBms] = [];
-                    }
-                }
-
-                // Hiển thị nội trở
-                let display_ir = pack_ir[activeBms] !== '--' ? pack_ir[activeBms] : (localStorage.getItem('saved_ir_' + activeBms) || '--');
-                if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = display_ir;
-
-                // 2. THUẬT TOÁN TÍNH THỜI GIAN
+            // 2. THUẬT TOÁN TÍNH THỜI GIAN
                 let timeText = "STANDBY";
                 let label = document.getElementById('time_remain_label');
                 
@@ -1372,6 +1323,22 @@
                 alert("Không thể gửi gói tin MQTT.");
             }
         }
+        function restartESP() {
+            if (!isEspConnected) {
+                alert("CẢNH BÁO: Mất kết nối mạng. Không thể gửi lệnh!");
+                return;
+            }
+            if (confirm("Thầy Tú có chắc chắn muốn khởi động lại hệ thống ESP32 không? (Sẽ mất khoảng 10 giây để kết nối lại)")) {
+                try {
+                    const message = new Paho.MQTT.Message("PRESS");
+                    message.destinationName = `${prefix}/button/restart_esp/command`;
+                    client.send(message);
+                } catch (error) {
+                    console.error("Lỗi gửi lệnh Reset:", error);
+                    alert("Không thể gửi gói tin MQTT.");
+                }
+            }
+}
     </script>
 </body>
 </html>
