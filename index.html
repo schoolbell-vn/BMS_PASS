@@ -77,7 +77,6 @@
 
     <main class="max-w-xl mx-auto p-4 mt-2">
 
-        <!-- TAB HOME -->
         <div id="tab-home" class="tab-content active space-y-6">
             
             <div class="card-scifi p-4 relative h-64 w-full flex items-center justify-center overflow-hidden border-cyan-500/40">
@@ -167,24 +166,29 @@
                     </div>
                 </div>
             </div>
-            <!-- === GIAO DIỆN TÍNH TOÁN VẬT LÝ MỚI === -->
+            
             <div class="grid grid-cols-2 gap-4 mt-1 mb-4">
-                <div class="card-scifi bg-gradient-to-br from-purple-900/40 to-purple-800/10 border-purple-500/30 p-4">
+                <div class="card-scifi bg-gradient-to-br from-purple-900/40 to-purple-800/10 border-purple-500/30 p-4 flex flex-col justify-center">
                     <p id="time_remain_label" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fas fa-stopwatch"></i> THỜI GIAN</p>
                     <span class="text-2xl font-black text-purple-100 neon-text nowrap" id="time_remain">STANDBY</span>
                 </div>
-                <div class="card-scifi bg-gradient-to-br from-teal-900/40 to-teal-800/10 border-teal-500/30 p-3 flex flex-col justify-center gap-2">
+                
+                <div class="card-scifi bg-gradient-to-br from-teal-900/40 to-teal-800/10 border-teal-500/30 p-3 flex flex-col justify-center gap-1.5">
                     <div class="flex justify-between items-end border-b border-teal-500/20 pb-1">
                         <span class="text-[10px] text-teal-300 font-bold uppercase tracking-wider"><i class="fas fa-random"></i> Dòng cân bằng</span>
-                        <span class="text-lg font-black text-teal-100 neon-text nowrap"><span id="main_bal_current">--</span><span class="text-xs text-teal-400 ml-1">A</span></span>
+                        <span class="text-base font-black text-teal-100 neon-text nowrap"><span id="main_bal_current">--</span><span class="text-[10px] text-teal-400 ml-1">A</span></span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-teal-500/20 pb-1">
+                        <span class="text-[10px] text-orange-300 font-bold uppercase tracking-wider"><i class="fas fa-thermometer-half text-orange-400"></i> Temp 1/2</span>
+                        <span class="text-base font-black text-orange-100 neon-text nowrap"><span id="main_temp_1">--</span>° / <span id="main_temp_2">--</span>°</span>
                     </div>
                     <div class="flex justify-between items-end">
-                        <span class="text-[10px] text-orange-300 font-bold uppercase tracking-wider"><i class="fas fa-thermometer-half text-orange-400"></i> Nhiệt độ MOS</span>
-                        <span class="text-lg font-black text-orange-100 neon-text nowrap"><span id="main_bms_temp">--</span><span class="text-xs text-orange-400 ml-1">°C</span></span>
+                        <span class="text-[10px] text-red-300 font-bold uppercase tracking-wider"><i class="fas fa-microchip text-red-400"></i> Temp MOS</span>
+                        <span class="text-base font-black text-red-100 neon-text nowrap"><span id="main_temp_mos">--</span><span class="text-[10px] text-red-400 ml-1">°C</span></span>
                     </div>
                 </div>
             </div>
-            <!-- ĐIỆN ÁP 16 CELL -->
+
             <div class="card-scifi overflow-hidden mb-8 border-cyan-800/50">
                 <div class="bg-[#0f172a] text-cyan-400 p-4 text-sm font-bold tracking-widest border-b border-cyan-900/50 uppercase flex justify-between items-center">
                     <span><i class="fas fa-layer-group mr-2"></i> Điện áp 16 Cell</span>
@@ -246,6 +250,11 @@
                 
                 <div class="p-5 space-y-8 h-[65vh] overflow-y-auto setting-scroll">
                     
+                    <div class="bg-[#111827] p-5 rounded-lg border border-cyan-900/50 flex justify-between items-center shadow-inner">
+                        <span class="text-cyan-600 font-bold text-base uppercase tracking-widest">Passcode:</span>
+                        <div class="font-mono font-black text-cyan-400 tracking-widest text-2xl neon-text" id="pack_passcode">SCANNING...</div>
+                    </div>
+
                     <div class="bg-[#111827] p-5 rounded-lg border border-red-900/50 flex justify-between items-center shadow-inner mt-4 mb-2">
                         <span class="text-red-500 font-bold text-sm uppercase tracking-widest"><i class="fas fa-power-off mr-2"></i> Khởi động lại</span>
                         <button onclick="restartESP()" class="bg-red-900 text-red-100 border border-red-700 px-5 py-2 rounded-lg font-black text-sm hover:bg-red-600 active:bg-red-500 transition shadow-md whitespace-nowrap">RESET ESP32</button>
@@ -612,6 +621,19 @@
             </div>
 
             <div class="card-scifi p-4">
+                <div class="flex justify-between items-center mb-4 border-b border-yellow-900/50 pb-2">
+                    <span class="text-yellow-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-exclamation-triangle mr-2"></i>Độ lệch áp (ΔV) 24h</span>
+                    <div class="text-right">
+                        <span class="text-[10px] text-gray-500 font-bold block uppercase">Max Lệch</span>
+                        <span class="text-yellow-400 font-black text-lg neon-text"><span id="stat_max_delta">--</span> V</span>
+                    </div>
+                </div>
+                <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
+                    <canvas id="deltaChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card-scifi p-4">
                 <div class="flex justify-between items-end mb-4 border-b border-orange-900/50 pb-2">
                     <span class="text-orange-400 text-sm font-bold tracking-widest uppercase pb-1"><i class="fas fa-bolt mr-2"></i>Dòng điện (A)</span>
                     <div class="flex gap-4">
@@ -683,165 +705,151 @@
         let isEspConnected = false;
         let pendingCommands = {};
         
-        let chartsObj = { volt: null, amp: null, chg: null, dis: null };
+        let chartsObj = { volt: null, delta: null, amp: null, chg: null, dis: null };
         let isChartsDrawn = false;
-      
+
         window.addEventListener('load', () => {
             const selector = document.getElementById('device-selector');
             if (selector) selector.value = activeBms;
         });
 
-        // ================= VẼ CHART.JS TỪ THINGSPEAK =================
+        // ================= VẼ CHART.JS TỪ THINGSPEAK (ĐÃ CHỐNG LỖI TỪNG KÊNH) =================
         async function fetchAndDrawCharts() {
+            Chart.defaults.color = '#475569';
+            const commonOptions = {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, datalabels: { display: false } },
+                elements: { point: { radius: 0, hitRadius: 10, hoverRadius: 4 } },
+                interaction: { mode: 'index', intersect: false }
+            };
+
+            // ---- BIỂU ĐỒ 1 & 3: VOLT / AMP (Từ Kênh 1) ----
             try {
-                // 1. Fetch data 1 Ngày cho Volt & Amp
                 let res1 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=1");
                 let data1 = await res1.json();
 
-                let labels1 = []; let voltData = []; let ampData = [];
-                let tsMaxV = 0; let tsMinV = 999; 
-                let tsMaxChg = 0; let tsMaxDis = 0;
+                if (data1 && data1.feeds) {
+                    let labels1 = []; let voltData = []; let ampData = [];
+                    let tsMaxV = 0; let tsMinV = 999; let tsMaxChg = 0; let tsMaxDis = 0;
 
-                data1.feeds.forEach(f => {
-                    if(!f.created_at) return;
-                    let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                    labels1.push(time);
+                    data1.feeds.forEach(f => {
+                        if(!f.created_at) return;
+                        let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                        labels1.push(time);
+                        
+                        let currentV = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field5 || 0);
+                        let currentA = (activeBms === 'b1') ? parseFloat(f.field2 || 0) : parseFloat(f.field6 || 0);
+
+                        voltData.push(currentV); ampData.push(currentA);
+
+                        if (currentV > tsMaxV) tsMaxV = currentV;
+                        if (currentV > 0 && currentV < tsMinV) tsMinV = currentV;
+                        if (currentA > tsMaxChg) tsMaxChg = currentA;
+                        if (currentA < 0 && Math.abs(currentA) > tsMaxDis) tsMaxDis = Math.abs(currentA);
+                    });
+
+                    if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = tsMaxV > 0 ? tsMaxV.toFixed(2) : "--";
+                    if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (tsMinV > 0 && tsMinV < 999) ? tsMinV.toFixed(2) : "--";
+                    if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = tsMaxChg > 0 ? "+" + tsMaxChg.toFixed(1) : "--";
+                    if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = tsMaxDis > 0 ? "-" + tsMaxDis.toFixed(1) : "--";
+
+                    if(chartsObj.volt) chartsObj.volt.destroy();
+                    let ctxVolt = document.getElementById('voltChart').getContext('2d');
+                    let gradVolt = ctxVolt.createLinearGradient(0, 0, 0, 260);
+                    gradVolt.addColorStop(0, 'rgba(168, 85, 247, 0.4)'); gradVolt.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+                    chartsObj.volt = new Chart(ctxVolt, {
+                        type: 'line', plugins: [ChartDataLabels],
+                        data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
+                        options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
+                    });
+
+                    if(chartsObj.amp) chartsObj.amp.destroy();
+                    chartsObj.amp = new Chart(document.getElementById('ampChart'), {
+                        type: 'line', plugins: [ChartDataLabels],
+                        data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
+                        options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
+                    });
+                }
+            } catch (e) { console.error("Lỗi vẽ Volt/Amp:", e); }
+
+            // ---- BIỂU ĐỒ 2: DELTA V (Từ Kênh 2) ----
+            try {
+                let resDelta = await fetch("https://api.thingspeak.com/channels/3384191/feeds.json?api_key=NS530G0NEY9EDSGE&days=1");
+                let dataDelta = await resDelta.json();
+                
+                if (dataDelta && dataDelta.feeds) {
+                    let labelsDelta = []; let deltaData = []; let tsMaxDelta = 0;
+
+                    dataDelta.feeds.forEach(f => {
+                        if(!f.created_at) return;
+                        let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                        labelsDelta.push(time);
+                        let val = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field2 || 0);
+                        deltaData.push(val);
+                        if(val > tsMaxDelta) tsMaxDelta = val;
+                    });
                     
-                    let currentV = 0;
-                    let currentA = 0;
-                    
-                    if (activeBms === 'b1') {
-                        currentV = parseFloat(f.field1);
-                        currentA = parseFloat(f.field2);
-                    } else {
-                        currentV = parseFloat(f.field5);
-                        currentA = parseFloat(f.field6);
-                    }
+                    if(document.getElementById('stat_max_delta')) document.getElementById('stat_max_delta').innerText = tsMaxDelta > 0 ? tsMaxDelta.toFixed(3) : "--";
 
-                    voltData.push(currentV); 
-                    ampData.push(currentA);
+                    if(chartsObj.delta) chartsObj.delta.destroy();
+                    let ctxDelta = document.getElementById('deltaChart').getContext('2d');
+                    let gradDelta = ctxDelta.createLinearGradient(0, 0, 0, 260);
+                    gradDelta.addColorStop(0, 'rgba(234, 179, 8, 0.4)'); gradDelta.addColorStop(1, 'rgba(234, 179, 8, 0.0)');
+                    chartsObj.delta = new Chart(ctxDelta, {
+                        type: 'line', plugins: [ChartDataLabels],
+                        data: { labels: labelsDelta, datasets: [{ data: deltaData, borderColor: '#eab308', backgroundColor: gradDelta, fill: true, borderWidth: 1.5, tension: 0.2 }] },
+                        options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 0, grace: '10%', grid: { color: '#1e293b' } } } }
+                    });
+                }
+            } catch (e) { console.error("Lỗi vẽ Delta:", e); }
 
-                    // Dò Max/Min 24h qua
-                    if (currentV > tsMaxV) tsMaxV = currentV;
-                    if (currentV > 0 && currentV < tsMinV) tsMinV = currentV;
-                    if (currentA > tsMaxChg) tsMaxChg = currentA;
-                    if (currentA < 0 && Math.abs(currentA) > tsMaxDis) tsMaxDis = Math.abs(currentA);
-                });
-
-                if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = tsMaxV > 0 ? tsMaxV.toFixed(2) : "--";
-                if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (tsMinV > 0 && tsMinV < 999) ? tsMinV.toFixed(2) : "--";
-                if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = tsMaxChg > 0 ? "+" + tsMaxChg.toFixed(1) : "--";
-                if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = tsMaxDis > 0 ? "-" + tsMaxDis.toFixed(1) : "--";
-
-                // 2. Fetch data 10 Ngày cho Năng lượng (Cột)
+            // ---- BIỂU ĐỒ 4 & 5: NĂNG LƯỢNG KWh 10 NGÀY (Từ Kênh 1) ----
+            try {
                 let res10 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=10");
                 let data10 = await res10.json();
 
-                let dailyChg = {}; let dailyDis = {};
+                if (data10 && data10.feeds) {
+                    let dailyChg = {}; let dailyDis = {};
 
-                data10.feeds.forEach(f => {
-                    if(!f.created_at) return;
-                    let dateStr = new Date(f.created_at).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
-                    
-                    let c = 0, d = 0;
-                    if (activeBms === 'b1') {
-                        c = parseFloat(f.field3) || 0;
-                        d = parseFloat(f.field4) || 0;
-                    } else {
-                        c = parseFloat(f.field7) || 0;
-                        d = parseFloat(f.field8) || 0;
-                    }
+                    data10.feeds.forEach(f => {
+                        if(!f.created_at) return;
+                        let dateStr = new Date(f.created_at).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                        
+                        let c = (activeBms === 'b1') ? parseFloat(f.field3 || 0) : parseFloat(f.field7 || 0);
+                        let d = (activeBms === 'b1') ? parseFloat(f.field4 || 0) : parseFloat(f.field8 || 0);
 
-                    c = c / 1000.0;
-                    d = d / 1000.0;
+                        c = c / 1000.0; d = d / 1000.0;
 
-                    if (!dailyChg[dateStr] || c > dailyChg[dateStr]) dailyChg[dateStr] = c;
-                    if (!dailyDis[dateStr] || d > dailyDis[dateStr]) dailyDis[dateStr] = d;
-                });
+                        if (!dailyChg[dateStr] || c > dailyChg[dateStr]) dailyChg[dateStr] = c;
+                        if (!dailyDis[dateStr] || d > dailyDis[dateStr]) dailyDis[dateStr] = d;
+                    });
 
-                let labels10 = Object.keys(dailyChg);
-                let chgData = Object.values(dailyChg);
-                let disData = Object.values(dailyDis);
+                    let labels10 = Object.keys(dailyChg);
+                    let chgData = Object.values(dailyChg);
+                    let disData = Object.values(dailyDis);
 
-                Chart.defaults.color = '#475569';
-                const commonOptions = {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        datalabels: { display: false } 
-                    },
-                    elements: { point: { radius: 0, hitRadius: 10, hoverRadius: 4 } },
-                    interaction: { mode: 'index', intersect: false }
-                };
+                    const dataLabelOpts = {
+                        display: true, anchor: 'end', align: 'end', offset: 0, font: { weight: 'bold', size: 10 },
+                        formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } 
+                    };
 
-                if(chartsObj.volt) chartsObj.volt.destroy();
-                let ctxVolt = document.getElementById('voltChart').getContext('2d');
-                let gradVolt = ctxVolt.createLinearGradient(0, 0, 0, 260);
-                gradVolt.addColorStop(0, 'rgba(168, 85, 247, 0.4)');
-                gradVolt.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+                    if(chartsObj.chg) chartsObj.chg.destroy();
+                    chartsObj.chg = new Chart(document.getElementById('chgChart'), {
+                        type: 'bar', plugins: [ChartDataLabels], 
+                        data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
+                        options: { ...commonOptions, plugins: { ...commonOptions.plugins, datalabels: { ...dataLabelOpts, color: '#4ade80' } },
+                            scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } }
+                    });
 
-                chartsObj.volt = new Chart(ctxVolt, {
-                    type: 'line',
-                    plugins: [ChartDataLabels],
-                    data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
-                    options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
-                });
-
-                if(chartsObj.amp) chartsObj.amp.destroy();
-                chartsObj.amp = new Chart(document.getElementById('ampChart'), {
-                    type: 'line',
-                    plugins: [ChartDataLabels],
-                    data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
-                    options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
-                });
-
-                if(chartsObj.chg) chartsObj.chg.destroy();
-                chartsObj.chg = new Chart(document.getElementById('chgChart'), {
-                    type: 'bar',
-                    plugins: [ChartDataLabels], 
-                    data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
-                    options: { 
-                        ...commonOptions, 
-                        plugins: {
-                            ...commonOptions.plugins,
-                            datalabels: {
-                                display: true, 
-                                color: '#4ade80', 
-                                anchor: 'end',
-                                align: 'end',
-                                offset: 0,
-                                font: { weight: 'bold', size: 10 },
-                                formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } 
-                            }
-                        },
-                        scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } 
-                    }
-                });
-
-                if(chartsObj.dis) chartsObj.dis.destroy();
-                chartsObj.dis = new Chart(document.getElementById('disChart'), {
-                    type: 'bar',
-                    plugins: [ChartDataLabels], 
-                    data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
-                    options: { 
-                        ...commonOptions, 
-                        plugins: {
-                            ...commonOptions.plugins,
-                            datalabels: {
-                                display: true, 
-                                color: '#f87171', 
-                                anchor: 'end',
-                                align: 'end',
-                                offset: 0,
-                                font: { weight: 'bold', size: 10 },
-                                formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } 
-                            }
-                        },
-                        scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } 
-                    }
-                });
-
-            } catch (error) { console.error("Lỗi vẽ đồ thị ChartJS:", error); }
+                    if(chartsObj.dis) chartsObj.dis.destroy();
+                    chartsObj.dis = new Chart(document.getElementById('disChart'), {
+                        type: 'bar', plugins: [ChartDataLabels], 
+                        data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
+                        options: { ...commonOptions, plugins: { ...commonOptions.plugins, datalabels: { ...dataLabelOpts, color: '#f87171' } },
+                            scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } }
+                    });
+                }
+            } catch (e) { console.error("Lỗi vẽ Năng lượng:", e); }
         }
 
         function resetBtn(btn) {
@@ -852,7 +860,8 @@
         function resetUI() {
             const elIds = ['main_voltage','main_current','main_power_card','main_soc',
                            'kwh_remaining','kwh_total','main_energy_now','main_capacity',
-                           'pack_a','pack_delta','pack_min','pack_max','main_bal_current','main_bms_temp'];
+                           'pack_a','pack_delta','pack_min','pack_max',
+                           'main_bal_current', 'main_temp_1', 'main_temp_2', 'main_temp_mos'];
             elIds.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = "--"; });
             for(let i=1; i<=16; i++) { 
                 const c = document.getElementById('c'+i); 
@@ -1002,16 +1011,22 @@
                 document.getElementById('main_current').innerText = parseFloat(val).toFixed(1);
                 document.getElementById('pack_a').innerText = parseFloat(val).toFixed(1);
             }
-            if (key === 'bal_current') {
-            if(document.getElementById('main_bal_current')) document.getElementById('main_bal_current').innerText = parseFloat(val).toFixed(2);
-            }
-            if (key === 'temperature_sensor_3') {
-                // JK BMS thường xuất nhiệt độ MOS ở cảm biến số 3
-            if(document.getElementById('main_bms_temp')) document.getElementById('main_bms_temp').innerText = parseFloat(val).toFixed(1);
-            }
 
             if (key === 'setup_passcode') {
                 if (document.getElementById('pack_passcode')) document.getElementById('pack_passcode').innerText = val;
+            }
+
+            if (key === 'bal_current') {
+                if(document.getElementById('main_bal_current')) document.getElementById('main_bal_current').innerText = parseFloat(val).toFixed(2);
+            }
+            if (key === 'temperature_sensor_1') {
+                if(document.getElementById('main_temp_1')) document.getElementById('main_temp_1').innerText = Math.round(val);
+            }
+            if (key === 'temperature_sensor_2') {
+                if(document.getElementById('main_temp_2')) document.getElementById('main_temp_2').innerText = Math.round(val);
+            }
+            if (key === 'temperature_sensor_3') {
+                if(document.getElementById('main_temp_mos')) document.getElementById('main_temp_mos').innerText = Math.round(val);
             }
 
             if (key.startsWith('cell_voltage_')) {
@@ -1133,7 +1148,6 @@
             }
 
             if (type === 'switch') {
-                // THÊM CHỐT CHẶN NÀY: Bỏ qua các bản tin rác khi nhiễu sóng BLE, giữ nguyên trạng thái nút bấm
                 if (val === 'unavailable' || val === 'unknown' || val === 'nan' || val === '') return;
 
                 const sw = document.getElementById('sw_' + key);
@@ -1143,15 +1157,12 @@
                 if (key === 'balancer') updateBalancerBadge();
             }
 
-            // ================= LOGIC VẬT LÝ: NỘI TRỞ TỐI ƯU SOH =================
+            // ================= LOGIC VẬT LÝ: TÍNH THỜI GIAN =================
             setTimeout(() => {
-                let U = parseFloat(bmsCache[activeBms]['voltage']?.value || 0);
                 let I = parseFloat(bmsCache[activeBms]['current']?.value || 0);
-                let SOC = parseFloat(bmsCache[activeBms]['soc']?.value || 0);
                 let Ah = parseFloat(bmsCache[activeBms]['capacity_remaining']?.value || 0);
                 let AhMax = parseFloat(bmsCache[activeBms]['bat_cap']?.value || 0);
 
-            // 2. THUẬT TOÁN TÍNH THỜI GIAN
                 let timeText = "STANDBY";
                 let label = document.getElementById('time_remain_label');
                 
@@ -1180,42 +1191,31 @@
             const balStatus = document.getElementById('pack_balancer_status');
             if (!balStatus) return;
 
-            // Đọc trạng thái công tắc vật lý và công tắc Auto
             const balSwitch = bmsCache[activeBms]['balancer']?.value || 'OFF';
             const autoSwitch = bmsCache[activeBms]['auto_balance']?.value || 'OFF';
             const isBalOn = (balSwitch.toUpperCase() === 'ON' || balSwitch === 'true' || balSwitch === '1');
             const isAutoOn = (autoSwitch.toUpperCase() === 'ON' || autoSwitch === 'true' || autoSwitch === '1');
             
-            // Lấy các tham số đo lường hiện tại
             const deltaText = document.getElementById('pack_delta').innerText;
             const currentDelta = deltaText === '--' ? 0 : parseFloat(deltaText);
             const maxV = parseFloat(document.getElementById('pack_max').innerText) || 0;
             const current = parseFloat(document.getElementById('pack_a').innerText) || 0;
             
-            // Lấy các ngưỡng cài đặt từ BMS
             const triggerV = parseFloat(bmsCache[activeBms]['bal_trig_v']?.value || 0.010); 
-            const balStartV = parseFloat(bmsCache[activeBms]['bal_start_v']?.value || 3.000); // Ngưỡng Start Balance của mạch JK
-            const smartTriggerV = parseFloat(bmsCache[activeBms]['smart_trigger_v']?.value || 3.400); // Ngưỡng Smart Auto Thầy cài
+            const balStartV = parseFloat(bmsCache[activeBms]['bal_start_v']?.value || 3.000); 
+            const smartTriggerV = parseFloat(bmsCache[activeBms]['smart_trigger_v']?.value || 3.400); 
 
             if (!isBalOn) {
-                // Công tắc đang tắt (do người dùng tắt thủ công hoặc bị chế độ Auto ép tắt)
                 balStatus.innerHTML = '<i class="fas fa-power-off"></i> BAL OFF';
                 balStatus.className = 'text-[10px] bg-gray-800 text-gray-500 px-2 py-1 rounded border border-gray-700 flex items-center gap-1 shadow-inner transition-all duration-300';
             } else {
-                // Công tắc đang bật. Kiểm tra xem JK BMS có đang THỰC SỰ chạy dòng cân bằng không.
                 let isActuallyBalancing = false;
                 
                 if (isAutoOn) {
-                    // Chế độ AUTO: ESP32 quản lý. Phải thỏa mãn đủ bộ 3 điều kiện:
-                    // 1. Độ lệch >= Trigger
-                    // 2. Áp Max >= Smart Trigger
-                    // 3. Dòng điện nhỏ (không xả tải nặng, không nạp dòng quá lớn)
                     if (currentDelta >= triggerV && maxV >= smartTriggerV && current > -10 && current < 10) {
                         isActuallyBalancing = true;
                     }
                 } else {
-                    // Chế độ MANUAL (Tắt Auto): Phụ thuộc vào phần cứng JK BMS tự quyết định.
-                    // JK BMS chỉ cân bằng khi: Độ lệch >= Trigger VÀ Áp Max >= Start Balance Voltage
                     if (currentDelta >= triggerV && maxV >= balStartV) {
                         isActuallyBalancing = true;
                     }
@@ -1225,7 +1225,6 @@
                     balStatus.innerHTML = '<i class="fas fa-balance-scale fa-spin text-blue-400"></i> BALANCING';
                     balStatus.className = 'text-[10px] bg-blue-900/40 text-blue-300 px-2 py-1 rounded border border-blue-500/50 flex items-center gap-1 shadow-[0_0_10px_rgba(59,130,246,0.4)] neon-text transition-all duration-300';
                 } else {
-                    // Trạng thái chờ: Đã bật công tắc nhưng độ lệch thấp, hoặc áp cell chưa lên tới ngưỡng
                     balStatus.innerHTML = '<i class="fas fa-check text-green-400"></i> STANDBY';
                     balStatus.className = 'text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-700/50 flex items-center gap-1 shadow-inner transition-all duration-300';
                 }
@@ -1236,8 +1235,6 @@
             activeBms = document.getElementById('device-selector').value;
             localStorage.setItem('selected_bms', activeBms); 
             resetUI();
-            
-            if(document.getElementById('pack_ir')) document.getElementById('pack_ir').innerText = localStorage.getItem('saved_ir_' + activeBms) || '--';
 
             const d = bmsCache[activeBms];
             if (d) {
@@ -1323,6 +1320,7 @@
                 alert("Không thể gửi gói tin MQTT.");
             }
         }
+
         function restartESP() {
             if (!isEspConnected) {
                 alert("CẢNH BÁO: Mất kết nối mạng. Không thể gửi lệnh!");
@@ -1338,7 +1336,7 @@
                     alert("Không thể gửi gói tin MQTT.");
                 }
             }
-}
+        }
     </script>
 </body>
 </html>
