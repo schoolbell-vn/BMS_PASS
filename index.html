@@ -713,7 +713,7 @@
             if (selector) selector.value = activeBms;
         });
 
-        // ================= VẼ CHART.JS TỪ THINGSPEAK (TẢI SONG SONG SIÊU TỐC) =================
+        // ================= VẼ CHART.JS ĐỒNG BỘ TRỤC THỜI GIAN VÀ CHẠY SONG SONG =================
         function fetchAndDrawCharts() {
             Chart.defaults.color = '#475569';
             const commonOptions = {
@@ -723,101 +723,114 @@
                 interaction: { mode: 'index', intersect: false }
             };
 
-            // LUỒNG 1: TẢI ĐIỆN ÁP & DÒNG ĐIỆN (1 NGÀY)
-            const loadVoltAmp = async () => {
+            // LUỒNG 1: TẢI SONG SONG VÀ ĐỒNG BỘ 3 ĐỒ THỊ (VOLT, AMP, DELTA) THEO TRỤC CỦA KÊNH 1
+            const loadAlignedLineCharts = async () => {
                 const tVolt = document.getElementById('title_volt');
                 const tAmp = document.getElementById('title_amp');
+                const tDelta = document.getElementById('title_delta');
                 if(tVolt) tVolt.innerHTML = '<i class="fas fa-circle-notch fa-spin text-cyan-600 mr-2"></i>Điện áp (Đang tải...)';
                 if(tAmp) tAmp.innerHTML = '<i class="fas fa-circle-notch fa-spin text-orange-600 mr-2"></i>Dòng điện (Đang tải...)';
+                if(tDelta) tDelta.innerHTML = '<i class="fas fa-circle-notch fa-spin text-yellow-600 mr-2"></i>Độ lệch (Đang tải...)';
                 
                 try {
-                    let res1 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=1");
-                    let data1 = await res1.json();
+                    // Gọi cùng lúc 2 kênh ThingSpeak (Tiết kiệm một nửa thời gian chờ)
+                    const [res1, resDelta] = await Promise.all([
+                        fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=1"),
+                        fetch("https://api.thingspeak.com/channels/3384191/feeds.json?api_key=NS530G0NEY9EDSGE&days=1")
+                    ]);
+
+                    const data1 = await res1.json();
+                    const dataDelta = await resDelta.json();
+
+                    // Tạo bản đồ (Map) dữ liệu Delta V theo mốc thời gian
+                    let deltaMap = {};
+                    if (dataDelta && dataDelta.feeds) {
+                        dataDelta.feeds.forEach(f => {
+                            if(!f.created_at) return;
+                            let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                            let val = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field2 || 0);
+                            deltaMap[time] = val;
+                        });
+                    }
+
+                    // Duyệt mốc thời gian của Kênh 1 để làm trục chuẩn
+                    let sharedLabels = []; 
+                    let voltData = []; let ampData = []; let deltaData = [];
+                    let tsMaxV = 0; let tsMinV = 999; let tsMaxChg = 0; let tsMaxDis = 0; let tsMaxDelta = 0;
 
                     if (data1 && data1.feeds) {
-                        let labels1 = []; let voltData = []; let ampData = [];
-                        let tsMaxV = 0; let tsMinV = 999; let tsMaxChg = 0; let tsMaxDis = 0;
-
                         data1.feeds.forEach(f => {
                             if(!f.created_at) return;
                             let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                            labels1.push(time);
+                            
+                            // Đưa mốc thời gian này vào mảng dùng chung
+                            sharedLabels.push(time);
                             
                             let currentV = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field5 || 0);
                             let currentA = (activeBms === 'b1') ? parseFloat(f.field2 || 0) : parseFloat(f.field6 || 0);
+                            
+                            // Tra cứu Delta V: Nếu có thì lắp vào, không có thì chèn giá trị NULL (để trống điểm đó trên đồ thị)
+                            let currentDelta = deltaMap[time] !== undefined ? deltaMap[time] : null;
 
-                            voltData.push(currentV); ampData.push(currentA);
+                            voltData.push(currentV); 
+                            ampData.push(currentA);
+                            deltaData.push(currentDelta);
 
+                            // Tính đỉnh (Max/Min)
                             if (currentV > tsMaxV) tsMaxV = currentV;
                             if (currentV > 0 && currentV < tsMinV) tsMinV = currentV;
                             if (currentA > tsMaxChg) tsMaxChg = currentA;
                             if (currentA < 0 && Math.abs(currentA) > tsMaxDis) tsMaxDis = Math.abs(currentA);
+                            if (currentDelta !== null && currentDelta > tsMaxDelta) tsMaxDelta = currentDelta;
                         });
 
+                        // Cập nhật số liệu chữ
                         if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = tsMaxV > 0 ? tsMaxV.toFixed(2) : "--";
                         if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (tsMinV > 0 && tsMinV < 999) ? tsMinV.toFixed(2) : "--";
                         if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = tsMaxChg > 0 ? "+" + tsMaxChg.toFixed(1) : "--";
                         if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = tsMaxDis > 0 ? "-" + tsMaxDis.toFixed(1) : "--";
+                        if(document.getElementById('stat_max_delta')) document.getElementById('stat_max_delta').innerText = tsMaxDelta > 0 ? tsMaxDelta.toFixed(3) : "--";
 
+                        // VẼ ĐỒ THỊ 1: VOLT (Dùng sharedLabels)
                         if(chartsObj.volt) chartsObj.volt.destroy();
                         let ctxVolt = document.getElementById('voltChart').getContext('2d');
                         let gradVolt = ctxVolt.createLinearGradient(0, 0, 0, 260);
                         gradVolt.addColorStop(0, 'rgba(168, 85, 247, 0.4)'); gradVolt.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
                         chartsObj.volt = new Chart(ctxVolt, {
                             type: 'line', plugins: [ChartDataLabels],
-                            data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
+                            data: { labels: sharedLabels, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
                             options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
                         });
 
-                        if(chartsObj.amp) chartsObj.amp.destroy();
-                        chartsObj.amp = new Chart(document.getElementById('ampChart'), {
-                            type: 'line', plugins: [ChartDataLabels],
-                            data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
-                            options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
-                        });
-                    }
-                    if(tVolt) tVolt.innerHTML = '<i class="fas fa-chart-area mr-2"></i>Điện áp (V) 24h';
-                    if(tAmp) tAmp.innerHTML = '<i class="fas fa-bolt mr-2"></i>Dòng điện (A)';
-                } catch (e) { console.error("Lỗi vẽ Volt/Amp:", e); }
-            };
-
-            // LUỒNG 2: TẢI ĐỘ LỆCH ÁP (1 NGÀY)
-            const loadDelta = async () => {
-                const tDelta = document.getElementById('title_delta');
-                if(tDelta) tDelta.innerHTML = '<i class="fas fa-circle-notch fa-spin text-yellow-600 mr-2"></i>Độ lệch (Đang tải...)';
-                try {
-                    let resDelta = await fetch("https://api.thingspeak.com/channels/3384191/feeds.json?api_key=NS530G0NEY9EDSGE&days=1");
-                    let dataDelta = await resDelta.json();
-                    
-                    if (dataDelta && dataDelta.feeds) {
-                        let labelsDelta = []; let deltaData = []; let tsMaxDelta = 0;
-
-                        dataDelta.feeds.forEach(f => {
-                            if(!f.created_at) return;
-                            let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                            labelsDelta.push(time);
-                            let val = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field2 || 0);
-                            deltaData.push(val);
-                            if(val > tsMaxDelta) tsMaxDelta = val;
-                        });
-                        
-                        if(document.getElementById('stat_max_delta')) document.getElementById('stat_max_delta').innerText = tsMaxDelta > 0 ? tsMaxDelta.toFixed(3) : "--";
-
+                        // VẼ ĐỒ THỊ 2: DELTA (Dùng chung sharedLabels) - THÊM spanGaps ĐỂ CHỐNG GÃY KHÚC
                         if(chartsObj.delta) chartsObj.delta.destroy();
                         let ctxDelta = document.getElementById('deltaChart').getContext('2d');
                         let gradDelta = ctxDelta.createLinearGradient(0, 0, 0, 260);
                         gradDelta.addColorStop(0, 'rgba(234, 179, 8, 0.4)'); gradDelta.addColorStop(1, 'rgba(234, 179, 8, 0.0)');
                         chartsObj.delta = new Chart(ctxDelta, {
                             type: 'line', plugins: [ChartDataLabels],
-                            data: { labels: labelsDelta, datasets: [{ data: deltaData, borderColor: '#eab308', backgroundColor: gradDelta, fill: true, borderWidth: 1.5, tension: 0.2 }] },
+                            data: { labels: sharedLabels, datasets: [{ data: deltaData, borderColor: '#eab308', backgroundColor: gradDelta, fill: true, borderWidth: 1.5, tension: 0.2, spanGaps: true }] },
                             options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 0, grace: '10%', grid: { color: '#1e293b' } } } }
                         });
+
+                        // VẼ ĐỒ THỊ 3: AMP (Dùng chung sharedLabels)
+                        if(chartsObj.amp) chartsObj.amp.destroy();
+                        chartsObj.amp = new Chart(document.getElementById('ampChart'), {
+                            type: 'line', plugins: [ChartDataLabels],
+                            data: { labels: sharedLabels, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
+                            options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
+                        });
                     }
+
+                    // Trả lại tiêu đề cũ khi tải xong
+                    if(tVolt) tVolt.innerHTML = '<i class="fas fa-chart-area mr-2"></i>Điện áp (V) 24h';
+                    if(tAmp) tAmp.innerHTML = '<i class="fas fa-bolt mr-2"></i>Dòng điện (A)';
                     if(tDelta) tDelta.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Độ lệch áp (ΔV) 24h';
-                } catch (e) { console.error("Lỗi vẽ Delta:", e); }
+
+                } catch (e) { console.error("Lỗi vẽ Đồng bộ Trục:", e); }
             };
 
-            // LUỒNG 3: TẢI NĂNG LƯỢNG SẠC/XẢ (10 NGÀY)
+            // LUỒNG 2: TẢI NĂNG LƯỢNG SẠC/XẢ (10 NGÀY)
             const loadEnergy = async () => {
                 const tChg = document.getElementById('title_chg');
                 const tDis = document.getElementById('title_dis');
@@ -873,9 +886,8 @@
                 } catch (e) { console.error("Lỗi vẽ Năng lượng:", e); }
             };
 
-            // KÍCH HOẠT CẢ 3 LUỒNG CÙNG LÚC CHẠY SONG SONG
-            loadVoltAmp();
-            loadDelta();
+            // KÍCH HOẠT CẢ 2 LUỒNG CÙNG LÚC CHẠY SONG SONG
+            loadAlignedLineCharts();
             loadEnergy();
         }
 
