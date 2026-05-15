@@ -1,0 +1,452 @@
+esphome:
+  name: jkbms-dual-monitor
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: arduino
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+logger:
+  level: INFO
+  hardware_uart: USB_SERIAL_JTAG
+
+wifi:
+  networks:
+    - ssid: "MINHGIANG"
+      password: "MINHGIANG@" 
+  reboot_timeout: 0s
+  ap:
+    ssid: "WIFI_BMS_CUU_HO"
+    password: "Tu12345678"
+
+captive_portal:
+
+ota:
+  - platform: esphome
+    password: "12345678"
+
+# BẮT BUỘC CÓ: Lấy giờ Internet chuẩn để Reset công tơ điện vào lúc 0h00
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: "Asia/Ho_Chi_Minh"
+    servers:
+      - "pool.ntp.org"
+      - "time.nist.gov"
+
+mqtt:
+  broker: "mqtt.flespi.io"
+  port: 1883
+  username: "rogJG4nHCYRsd6kpWp6fFCXIEX765LSqCBLYOGErtXDk666h4pmwx7W9YsvuVhiC"
+  password: ""
+  client_id: "esp_tu_bms_secret_9988"
+  topic_prefix: "ngoctuyka_bms_private_2026"
+  keepalive: 60s
+
+external_components:
+  - source: github://syssi/esphome-jk-bms@main
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: true
+
+ble_client:
+  - mac_address: "C8:47:80:37:18:C6"
+    id: bms_ble_1
+  - mac_address: "C8:47:80:16:9C:90"
+    id: bms_ble_2
+
+jk_bms_ble:
+  - id: bms1
+    ble_client_id: bms_ble_1
+    protocol_version: JK02_32S
+  - id: bms2
+    ble_client_id: bms_ble_2
+    protocol_version: JK02_32S
+
+# ================= CẢM BIẾN VÀ ĐO LƯỜNG =================
+sensor:
+  - platform: wifi_signal
+    name: "wifi_signal"
+    update_interval: 10s
+  - platform: uptime
+    name: "b1_uptime"
+    id: uptime_1
+  - platform: uptime
+    name: "b2_uptime"
+    id: uptime_2
+  - platform: ble_client
+    ble_client_id: bms_ble_1
+    name: "b1_rssi"
+    type: rssi
+  - platform: ble_client
+    ble_client_id: bms_ble_2
+    name: "b2_rssi"
+    type: rssi
+
+  # ---- BỘ SỐ 1 (MASTER 314Ah) ----
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms1
+    total_voltage: { name: "b1_voltage", id: "b1_voltage" }
+    current: { name: "b1_current", id: "b1_current" }
+    power: { name: "b1_power", id: "b1_power" }
+    state_of_charge: { name: "b1_soc", id: "b1_soc" }
+    capacity_remaining: { name: "b1_capacity_remaining" }
+    delta_cell_voltage: { name: "b1_delta_cell_voltage", id: "b1_delta_cell_voltage" }
+    charging_cycles: { name: "b1_charging_cycles" }
+    total_charging_cycle_capacity: { name: "b1_total_charging_cycle_capacity" }
+    # ĐÃ SỬA: THÊM ID CHO CẢM BIẾN NHIỆT ĐỘ KHỐI 1
+    temperature_sensor_1: { name: "b1_temperature_sensor_1", id: "b1_temperature_sensor_1" }
+    temperature_sensor_2: { name: "b1_temperature_sensor_2", id: "b1_temperature_sensor_2" }
+    temperature_sensor_3: { name: "b1_temperature_sensor_3", id: "b1_temperature_sensor_3" }
+    min_cell_voltage: { name: "b1_min_cell_voltage" }
+    max_cell_voltage: { name: "b1_max_cell_voltage", id: "b1_max_cell_voltage" }
+    cell_voltage_1: { name: "b1_cell_voltage_1" }
+    cell_voltage_2: { name: "b1_cell_voltage_2" }
+    cell_voltage_3: { name: "b1_cell_voltage_3" }
+    cell_voltage_4: { name: "b1_cell_voltage_4" }
+    cell_voltage_5: { name: "b1_cell_voltage_5" }
+    cell_voltage_6: { name: "b1_cell_voltage_6" }
+    cell_voltage_7: { name: "b1_cell_voltage_7" }
+    cell_voltage_8: { name: "b1_cell_voltage_8" }
+    cell_voltage_9: { name: "b1_cell_voltage_9" }
+    cell_voltage_10: { name: "b1_cell_voltage_10" }
+    cell_voltage_11: { name: "b1_cell_voltage_11" }
+    cell_voltage_12: { name: "b1_cell_voltage_12" }
+    cell_voltage_13: { name: "b1_cell_voltage_13" }
+    cell_voltage_14: { name: "b1_cell_voltage_14" }
+    cell_voltage_15: { name: "b1_cell_voltage_15" }
+    cell_voltage_16: { name: "b1_cell_voltage_16" }
+    balancing_current: { name: "b1_bal_current", id: "b1_bal_current" }
+    
+  # ---- BỘ SỐ 2 (SLAVE 280Ah) ----
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms2
+    total_voltage: { name: "b2_voltage", id: "b2_voltage" }
+    current: { name: "b2_current", id: "b2_current" }
+    power: { name: "b2_power", id: "b2_power" }
+    state_of_charge: { name: "b2_soc", id: "b2_soc" }
+    capacity_remaining: { name: "b2_capacity_remaining" }
+    delta_cell_voltage: { name: "b2_delta_cell_voltage", id: "b2_delta_cell_voltage" }
+    charging_cycles: { name: "b2_charging_cycles" }
+    total_charging_cycle_capacity: { name: "b2_total_charging_cycle_capacity" }
+    # ĐÃ SỬA: THÊM ID CHO CẢM BIẾN NHIỆT ĐỘ KHỐI 2
+    temperature_sensor_1: { name: "b2_temperature_sensor_1", id: "b2_temperature_sensor_1" }
+    temperature_sensor_2: { name: "b2_temperature_sensor_2", id: "b2_temperature_sensor_2" }
+    temperature_sensor_3: { name: "b2_temperature_sensor_3", id: "b2_temperature_sensor_3" }
+    min_cell_voltage: { name: "b2_min_cell_voltage" }
+    max_cell_voltage: { name: "b2_max_cell_voltage", id: "b2_max_cell_voltage" }
+    cell_voltage_1: { name: "b2_cell_voltage_1" }
+    cell_voltage_2: { name: "b2_cell_voltage_2" }
+    cell_voltage_3: { name: "b2_cell_voltage_3" }
+    cell_voltage_4: { name: "b2_cell_voltage_4" }
+    cell_voltage_5: { name: "b2_cell_voltage_5" }
+    cell_voltage_6: { name: "b2_cell_voltage_6" }
+    cell_voltage_7: { name: "b2_cell_voltage_7" }
+    cell_voltage_8: { name: "b2_cell_voltage_8" }
+    cell_voltage_9: { name: "b2_cell_voltage_9" }
+    cell_voltage_10: { name: "b2_cell_voltage_10" }
+    cell_voltage_11: { name: "b2_cell_voltage_11" }
+    cell_voltage_12: { name: "b2_cell_voltage_12" }
+    cell_voltage_13: { name: "b2_cell_voltage_13" }
+    cell_voltage_14: { name: "b2_cell_voltage_14" }
+    cell_voltage_15: { name: "b2_cell_voltage_15" }
+    cell_voltage_16: { name: "b2_cell_voltage_16" }
+    balancing_current: { name: "b2_bal_current", id: "b2_bal_current" }
+
+  # ================= BỘ ĐẾM SỐ ĐIỆN B1 (MASTER 314Ah) =================
+  - platform: template
+    name: "B1 Power Charge Only"
+    id: b1_power_charge_only
+    unit_of_measurement: "W"
+    update_interval: 5s
+    lambda: |-
+      if (id(b1_current).state > 0) return id(b1_power).state;
+      else return 0.0;
+
+  - platform: template
+    name: "B1 Power Discharge Only"
+    id: b1_power_discharge_only
+    unit_of_measurement: "W"
+    update_interval: 5s
+    lambda: |-
+      if (id(b1_current).state < 0) return std::abs(id(b1_power).state);
+      else return 0.0;
+
+  - platform: total_daily_energy
+    name: "B1 Daily Charge kWh"
+    id: b1_daily_charge_kwh
+    power_id: b1_power_charge_only
+
+  - platform: total_daily_energy
+    name: "B1 Daily Discharge kWh"
+    id: b1_daily_discharge_kwh
+    power_id: b1_power_discharge_only
+
+  # ================= BỘ ĐẾM SỐ ĐIỆN B2 (SLAVE 280Ah) =================
+  - platform: template
+    name: "B2 Power Charge Only"
+    id: b2_power_charge_only
+    unit_of_measurement: "W"
+    update_interval: 5s
+    lambda: |-
+      if (id(b2_current).state > 0) return id(b2_power).state;
+      else return 0.0;
+
+  - platform: template
+    name: "B2 Power Discharge Only"
+    id: b2_power_discharge_only
+    unit_of_measurement: "W"
+    update_interval: 5s
+    lambda: |-
+      if (id(b2_current).state < 0) return std::abs(id(b2_power).state);
+      else return 0.0;
+
+  - platform: total_daily_energy
+    name: "B2 Daily Charge kWh"
+    id: b2_daily_charge_kwh
+    power_id: b2_power_charge_only
+
+  - platform: total_daily_energy
+    name: "B2 Daily Discharge kWh"
+    id: b2_daily_discharge_kwh
+    power_id: b2_power_discharge_only
+
+text_sensor:
+  - platform: wifi_info
+    ssid:
+      name: "wifi_ssid"
+  - platform: template
+    name: "b1_setup_passcode"
+    update_interval: 60s
+    lambda: |-
+      return {"segatech810"};
+  - platform: template
+    name: "b2_setup_passcode"
+    update_interval: 60s
+    lambda: |-
+      return {"az1234"};
+
+switch:
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms1
+    charging: { name: "b1_charging" }
+    discharging: { name: "b1_discharging" }
+    balancer: { name: "b1_balancer", id: "b1_balancer" }
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms2
+    charging: { name: "b2_charging" }
+    discharging: { name: "b2_discharging" }
+    balancer: { name: "b2_balancer", id: "b2_balancer" }
+
+  # MỚI: BIẾN ẢO LƯU TRẠNG THÁI AUTO/MANUAL TRÊN ESP32
+  - platform: template
+    name: "b1_auto_balance"
+    id: b1_auto_balance
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+  - platform: template
+    name: "b2_auto_balance"
+    id: b2_auto_balance
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+
+number:
+  # ---- BỘ SỐ 1 ----
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms1
+    balance_starting_voltage: { name: "b1_bal_start_v" }
+    balance_trigger_voltage: { name: "b1_bal_trig_v", id: "b1_bal_trig_v" }
+    cell_voltage_overvoltage_protection: { name: "b1_cell_ovp" }
+    cell_request_charge_voltage: { name: "b1_cell_req_chg_v" }
+    cell_request_float_voltage: { name: "b1_cell_req_float_v" }
+    cell_soc100_voltage: { name: "b1_soc_100_v" }
+    cell_voltage_overvoltage_recovery: { name: "b1_cell_ovpr" }
+    cell_voltage_undervoltage_recovery: { name: "b1_cell_uvpr" }
+    cell_soc0_voltage: { name: "b1_soc_0_v" }
+    cell_voltage_undervoltage_protection: { name: "b1_cell_uvp" }
+    power_off_voltage: { name: "b1_power_off_v" }
+    max_charge_current: { name: "b1_max_chg_current" }
+    max_discharge_current: { name: "b1_max_dis_current" }
+    charge_overcurrent_protection_delay: { name: "b1_chg_ocp_delay" }
+    charge_overcurrent_protection_recovery_time: { name: "b1_chg_ocpr_time" }
+    discharge_overcurrent_protection_delay: { name: "b1_dis_ocp_delay" }
+    discharge_overcurrent_protection_recovery_time: { name: "b1_dis_ocpr_time" }
+    short_circuit_protection_recovery_time: { name: "b1_scp_rec_time" }
+    max_balance_current: { name: "b1_max_bal_current" }
+    charge_overtemperature_protection: { name: "b1_chg_otp" }
+    charge_overtemperature_protection_recovery: { name: "b1_chg_otpr" }
+    discharge_overtemperature_protection: { name: "b1_dis_otp" }
+    discharge_overtemperature_protection_recovery: { name: "b1_dis_otpr" }
+    charge_undertemperature_protection: { name: "b1_chg_utp" }
+    charge_undertemperature_protection_recovery: { name: "b1_chg_utpr" }
+    power_tube_overtemperature_protection: { name: "b1_mos_otp" }
+    power_tube_overtemperature_protection_recovery: { name: "b1_mos_otpr" }
+    short_circuit_protection_delay: { name: "b1_scp_delay" }
+    total_battery_capacity: { name: "b1_bat_cap" }
+    cell_count: { name: "b1_cell_count" }
+
+  # MỚI: BIẾN ẢO LƯU MỐC ĐIỆN ÁP SẠC BỒI CHO KHỐI 1
+  - platform: template
+    name: "b1_smart_trigger_v"
+    id: b1_smart_trigger_v
+    optimistic: true
+    min_value: 3.200
+    max_value: 3.600
+    step: 0.001
+    initial_value: 3.400
+    restore_value: true
+
+  # ---- BỘ SỐ 2 ----
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms2
+    balance_starting_voltage: { name: "b2_bal_start_v" }
+    balance_trigger_voltage: { name: "b2_bal_trig_v", id: "b2_bal_trig_v" }
+    cell_voltage_overvoltage_protection: { name: "b2_cell_ovp" }
+    cell_request_charge_voltage: { name: "b2_cell_req_chg_v" }
+    cell_request_float_voltage: { name: "b2_cell_req_float_v" }
+    cell_soc100_voltage: { name: "b2_soc_100_v" }
+    cell_voltage_overvoltage_recovery: { name: "b2_cell_ovpr" }
+    cell_voltage_undervoltage_recovery: { name: "b2_cell_uvpr" }
+    cell_soc0_voltage: { name: "b2_soc_0_v" }
+    cell_voltage_undervoltage_protection: { name: "b2_cell_uvp" }
+    power_off_voltage: { name: "b2_power_off_v" }
+    max_charge_current: { name: "b2_max_chg_current" }
+    max_discharge_current: { name: "b2_max_dis_current" }
+    charge_overcurrent_protection_delay: { name: "b2_chg_ocp_delay" }
+    charge_overcurrent_protection_recovery_time: { name: "b2_chg_ocpr_time" }
+    discharge_overcurrent_protection_delay: { name: "b2_dis_ocp_delay" }
+    discharge_overcurrent_protection_recovery_time: { name: "b2_dis_ocpr_time" }
+    short_circuit_protection_recovery_time: { name: "b2_scp_rec_time" }
+    max_balance_current: { name: "b2_max_bal_current" }
+    charge_overtemperature_protection: { name: "b2_chg_otp" }
+    charge_overtemperature_protection_recovery: { name: "b2_chg_otpr" }
+    discharge_overtemperature_protection: { name: "b2_dis_otp" }
+    discharge_overtemperature_protection_recovery: { name: "b2_dis_otpr" }
+    charge_undertemperature_protection: { name: "b2_chg_utp" }
+    charge_undertemperature_protection_recovery: { name: "b2_chg_utpr" }
+    power_tube_overtemperature_protection: { name: "b2_mos_otp" }
+    power_tube_overtemperature_protection_recovery: { name: "b2_mos_otpr" }
+    short_circuit_protection_delay: { name: "b2_scp_delay" }
+    total_battery_capacity: { name: "b2_bat_cap" }
+    cell_count: { name: "b2_cell_count" }
+
+  # MỚI: BIẾN ẢO LƯU MỐC ĐIỆN ÁP SẠC BỒI CHO KHỐI 2
+  - platform: template
+    name: "b2_smart_trigger_v"
+    id: b2_smart_trigger_v
+    optimistic: true
+    min_value: 3.200
+    max_value: 3.600
+    step: 0.001
+    initial_value: 3.400
+    restore_value: true
+
+button:
+  - platform: restart
+    name: "Restart ESP32"
+    id: restart_esp
+
+# ================= ĐẨY DỮ LIỆU LÊN THINGSPEAK =================
+http_request:
+  verify_ssl: false
+
+# ================= TỰ ĐỘNG HÓA VÀ ĐẨY DỮ LIỆU THINGSPEAK =================
+interval:
+  # 1. Khối đẩy dữ liệu lên ThingSpeak
+  - interval: 2min
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(b1_voltage).has_state() && id(b2_voltage).has_state();
+          then:
+            - http_request.get:
+                url: !lambda |-
+                  char url[512];
+                  sprintf(url, "http://api.thingspeak.com/update?api_key=6K088FEPYQRI9SX1&field1=%.2f&field2=%.2f&field3=%.4f&field4=%.4f&field5=%.2f&field6=%.2f&field7=%.4f&field8=%.4f",
+                    id(b1_voltage).state, id(b1_current).state, id(b1_daily_charge_kwh).state, id(b1_daily_discharge_kwh).state,
+                    id(b2_voltage).state, id(b2_current).state, id(b2_daily_charge_kwh).state, id(b2_daily_discharge_kwh).state
+                  );
+                  return url;
+            - http_request.get:
+                url: !lambda |-
+                  char url[512];
+                  sprintf(url, "http://api.thingspeak.com/update?api_key=5E0SJRPUMBL0Q76M&field1=%.3f&field2=%.3f&field3=%.1f&field4=%.1f&field5=%.1f&field6=%.1f",
+                    id(b1_delta_cell_voltage).state, id(b2_delta_cell_voltage).state,
+                    id(b1_temperature_sensor_1).state, id(b1_temperature_sensor_2).state,
+                    id(b2_temperature_sensor_1).state, id(b2_temperature_sensor_2).state
+                  );
+                  return url;
+
+  # 2. KHỐI LOGIC CÂN BẰNG THÔNG MINH (ĐÃ FIX: KIỂM SOÁT ĐỘ LỆCH, ÁP, DÒNG VÀ ĐÈ QUYỀN MANUAL)
+  - interval: 10s
+    then:
+      # ---- B1 (MASTER 314Ah) ----
+      - if:
+          condition:
+            switch.is_on: b1_auto_balance
+          then:
+            - if:
+                condition:
+                  and:
+                    # Đảm bảo các cảm biến đã có dữ liệu để tránh lỗi chia số 0 hoặc null
+                    - lambda: 'return id(b1_max_cell_voltage).has_state() && id(b1_smart_trigger_v).has_state() && id(b1_delta_cell_voltage).has_state() && id(b1_bal_trig_v).has_state() && id(b1_current).has_state();'
+                    # Thuật toán tính toán
+                    - lambda: |-
+                        float max_v = id(b1_max_cell_voltage).state;
+                        float trigger_v = id(b1_smart_trigger_v).state;
+                        float delta = id(b1_delta_cell_voltage).state;
+                        float delta_trigger = id(b1_bal_trig_v).state;
+                        float current = id(b1_current).state;
+                        
+                        // ĐIỀU KIỆN: Áp max vượt ngưỡng + Lệch vượt ngưỡng + Dòng nạp/xả nhỏ hơn 10A
+                        return (max_v >= trigger_v) && (delta >= delta_trigger) && (current > -10.0) && (current < 10.0);
+                then:
+                  - if: # Đủ điều kiện -> BẬT
+                      condition:
+                        switch.is_off: b1_balancer
+                      then:
+                        - switch.turn_on: b1_balancer
+                else:
+                  - if: # Không đủ điều kiện (áp tụt, dòng cao, đã cân bằng xong) -> ÉP TẮT
+                      condition:
+                        switch.is_on: b1_balancer
+                      then:
+                        - switch.turn_off: b1_balancer
+
+      # ---- B2 (SLAVE 280Ah) ----
+      - if:
+          condition:
+            switch.is_on: b2_auto_balance
+          then:
+            - if:
+                condition:
+                  and:
+                    - lambda: 'return id(b2_max_cell_voltage).has_state() && id(b2_smart_trigger_v).has_state() && id(b2_delta_cell_voltage).has_state() && id(b2_bal_trig_v).has_state() && id(b2_current).has_state();'
+                    - lambda: |-
+                        float max_v = id(b2_max_cell_voltage).state;
+                        float trigger_v = id(b2_smart_trigger_v).state;
+                        float delta = id(b2_delta_cell_voltage).state;
+                        float delta_trigger = id(b2_bal_trig_v).state;
+                        float current = id(b2_current).state;
+                        
+                        return (max_v >= trigger_v) && (delta >= delta_trigger) && (current > -10.0) && (current < 10.0);
+                then:
+                  - if:
+                      condition:
+                        switch.is_off: b2_balancer
+                      then:
+                        - switch.turn_on: b2_balancer
+                else:
+                  - if:
+                      condition:
+                        switch.is_on: b2_balancer
+                      then:
+                        - switch.turn_off: b2_balancer
