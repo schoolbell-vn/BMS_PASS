@@ -603,7 +603,7 @@
             
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-cyan-900/50 pb-2">
-                    <span class="text-cyan-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-chart-area mr-2"></i>Điện áp (V) 24h</span>
+                    <span id="title_volt" class="text-cyan-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-chart-area mr-2"></i>Điện áp (V) 24h</span>
                     <div class="flex gap-4">
                         <div class="text-right">
                             <span class="text-[10px] text-gray-500 font-bold block uppercase">Min Ngày</span>
@@ -622,7 +622,7 @@
 
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-yellow-900/50 pb-2">
-                    <span class="text-yellow-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-exclamation-triangle mr-2"></i>Độ lệch áp (ΔV) 24h</span>
+                    <span id="title_delta" class="text-yellow-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-exclamation-triangle mr-2"></i>Độ lệch áp (ΔV) 24h</span>
                     <div class="text-right">
                         <span class="text-[10px] text-gray-500 font-bold block uppercase">Max Lệch</span>
                         <span class="text-yellow-400 font-black text-lg neon-text"><span id="stat_max_delta">--</span> V</span>
@@ -635,7 +635,7 @@
 
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-end mb-4 border-b border-orange-900/50 pb-2">
-                    <span class="text-orange-400 text-sm font-bold tracking-widest uppercase pb-1"><i class="fas fa-bolt mr-2"></i>Dòng điện (A)</span>
+                    <span id="title_amp" class="text-orange-400 text-sm font-bold tracking-widest uppercase pb-1"><i class="fas fa-bolt mr-2"></i>Dòng điện (A)</span>
                     <div class="flex gap-4">
                         <div class="text-right">
                             <span class="text-[10px] text-gray-500 font-bold block uppercase">Max Xả</span>
@@ -654,7 +654,7 @@
 
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-green-900/50 pb-2">
-                    <span class="text-green-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-charging-station mr-2"></i>Đã sạc (kWh) - 10 Ngày</span>
+                    <span id="title_chg" class="text-green-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-charging-station mr-2"></i>Đã sạc (kWh) - 10 Ngày</span>
                 </div>
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
                     <canvas id="chgChart"></canvas>
@@ -663,7 +663,7 @@
 
             <div class="card-scifi p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-red-900/50 pb-2">
-                    <span class="text-red-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-battery-empty mr-2"></i>Đã xả (kWh) - 10 Ngày</span>
+                    <span id="title_dis" class="text-red-400 text-sm font-bold tracking-widest uppercase"><i class="fas fa-battery-empty mr-2"></i>Đã xả (kWh) - 10 Ngày</span>
                 </div>
                 <div class="relative w-full h-[260px] rounded-lg overflow-hidden bg-[#0f172a]">
                     <canvas id="disChart"></canvas>
@@ -713,8 +713,8 @@
             if (selector) selector.value = activeBms;
         });
 
-        // ================= VẼ CHART.JS TỪ THINGSPEAK (ĐÃ CHỐNG LỖI TỪNG KÊNH) =================
-        async function fetchAndDrawCharts() {
+        // ================= VẼ CHART.JS TỪ THINGSPEAK (TẢI SONG SONG SIÊU TỐC) =================
+        function fetchAndDrawCharts() {
             Chart.defaults.color = '#475569';
             const commonOptions = {
                 responsive: true, maintainAspectRatio: false,
@@ -723,133 +723,160 @@
                 interaction: { mode: 'index', intersect: false }
             };
 
-            // ---- BIỂU ĐỒ 1 & 3: VOLT / AMP (Từ Kênh 1) ----
-            try {
-                let res1 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=1");
-                let data1 = await res1.json();
-
-                if (data1 && data1.feeds) {
-                    let labels1 = []; let voltData = []; let ampData = [];
-                    let tsMaxV = 0; let tsMinV = 999; let tsMaxChg = 0; let tsMaxDis = 0;
-
-                    data1.feeds.forEach(f => {
-                        if(!f.created_at) return;
-                        let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                        labels1.push(time);
-                        
-                        let currentV = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field5 || 0);
-                        let currentA = (activeBms === 'b1') ? parseFloat(f.field2 || 0) : parseFloat(f.field6 || 0);
-
-                        voltData.push(currentV); ampData.push(currentA);
-
-                        if (currentV > tsMaxV) tsMaxV = currentV;
-                        if (currentV > 0 && currentV < tsMinV) tsMinV = currentV;
-                        if (currentA > tsMaxChg) tsMaxChg = currentA;
-                        if (currentA < 0 && Math.abs(currentA) > tsMaxDis) tsMaxDis = Math.abs(currentA);
-                    });
-
-                    if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = tsMaxV > 0 ? tsMaxV.toFixed(2) : "--";
-                    if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (tsMinV > 0 && tsMinV < 999) ? tsMinV.toFixed(2) : "--";
-                    if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = tsMaxChg > 0 ? "+" + tsMaxChg.toFixed(1) : "--";
-                    if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = tsMaxDis > 0 ? "-" + tsMaxDis.toFixed(1) : "--";
-
-                    if(chartsObj.volt) chartsObj.volt.destroy();
-                    let ctxVolt = document.getElementById('voltChart').getContext('2d');
-                    let gradVolt = ctxVolt.createLinearGradient(0, 0, 0, 260);
-                    gradVolt.addColorStop(0, 'rgba(168, 85, 247, 0.4)'); gradVolt.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
-                    chartsObj.volt = new Chart(ctxVolt, {
-                        type: 'line', plugins: [ChartDataLabels],
-                        data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
-                        options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
-                    });
-
-                    if(chartsObj.amp) chartsObj.amp.destroy();
-                    chartsObj.amp = new Chart(document.getElementById('ampChart'), {
-                        type: 'line', plugins: [ChartDataLabels],
-                        data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
-                        options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
-                    });
-                }
-            } catch (e) { console.error("Lỗi vẽ Volt/Amp:", e); }
-
-            // ---- BIỂU ĐỒ 2: DELTA V (Từ Kênh 2) ----
-            try {
-                let resDelta = await fetch("https://api.thingspeak.com/channels/3384191/feeds.json?api_key=NS530G0NEY9EDSGE&days=1");
-                let dataDelta = await resDelta.json();
+            // LUỒNG 1: TẢI ĐIỆN ÁP & DÒNG ĐIỆN (1 NGÀY)
+            const loadVoltAmp = async () => {
+                const tVolt = document.getElementById('title_volt');
+                const tAmp = document.getElementById('title_amp');
+                if(tVolt) tVolt.innerHTML = '<i class="fas fa-circle-notch fa-spin text-cyan-600 mr-2"></i>Điện áp (Đang tải...)';
+                if(tAmp) tAmp.innerHTML = '<i class="fas fa-circle-notch fa-spin text-orange-600 mr-2"></i>Dòng điện (Đang tải...)';
                 
-                if (dataDelta && dataDelta.feeds) {
-                    let labelsDelta = []; let deltaData = []; let tsMaxDelta = 0;
+                try {
+                    let res1 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=1");
+                    let data1 = await res1.json();
 
-                    dataDelta.feeds.forEach(f => {
-                        if(!f.created_at) return;
-                        let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                        labelsDelta.push(time);
-                        let val = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field2 || 0);
-                        deltaData.push(val);
-                        if(val > tsMaxDelta) tsMaxDelta = val;
-                    });
+                    if (data1 && data1.feeds) {
+                        let labels1 = []; let voltData = []; let ampData = [];
+                        let tsMaxV = 0; let tsMinV = 999; let tsMaxChg = 0; let tsMaxDis = 0;
+
+                        data1.feeds.forEach(f => {
+                            if(!f.created_at) return;
+                            let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                            labels1.push(time);
+                            
+                            let currentV = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field5 || 0);
+                            let currentA = (activeBms === 'b1') ? parseFloat(f.field2 || 0) : parseFloat(f.field6 || 0);
+
+                            voltData.push(currentV); ampData.push(currentA);
+
+                            if (currentV > tsMaxV) tsMaxV = currentV;
+                            if (currentV > 0 && currentV < tsMinV) tsMinV = currentV;
+                            if (currentA > tsMaxChg) tsMaxChg = currentA;
+                            if (currentA < 0 && Math.abs(currentA) > tsMaxDis) tsMaxDis = Math.abs(currentA);
+                        });
+
+                        if(document.getElementById('stat_max_v')) document.getElementById('stat_max_v').innerText = tsMaxV > 0 ? tsMaxV.toFixed(2) : "--";
+                        if(document.getElementById('stat_min_v')) document.getElementById('stat_min_v').innerText = (tsMinV > 0 && tsMinV < 999) ? tsMinV.toFixed(2) : "--";
+                        if(document.getElementById('stat_max_chg')) document.getElementById('stat_max_chg').innerText = tsMaxChg > 0 ? "+" + tsMaxChg.toFixed(1) : "--";
+                        if(document.getElementById('stat_max_dis')) document.getElementById('stat_max_dis').innerText = tsMaxDis > 0 ? "-" + tsMaxDis.toFixed(1) : "--";
+
+                        if(chartsObj.volt) chartsObj.volt.destroy();
+                        let ctxVolt = document.getElementById('voltChart').getContext('2d');
+                        let gradVolt = ctxVolt.createLinearGradient(0, 0, 0, 260);
+                        gradVolt.addColorStop(0, 'rgba(168, 85, 247, 0.4)'); gradVolt.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+                        chartsObj.volt = new Chart(ctxVolt, {
+                            type: 'line', plugins: [ChartDataLabels],
+                            data: { labels: labels1, datasets: [{ data: voltData, borderColor: '#a855f7', backgroundColor: gradVolt, fill: true, borderWidth: 1.5, tension: 0.2 }] },
+                            options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 50, max: 56, grid: { color: '#1e293b' } } } }
+                        });
+
+                        if(chartsObj.amp) chartsObj.amp.destroy();
+                        chartsObj.amp = new Chart(document.getElementById('ampChart'), {
+                            type: 'line', plugins: [ChartDataLabels],
+                            data: { labels: labels1, datasets: [{ data: ampData, borderColor: '#f97316', borderWidth: 1.5, tension: 0.2 }] },
+                            options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { grid: { color: '#1e293b' } } } }
+                        });
+                    }
+                    if(tVolt) tVolt.innerHTML = '<i class="fas fa-chart-area mr-2"></i>Điện áp (V) 24h';
+                    if(tAmp) tAmp.innerHTML = '<i class="fas fa-bolt mr-2"></i>Dòng điện (A)';
+                } catch (e) { console.error("Lỗi vẽ Volt/Amp:", e); }
+            };
+
+            // LUỒNG 2: TẢI ĐỘ LỆCH ÁP (1 NGÀY)
+            const loadDelta = async () => {
+                const tDelta = document.getElementById('title_delta');
+                if(tDelta) tDelta.innerHTML = '<i class="fas fa-circle-notch fa-spin text-yellow-600 mr-2"></i>Độ lệch (Đang tải...)';
+                try {
+                    let resDelta = await fetch("https://api.thingspeak.com/channels/3384191/feeds.json?api_key=NS530G0NEY9EDSGE&days=1");
+                    let dataDelta = await resDelta.json();
                     
-                    if(document.getElementById('stat_max_delta')) document.getElementById('stat_max_delta').innerText = tsMaxDelta > 0 ? tsMaxDelta.toFixed(3) : "--";
+                    if (dataDelta && dataDelta.feeds) {
+                        let labelsDelta = []; let deltaData = []; let tsMaxDelta = 0;
 
-                    if(chartsObj.delta) chartsObj.delta.destroy();
-                    let ctxDelta = document.getElementById('deltaChart').getContext('2d');
-                    let gradDelta = ctxDelta.createLinearGradient(0, 0, 0, 260);
-                    gradDelta.addColorStop(0, 'rgba(234, 179, 8, 0.4)'); gradDelta.addColorStop(1, 'rgba(234, 179, 8, 0.0)');
-                    chartsObj.delta = new Chart(ctxDelta, {
-                        type: 'line', plugins: [ChartDataLabels],
-                        data: { labels: labelsDelta, datasets: [{ data: deltaData, borderColor: '#eab308', backgroundColor: gradDelta, fill: true, borderWidth: 1.5, tension: 0.2 }] },
-                        options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 0, grace: '10%', grid: { color: '#1e293b' } } } }
-                    });
-                }
-            } catch (e) { console.error("Lỗi vẽ Delta:", e); }
-
-            // ---- BIỂU ĐỒ 4 & 5: NĂNG LƯỢNG KWh 10 NGÀY (Từ Kênh 1) ----
-            try {
-                let res10 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=10");
-                let data10 = await res10.json();
-
-                if (data10 && data10.feeds) {
-                    let dailyChg = {}; let dailyDis = {};
-
-                    data10.feeds.forEach(f => {
-                        if(!f.created_at) return;
-                        let dateStr = new Date(f.created_at).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                        dataDelta.feeds.forEach(f => {
+                            if(!f.created_at) return;
+                            let time = new Date(f.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                            labelsDelta.push(time);
+                            let val = (activeBms === 'b1') ? parseFloat(f.field1 || 0) : parseFloat(f.field2 || 0);
+                            deltaData.push(val);
+                            if(val > tsMaxDelta) tsMaxDelta = val;
+                        });
                         
-                        let c = (activeBms === 'b1') ? parseFloat(f.field3 || 0) : parseFloat(f.field7 || 0);
-                        let d = (activeBms === 'b1') ? parseFloat(f.field4 || 0) : parseFloat(f.field8 || 0);
+                        if(document.getElementById('stat_max_delta')) document.getElementById('stat_max_delta').innerText = tsMaxDelta > 0 ? tsMaxDelta.toFixed(3) : "--";
 
-                        c = c / 1000.0; d = d / 1000.0;
+                        if(chartsObj.delta) chartsObj.delta.destroy();
+                        let ctxDelta = document.getElementById('deltaChart').getContext('2d');
+                        let gradDelta = ctxDelta.createLinearGradient(0, 0, 0, 260);
+                        gradDelta.addColorStop(0, 'rgba(234, 179, 8, 0.4)'); gradDelta.addColorStop(1, 'rgba(234, 179, 8, 0.0)');
+                        chartsObj.delta = new Chart(ctxDelta, {
+                            type: 'line', plugins: [ChartDataLabels],
+                            data: { labels: labelsDelta, datasets: [{ data: deltaData, borderColor: '#eab308', backgroundColor: gradDelta, fill: true, borderWidth: 1.5, tension: 0.2 }] },
+                            options: { ...commonOptions, scales: { x: { ticks: { maxTicksLimit: 6 }, grid: {display: false} }, y: { min: 0, grace: '10%', grid: { color: '#1e293b' } } } }
+                        });
+                    }
+                    if(tDelta) tDelta.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Độ lệch áp (ΔV) 24h';
+                } catch (e) { console.error("Lỗi vẽ Delta:", e); }
+            };
 
-                        if (!dailyChg[dateStr] || c > dailyChg[dateStr]) dailyChg[dateStr] = c;
-                        if (!dailyDis[dateStr] || d > dailyDis[dateStr]) dailyDis[dateStr] = d;
-                    });
+            // LUỒNG 3: TẢI NĂNG LƯỢNG SẠC/XẢ (10 NGÀY)
+            const loadEnergy = async () => {
+                const tChg = document.getElementById('title_chg');
+                const tDis = document.getElementById('title_dis');
+                if(tChg) tChg.innerHTML = '<i class="fas fa-circle-notch fa-spin text-green-600 mr-2"></i>Đã sạc (Đang tải 10 ngày...)';
+                if(tDis) tDis.innerHTML = '<i class="fas fa-circle-notch fa-spin text-red-600 mr-2"></i>Đã xả (Đang tải 10 ngày...)';
+                try {
+                    let res10 = await fetch("https://api.thingspeak.com/channels/3366132/feeds.json?api_key=TIYKGXDCN6JHICSJ&days=10");
+                    let data10 = await res10.json();
 
-                    let labels10 = Object.keys(dailyChg);
-                    let chgData = Object.values(dailyChg);
-                    let disData = Object.values(dailyDis);
+                    if (data10 && data10.feeds) {
+                        let dailyChg = {}; let dailyDis = {};
 
-                    const dataLabelOpts = {
-                        display: true, anchor: 'end', align: 'end', offset: 0, font: { weight: 'bold', size: 10 },
-                        formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } 
-                    };
+                        data10.feeds.forEach(f => {
+                            if(!f.created_at) return;
+                            let dateStr = new Date(f.created_at).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                            
+                            let c = (activeBms === 'b1') ? parseFloat(f.field3 || 0) : parseFloat(f.field7 || 0);
+                            let d = (activeBms === 'b1') ? parseFloat(f.field4 || 0) : parseFloat(f.field8 || 0);
 
-                    if(chartsObj.chg) chartsObj.chg.destroy();
-                    chartsObj.chg = new Chart(document.getElementById('chgChart'), {
-                        type: 'bar', plugins: [ChartDataLabels], 
-                        data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
-                        options: { ...commonOptions, plugins: { ...commonOptions.plugins, datalabels: { ...dataLabelOpts, color: '#4ade80' } },
-                            scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } }
-                    });
+                            c = c / 1000.0; d = d / 1000.0;
 
-                    if(chartsObj.dis) chartsObj.dis.destroy();
-                    chartsObj.dis = new Chart(document.getElementById('disChart'), {
-                        type: 'bar', plugins: [ChartDataLabels], 
-                        data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
-                        options: { ...commonOptions, plugins: { ...commonOptions.plugins, datalabels: { ...dataLabelOpts, color: '#f87171' } },
-                            scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } }
-                    });
-                }
-            } catch (e) { console.error("Lỗi vẽ Năng lượng:", e); }
+                            if (!dailyChg[dateStr] || c > dailyChg[dateStr]) dailyChg[dateStr] = c;
+                            if (!dailyDis[dateStr] || d > dailyDis[dateStr]) dailyDis[dateStr] = d;
+                        });
+
+                        let labels10 = Object.keys(dailyChg);
+                        let chgData = Object.values(dailyChg);
+                        let disData = Object.values(dailyDis);
+
+                        const dataLabelOpts = {
+                            display: true, anchor: 'end', align: 'end', offset: 0, font: { weight: 'bold', size: 10 },
+                            formatter: function(value) { return value > 0 ? value.toFixed(1) : ''; } 
+                        };
+
+                        if(chartsObj.chg) chartsObj.chg.destroy();
+                        chartsObj.chg = new Chart(document.getElementById('chgChart'), {
+                            type: 'bar', plugins: [ChartDataLabels], 
+                            data: { labels: labels10, datasets: [{ data: chgData, backgroundColor: '#22c55e', borderRadius: 4 }] },
+                            options: { ...commonOptions, plugins: { ...commonOptions.plugins, datalabels: { ...dataLabelOpts, color: '#4ade80' } },
+                                scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } }
+                        });
+
+                        if(chartsObj.dis) chartsObj.dis.destroy();
+                        chartsObj.dis = new Chart(document.getElementById('disChart'), {
+                            type: 'bar', plugins: [ChartDataLabels], 
+                            data: { labels: labels10, datasets: [{ data: disData, backgroundColor: '#ef4444', borderRadius: 4 }] },
+                            options: { ...commonOptions, plugins: { ...commonOptions.plugins, datalabels: { ...dataLabelOpts, color: '#f87171' } },
+                                scales: { x: { grid: {display: false} }, y: { beginAtZero: true, grace: '15%', grid: { color: '#1e293b' } } } }
+                        });
+                    }
+                    if(tChg) tChg.innerHTML = '<i class="fas fa-charging-station mr-2"></i>Đã sạc (kWh) - 10 Ngày';
+                    if(tDis) tDis.innerHTML = '<i class="fas fa-battery-empty mr-2"></i>Đã xả (kWh) - 10 Ngày';
+                } catch (e) { console.error("Lỗi vẽ Năng lượng:", e); }
+            };
+
+            // KÍCH HOẠT CẢ 3 LUỒNG CÙNG LÚC CHẠY SONG SONG
+            loadVoltAmp();
+            loadDelta();
+            loadEnergy();
         }
 
         function resetBtn(btn) {
