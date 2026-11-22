@@ -19,7 +19,7 @@ logger:
 wifi:
   networks:
     - ssid: "MINHGIANG"
-      password: "MINHGIANG@" 
+      password: "MINHGIANG@"
   reboot_timeout: 0s
   ap:
     ssid: "WIFI_BMS_CUU_HO"
@@ -48,13 +48,15 @@ mqtt:
   client_id: "esp_tu_bms_secret_9988"
   topic_prefix: "ngoctuyka_bms_private_2026"
   keepalive: 60s
+  reboot_timeout: 0s
+  discovery: false
 
 external_components:
   - source: github://syssi/esphome-jk-bms@main
 
 esp32_ble_tracker:
   scan_parameters:
-    active: true
+    active: false
 
 ble_client:
   - mac_address: "C8:47:80:37:18:C6"
@@ -66,9 +68,24 @@ jk_bms_ble:
   - id: bms1
     ble_client_id: bms_ble_1
     protocol_version: JK02_32S
+    throttle: 5s
   - id: bms2
     ble_client_id: bms_ble_2
     protocol_version: JK02_32S
+    throttle: 5s
+
+# ================= TRẠNG THÁI KẾT NỐI BLE =================
+binary_sensor:
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms1
+    online_status:
+      name: "b1_online_status"
+      id: b1_online_status
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms2
+    online_status:
+      name: "b2_online_status"
+      id: b2_online_status
 
 # ================= CẢM BIẾN VÀ ĐO LƯỜNG =================
 sensor:
@@ -101,7 +118,6 @@ sensor:
     delta_cell_voltage: { name: "b1_delta_cell_voltage", id: "b1_delta_cell_voltage" }
     charging_cycles: { name: "b1_charging_cycles" }
     total_charging_cycle_capacity: { name: "b1_total_charging_cycle_capacity" }
-    # ĐÃ SỬA: THÊM ID CHO CẢM BIẾN NHIỆT ĐỘ KHỐI 1
     temperature_sensor_1: { name: "b1_temperature_sensor_1", id: "b1_temperature_sensor_1" }
     temperature_sensor_2: { name: "b1_temperature_sensor_2", id: "b1_temperature_sensor_2" }
     temperature_sensor_3: { name: "b1_temperature_sensor_3", id: "b1_temperature_sensor_3" }
@@ -124,7 +140,7 @@ sensor:
     cell_voltage_15: { name: "b1_cell_voltage_15" }
     cell_voltage_16: { name: "b1_cell_voltage_16" }
     balancing_current: { name: "b1_bal_current", id: "b1_bal_current" }
-    
+
   # ---- BỘ SỐ 2 (SLAVE 280Ah) ----
   - platform: jk_bms_ble
     jk_bms_ble_id: bms2
@@ -136,7 +152,6 @@ sensor:
     delta_cell_voltage: { name: "b2_delta_cell_voltage", id: "b2_delta_cell_voltage" }
     charging_cycles: { name: "b2_charging_cycles" }
     total_charging_cycle_capacity: { name: "b2_total_charging_cycle_capacity" }
-    # ĐÃ SỬA: THÊM ID CHO CẢM BIẾN NHIỆT ĐỘ KHỐI 2
     temperature_sensor_1: { name: "b2_temperature_sensor_1", id: "b2_temperature_sensor_1" }
     temperature_sensor_2: { name: "b2_temperature_sensor_2", id: "b2_temperature_sensor_2" }
     temperature_sensor_3: { name: "b2_temperature_sensor_3", id: "b2_temperature_sensor_3" }
@@ -245,7 +260,7 @@ switch:
     discharging: { name: "b2_discharging" }
     balancer: { name: "b2_balancer", id: "b2_balancer" }
 
-  # MỚI: BIẾN ẢO LƯU TRẠNG THÁI AUTO/MANUAL TRÊN ESP32
+  # BIẾN ẢO LƯU TRẠNG THÁI AUTO/MANUAL TRÊN ESP32
   - platform: template
     name: "b1_auto_balance"
     id: b1_auto_balance
@@ -292,7 +307,7 @@ number:
     total_battery_capacity: { name: "b1_bat_cap" }
     cell_count: { name: "b1_cell_count" }
 
-  # MỚI: BIẾN ẢO LƯU MỐC ĐIỆN ÁP SẠC BỒI CHO KHỐI 1
+  # BIẾN ẢO LƯU MỐC ĐIỆN ÁP SẠC BỒI CHO KHỐI 1
   - platform: template
     name: "b1_smart_trigger_v"
     id: b1_smart_trigger_v
@@ -337,7 +352,7 @@ number:
     total_battery_capacity: { name: "b2_bat_cap" }
     cell_count: { name: "b2_cell_count" }
 
-  # MỚI: BIẾN ẢO LƯU MỐC ĐIỆN ÁP SẠC BỒI CHO KHỐI 2
+  # BIẾN ẢO LƯU MỐC ĐIỆN ÁP SẠC BỒI CHO KHỐI 2
   - platform: template
     name: "b2_smart_trigger_v"
     id: b2_smart_trigger_v
@@ -352,6 +367,14 @@ button:
   - platform: restart
     name: "Restart ESP32"
     id: restart_esp
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms1
+    retrieve_settings:
+      name: "b1_retrieve_settings"
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms2
+    retrieve_settings:
+      name: "b2_retrieve_settings"
 
 # ================= ĐẨY DỮ LIỆU LÊN THINGSPEAK =================
 http_request:
@@ -385,68 +408,87 @@ interval:
                   );
                   return url;
 
-  # 2. KHỐI LOGIC CÂN BẰNG THÔNG MINH (ĐÃ FIX: KIỂM SOÁT ĐỘ LỆCH, ÁP, DÒNG VÀ ĐÈ QUYỀN MANUAL)
-  - interval: 10s
+  # 2. KHỐI LOGIC CÂN BẰNG THÔNG MINH (ĐÃ FIX: CHỐNG TẮT NHẦM KHI THIẾU DATA + HYSTERESIS + DÒNG 20A/25A)
+  - interval: 15s
     then:
       # ---- B1 (MASTER 314Ah) ----
       - if:
           condition:
-            switch.is_on: b1_auto_balance
+            and:
+              - switch.is_on: b1_auto_balance
+              - binary_sensor.is_on: b1_online_status
+              - lambda: |-
+                  return id(b1_max_cell_voltage).has_state() &&
+                         id(b1_smart_trigger_v).has_state() &&
+                         id(b1_delta_cell_voltage).has_state() &&
+                         id(b1_bal_trig_v).has_state() &&
+                         id(b1_current).has_state();
           then:
             - if:
                 condition:
                   and:
-                    # Đảm bảo các cảm biến đã có dữ liệu để tránh lỗi chia số 0 hoặc null
-                    - lambda: 'return id(b1_max_cell_voltage).has_state() && id(b1_smart_trigger_v).has_state() && id(b1_delta_cell_voltage).has_state() && id(b1_bal_trig_v).has_state() && id(b1_current).has_state();'
-                    # Thuật toán tính toán
+                    - switch.is_off: b1_balancer
                     - lambda: |-
                         float max_v = id(b1_max_cell_voltage).state;
                         float trigger_v = id(b1_smart_trigger_v).state;
                         float delta = id(b1_delta_cell_voltage).state;
                         float delta_trigger = id(b1_bal_trig_v).state;
                         float current = id(b1_current).state;
-                        
-                        // ĐIỀU KIỆN: Áp max vượt ngưỡng + Lệch vượt ngưỡng + Dòng nạp/xả nhỏ hơn 10A
-                        return (max_v >= trigger_v) && (delta >= delta_trigger) && (current > -10.0) && (current < 10.0);
+                        return (max_v >= trigger_v) && (delta >= delta_trigger) && (current > -20.0) && (current < 20.0);
                 then:
-                  - if: # Đủ điều kiện -> BẬT
-                      condition:
-                        switch.is_off: b1_balancer
-                      then:
-                        - switch.turn_on: b1_balancer
-                else:
-                  - if: # Không đủ điều kiện (áp tụt, dòng cao, đã cân bằng xong) -> ÉP TẮT
-                      condition:
-                        switch.is_on: b1_balancer
-                      then:
-                        - switch.turn_off: b1_balancer
+                  - switch.turn_on: b1_balancer
+            - if:
+                condition:
+                  and:
+                    - switch.is_on: b1_balancer
+                    - lambda: |-
+                        float max_v = id(b1_max_cell_voltage).state;
+                        float trigger_v = id(b1_smart_trigger_v).state;
+                        float delta = id(b1_delta_cell_voltage).state;
+                        float delta_trigger = id(b1_bal_trig_v).state;
+                        float current = id(b1_current).state;
+                        float delta_stop = (delta_trigger > 0.005) ? (delta_trigger - 0.004) : (delta_trigger * 0.5);
+                        return (max_v < (trigger_v - 0.030)) || (delta < delta_stop) || (current <= -25.0) || (current >= 25.0);
+                then:
+                  - switch.turn_off: b1_balancer
 
       # ---- B2 (SLAVE 280Ah) ----
       - if:
           condition:
-            switch.is_on: b2_auto_balance
+            and:
+              - switch.is_on: b2_auto_balance
+              - binary_sensor.is_on: b2_online_status
+              - lambda: |-
+                  return id(b2_max_cell_voltage).has_state() &&
+                         id(b2_smart_trigger_v).has_state() &&
+                         id(b2_delta_cell_voltage).has_state() &&
+                         id(b2_bal_trig_v).has_state() &&
+                         id(b2_current).has_state();
           then:
             - if:
                 condition:
                   and:
-                    - lambda: 'return id(b2_max_cell_voltage).has_state() && id(b2_smart_trigger_v).has_state() && id(b2_delta_cell_voltage).has_state() && id(b2_bal_trig_v).has_state() && id(b2_current).has_state();'
+                    - switch.is_off: b2_balancer
                     - lambda: |-
                         float max_v = id(b2_max_cell_voltage).state;
                         float trigger_v = id(b2_smart_trigger_v).state;
                         float delta = id(b2_delta_cell_voltage).state;
                         float delta_trigger = id(b2_bal_trig_v).state;
                         float current = id(b2_current).state;
-                        
-                        return (max_v >= trigger_v) && (delta >= delta_trigger) && (current > -10.0) && (current < 10.0);
+                        return (max_v >= trigger_v) && (delta >= delta_trigger) && (current > -20.0) && (current < 20.0);
                 then:
-                  - if:
-                      condition:
-                        switch.is_off: b2_balancer
-                      then:
-                        - switch.turn_on: b2_balancer
-                else:
-                  - if:
-                      condition:
-                        switch.is_on: b2_balancer
-                      then:
-                        - switch.turn_off: b2_balancer
+                  - switch.turn_on: b2_balancer
+            - if:
+                condition:
+                  and:
+                    - switch.is_on: b2_balancer
+                    - lambda: |-
+                        float max_v = id(b2_max_cell_voltage).state;
+                        float trigger_v = id(b2_smart_trigger_v).state;
+                        float delta = id(b2_delta_cell_voltage).state;
+                        float delta_trigger = id(b2_bal_trig_v).state;
+                        float current = id(b2_current).state;
+                        float delta_stop = (delta_trigger > 0.005) ? (delta_trigger - 0.004) : (delta_trigger * 0.5);
+                        return (max_v < (trigger_v - 0.030)) || (delta < delta_stop) || (current <= -25.0) || (current >= 25.0);
+                then:
+                  - switch.turn_off: b2_balancer
